@@ -1,3 +1,4 @@
 <resources>
     <string name="app_name">MobileSW</string>
+    <string name="title_activity_world_photo">Map</string>
 </resources>

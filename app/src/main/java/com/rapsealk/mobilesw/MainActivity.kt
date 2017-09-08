@@ -14,7 +14,9 @@ class MainActivity : AppCompatActivity() {
         setContentView(R.layout.activity_main)
 
         imageButtonWorldPhoto.setOnClickListener { view ->
-            toast("WorldPhoto")
+            // toast("WorldPhoto")
+            var intent = Intent(this, WorldPhotoActivity::class.java)
+            startActivity(intent)
         }
 
         imageButtonSetting.setOnClickListener { view ->

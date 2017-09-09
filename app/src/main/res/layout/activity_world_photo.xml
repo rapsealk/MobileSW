@@ -1,8 +1,78 @@
-<fragment xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:map="http://schemas.android.com/apk/res-auto"
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
-    android:id="@+id/map"
-    android:name="com.google.android.gms.maps.SupportMapFragment"
     android:layout_width="match_parent"
-    android:layout_height="480dp"
-    tools:context="com.rapsealk.mobilesw.WorldPhotoActivity" />
+    android:layout_height="match_parent"
+    tools:context=".WorldPhotoActivity" >
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical">
+
+        <fragment
+            android:id="@+id/map"
+            android:name="com.google.android.gms.maps.SupportMapFragment"
+            android:layout_width="match_parent"
+            android:layout_height="480dp"
+            android:layout_weight="1"
+            tools:context="com.rapsealk.mobilesw.WorldPhotoActivity"
+            tools:layout_editor_absoluteX="8dp"
+            tools:layout_editor_absoluteY="16dp" />
+
+        <!--android:background="@null"-->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:orientation="horizontal">
+
+            <ImageButton
+                android:id="@+id/btnMagnify"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:tint="@android:color/holo_orange_dark"
+                app:srcCompat="@drawable/ic_add_circle_black_48dp"
+                tools:layout_editor_absoluteX="485dp"
+                tools:layout_editor_absoluteY="519dp" />
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:orientation="vertical">
+
+                <TextView
+                    android:id="@+id/tvLatitude"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="Lat"
+                    android:textSize="48sp" />
+
+                <TextView
+                    android:id="@+id/tvLongitude"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="Lon"
+                    android:textSize="48sp" />
+            </LinearLayout>
+
+            <ImageButton
+                android:id="@+id/btnReduce"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:tint="@android:color/holo_orange_dark"
+                app:srcCompat="@drawable/ic_remove_circle_black_48dp"
+                tools:layout_editor_absoluteX="485dp"
+                tools:layout_editor_absoluteY="519dp" />
+
+        </LinearLayout>
+
+        <!--android:background="@null"-->
+    </LinearLayout>
+
+</FrameLayout>

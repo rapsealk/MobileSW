@@ -1,11 +1,14 @@
 package com.rapsealk.mobilesw
 
+import android.Manifest
 import android.content.Context
-import android.location.Location
-import android.location.LocationListener
-import android.location.LocationManager
 import android.support.v4.app.FragmentActivity
 import android.os.Bundle
+import kotlinx.android.synthetic.main.activity_world_photo.*
+
+import android.location.Location
+import android.location.LocationManager
+import android.location.LocationListener
 
 import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.GoogleMap
@@ -13,33 +16,47 @@ import com.google.android.gms.maps.OnMapReadyCallback
 import com.google.android.gms.maps.SupportMapFragment
 import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.maps.model.MarkerOptions
-import kotlinx.android.synthetic.main.activity_world_photo.*
 
 class WorldPhotoActivity : FragmentActivity(), OnMapReadyCallback {
 
-    private var mMap: GoogleMap? = null
-    private var mLocationManager: LocationManager? = getSystemService(Context.LOCATION_SERVICE) as LocationManager
+    private var LOCATION_PERMISSIONS: Array<String> = Array<String>(1) {
+        Manifest.permission.ACCESS_FINE_LOCATION
+    }
 
-    private var mLocationListener: LocationListener? = CustomLocationListener();
+    private var mMap: GoogleMap? = null
+    private var mLocationManager: LocationManager? = null
+    private var mLocationListener: LocationListener? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_world_photo)
-
         // Obtain the SupportMapFragment and get notified when the map is ready to be used.
         val mapFragment = supportFragmentManager.findFragmentById(R.id.map) as SupportMapFragment
         mapFragment.getMapAsync(this)
 
-        // GET GPS Data
+        btnMagnify.setOnClickListener { view ->
+            toast("Magnifying!")
+            mMap!!.animateCamera(CameraUpdateFactory.zoomIn())
+        }
+
+        btnReduce.setOnClickListener { view ->
+            toast("Reducing!")
+            mMap!!.animateCamera(CameraUpdateFactory.zoomOut())
+        }
+
+        // GET GPS DATA
         try {
+            mLocationManager = getSystemService(Context.LOCATION_SERVICE) as LocationManager
+            mLocationListener = CustomLocationListener()
             mLocationManager!!.requestLocationUpdates(LocationManager.GPS_PROVIDER, 100, 1f, mLocationListener)
             mLocationManager!!.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 100, 1f, mLocationListener)
         }
-        catch (exception: Exception) {
-            finish()
+        catch (ex: Exception) {
+            toast(ex.toString())
+            
+            // finish()
         }
     }
-
 
     /**
      * Manipulates the map once available.
@@ -54,29 +71,41 @@ class WorldPhotoActivity : FragmentActivity(), OnMapReadyCallback {
         mMap = googleMap
 
         // Add a marker in Sydney and move the camera
-        // val sydney = LatLng(-34.0, 151.0)
-        // mMap!!.addMarker(MarkerOptions().position(sydney).title("Marker in Sydney"))
-        // mMap!!.moveCamera(CameraUpdateFactory.newLatLng(sydney))
+        val seoul = LatLng(37.56, 126.97)
+        mMap!!.animateCamera(CameraUpdateFactory.zoomTo(10f))
+        mMap!!.addMarker(MarkerOptions().position(seoul).title("Hi Seoul"))
+        mMap!!.moveCamera(CameraUpdateFactory.newLatLng(seoul))
     }
 
-    // CUSTOM CLASS EXTENDS "LocationListener"
+    // CUSTOM INNER_CLASS IMPLEMENTS INTERFACE:LocationListener
     inner class CustomLocationListener : LocationListener {
 
-        public var currentLocation: Location? = null
+        private var counter: Int = 0
+        private var currentLocation: Location? = null
 
         constructor() : super() {
             currentLocation = Location("user")
-            // location!!.longitude
-            // location!!.latitude
-        }
-
-        override fun onLocationChanged(location: Location?) {
-            currentLocation = location
-            toast("Latitude: " + location!!.latitude + ", Longitude: " + location!!.longitude)
         }
 
         override fun onStatusChanged(provider: String?, status: Int, extras: Bundle?) {}
-        override fun onProviderEnabled(provider: String?) {}
-        override fun onProviderDisabled(provider: String?) {}
+
+        override fun onLocationChanged(location: Location?) {
+            var currentLatLng = LatLng(location!!.latitude, location!!.longitude)
+            currentLocation?.latitude = location!!.latitude
+            currentLocation?.longitude = location!!.longitude
+            mMap!!.addMarker(MarkerOptions().position(currentLatLng).title("#"+(++counter)))
+            mMap!!.moveCamera(CameraUpdateFactory.newLatLng(currentLatLng))
+            tvLatitude.setText(location!!.latitude.toString())
+            tvLongitude.setText(location!!.longitude.toString())
+        }
+
+        override fun onProviderEnabled(provider: String?) {
+            toast("ProviderEnabled:"+provider)
+        }
+
+        override fun onProviderDisabled(provider: String?) {
+            toast("ProviderDisabled:"+provider)
+        }
     }
+
 }

@@ -9,11 +9,8 @@ import kotlinx.android.synthetic.main.activity_world_photo.*
 import android.location.Location
 import android.location.LocationManager
 import android.location.LocationListener
+import com.google.android.gms.maps.*
 
-import com.google.android.gms.maps.CameraUpdateFactory
-import com.google.android.gms.maps.GoogleMap
-import com.google.android.gms.maps.OnMapReadyCallback
-import com.google.android.gms.maps.SupportMapFragment
 import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.maps.model.MarkerOptions
 
@@ -53,7 +50,7 @@ class WorldPhotoActivity : FragmentActivity(), OnMapReadyCallback {
         }
         catch (ex: Exception) {
             toast(ex.toString())
-            
+
             // finish()
         }
     }
@@ -69,6 +66,12 @@ class WorldPhotoActivity : FragmentActivity(), OnMapReadyCallback {
      */
     override fun onMapReady(googleMap: GoogleMap) {
         mMap = googleMap
+
+        mMap!!.uiSettings.isMapToolbarEnabled = false
+
+        mMap!!.setOnMapClickListener { point: LatLng ->
+            toast("Click :: ("+point.latitude+", "+point.longitude+")")
+        }
 
         // Add a marker in Sydney and move the camera
         val seoul = LatLng(37.56, 126.97)
@@ -97,6 +100,7 @@ class WorldPhotoActivity : FragmentActivity(), OnMapReadyCallback {
             mMap!!.moveCamera(CameraUpdateFactory.newLatLng(currentLatLng))
             tvLatitude.setText(location!!.latitude.toString())
             tvLongitude.setText(location!!.longitude.toString())
+            tvAccuracy.setText(location!!.accuracy.toString())
         }
 
         override fun onProviderEnabled(provider: String?) {

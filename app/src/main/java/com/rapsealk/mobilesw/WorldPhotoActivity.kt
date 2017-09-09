@@ -2,6 +2,7 @@ package com.rapsealk.mobilesw
 
 import android.Manifest
 import android.content.Context
+import android.content.pm.PackageManager
 import android.support.v4.app.FragmentActivity
 import android.os.Bundle
 import kotlinx.android.synthetic.main.activity_world_photo.*
@@ -9,6 +10,8 @@ import kotlinx.android.synthetic.main.activity_world_photo.*
 import android.location.Location
 import android.location.LocationManager
 import android.location.LocationListener
+import android.support.v4.app.ActivityCompat
+import android.support.v4.content.ContextCompat
 import com.google.android.gms.maps.*
 
 import com.google.android.gms.maps.model.LatLng
@@ -16,9 +19,7 @@ import com.google.android.gms.maps.model.MarkerOptions
 
 class WorldPhotoActivity : FragmentActivity(), OnMapReadyCallback {
 
-    private var LOCATION_PERMISSIONS: Array<String> = Array<String>(1) {
-        Manifest.permission.ACCESS_FINE_LOCATION
-    }
+    private val FINE_LOCATION_CODE: Int = 1
 
     private var mMap: GoogleMap? = null
     private var mLocationManager: LocationManager? = null
@@ -27,6 +28,15 @@ class WorldPhotoActivity : FragmentActivity(), OnMapReadyCallback {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_world_photo)
+
+        // Permission Check
+        if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+            if (ActivityCompat.shouldShowRequestPermissionRationale(this, Manifest.permission.ACCESS_FINE_LOCATION)) {
+                toast("위치 정보를 이용하기 위해서는 권한이 필요합니다.")
+            }
+            ActivityCompat.requestPermissions(this, Array<String>(1) { Manifest.permission.ACCESS_FINE_LOCATION }, FINE_LOCATION_CODE)
+        }
+
         // Obtain the SupportMapFragment and get notified when the map is ready to be used.
         val mapFragment = supportFragmentManager.findFragmentById(R.id.map) as SupportMapFragment
         mapFragment.getMapAsync(this)
@@ -50,7 +60,6 @@ class WorldPhotoActivity : FragmentActivity(), OnMapReadyCallback {
         }
         catch (ex: Exception) {
             toast(ex.toString())
-
             // finish()
         }
     }
@@ -80,6 +89,20 @@ class WorldPhotoActivity : FragmentActivity(), OnMapReadyCallback {
         mMap!!.moveCamera(CameraUpdateFactory.newLatLng(seoul))
     }
 
+    override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<out String>, grantResults: IntArray) {
+        when (requestCode) {
+            FINE_LOCATION_CODE -> {
+                if (grantResults.size > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED)
+                    toast("ACCESS_FINE_LOCATION PERMISSION GRANTED")
+                else finish()
+                return
+            }
+            else -> {
+                finish()
+            }
+        }
+    }
+
     // CUSTOM INNER_CLASS IMPLEMENTS INTERFACE:LocationListener
     inner class CustomLocationListener : LocationListener {
 
@@ -104,11 +127,11 @@ class WorldPhotoActivity : FragmentActivity(), OnMapReadyCallback {
         }
 
         override fun onProviderEnabled(provider: String?) {
-            toast("ProviderEnabled:"+provider)
+            toast("ProviderEnabled: $provider")
         }
 
         override fun onProviderDisabled(provider: String?) {
-            toast("ProviderDisabled:"+provider)
+            toast("ProviderDisabled: $provider")
         }
     }
 

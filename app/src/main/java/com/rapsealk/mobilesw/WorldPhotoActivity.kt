@@ -3,6 +3,7 @@ package com.rapsealk.mobilesw
 import android.Manifest
 import android.content.Context
 import android.content.pm.PackageManager
+import android.graphics.Color
 import android.support.v4.app.FragmentActivity
 import android.os.Bundle
 import kotlinx.android.synthetic.main.activity_world_photo.*
@@ -13,9 +14,7 @@ import android.location.LocationListener
 import android.support.v4.app.ActivityCompat
 import android.support.v4.content.ContextCompat
 import com.google.android.gms.maps.*
-
-import com.google.android.gms.maps.model.LatLng
-import com.google.android.gms.maps.model.MarkerOptions
+import com.google.android.gms.maps.model.*
 
 class WorldPhotoActivity : FragmentActivity(), OnMapReadyCallback {
 
@@ -24,6 +23,10 @@ class WorldPhotoActivity : FragmentActivity(), OnMapReadyCallback {
     private var mMap: GoogleMap? = null
     private var mLocationManager: LocationManager? = null
     private var mLocationListener: LocationListener? = null
+    private var customMarkerDragListener: CustomDragMarkerListener? = null
+    private var draggableMarker: Marker? = null
+    private var polygonStartPoint: LatLng? = null
+    private var exPolygon: Polygon? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -55,8 +58,9 @@ class WorldPhotoActivity : FragmentActivity(), OnMapReadyCallback {
         try {
             mLocationManager = getSystemService(Context.LOCATION_SERVICE) as LocationManager
             mLocationListener = CustomLocationListener()
-            mLocationManager!!.requestLocationUpdates(LocationManager.GPS_PROVIDER, 100, 1f, mLocationListener)
-            mLocationManager!!.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 100, 1f, mLocationListener)
+            mLocationManager!!.requestLocationUpdates(LocationManager.GPS_PROVIDER, 5000, 1f, mLocationListener)
+            mLocationManager!!.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 5000, 1f, mLocationListener)
+            customMarkerDragListener = CustomDragMarkerListener()
         }
         catch (ex: Exception) {
             toast(ex.toString())
@@ -79,10 +83,29 @@ class WorldPhotoActivity : FragmentActivity(), OnMapReadyCallback {
         mMap!!.uiSettings.isMapToolbarEnabled = false
 
         mMap!!.setOnMapClickListener { point: LatLng ->
+            draggableMarker?.remove()
+            exPolygon?.remove()
             toast("Click :: ("+point.latitude+", "+point.longitude+")")
         }
 
-        // Add a marker in Sydney and move the camera
+        mMap!!.setOnMapLongClickListener { point: LatLng ->
+            draggableMarker?.remove()
+            draggableMarker = mMap!!.addMarker(MarkerOptions().position(point).title("Draggable"))
+            draggableMarker!!.isDraggable = true
+            polygonStartPoint = point
+        }
+
+        mMap!!.setOnMarkerDragListener(customMarkerDragListener)
+
+        mMap!!.setOnPolygonClickListener { polygon: Polygon ->
+            var points: List<LatLng> = polygon.points
+            var topLeft: LatLng = points.get(0)
+            var bottomRight: LatLng = points.get(2)
+            // Check Photos
+            toast("TopLeft: $topLeft, BottomRight: $bottomRight")
+        }
+
+        // Add a marker in Seoul and move the camera
         val seoul = LatLng(37.56, 126.97)
         mMap!!.animateCamera(CameraUpdateFactory.zoomTo(10f))
         mMap!!.addMarker(MarkerOptions().position(seoul).title("Hi Seoul"))
@@ -108,6 +131,7 @@ class WorldPhotoActivity : FragmentActivity(), OnMapReadyCallback {
 
         private var counter: Int = 0
         private var currentLocation: Location? = null
+        private var exMarker: Marker? = null
 
         constructor() : super() {
             currentLocation = Location("user")
@@ -119,7 +143,8 @@ class WorldPhotoActivity : FragmentActivity(), OnMapReadyCallback {
             var currentLatLng = LatLng(location!!.latitude, location!!.longitude)
             currentLocation?.latitude = location!!.latitude
             currentLocation?.longitude = location!!.longitude
-            mMap!!.addMarker(MarkerOptions().position(currentLatLng).title("#"+(++counter)))
+            exMarker?.remove()
+            exMarker = mMap!!.addMarker(MarkerOptions().position(currentLatLng).title("#"+(++counter)))
             mMap!!.moveCamera(CameraUpdateFactory.newLatLng(currentLatLng))
             tvLatitude.setText(location!!.latitude.toString())
             tvLongitude.setText(location!!.longitude.toString())
@@ -132,6 +157,35 @@ class WorldPhotoActivity : FragmentActivity(), OnMapReadyCallback {
 
         override fun onProviderDisabled(provider: String?) {
             toast("ProviderDisabled: $provider")
+        }
+    }
+
+    inner class CustomDragMarkerListener : GoogleMap.OnMarkerDragListener {
+
+        constructor() : super() {
+
+        }
+
+        override fun onMarkerDragStart(marker: Marker?) {
+            toast("onMarkerDragStart")
+        }
+
+        override fun onMarkerDrag(marker: Marker?) {
+            exPolygon?.remove()
+            var pointTopLeft = polygonStartPoint
+            var pointBottomRight = marker!!.position
+            var rectangle = PolygonOptions().add(
+                    LatLng(pointTopLeft!!.latitude, pointTopLeft!!.longitude),
+                    LatLng(pointTopLeft!!.latitude, pointBottomRight.longitude),
+                    LatLng(pointBottomRight.latitude, pointBottomRight.longitude),
+                    LatLng(pointBottomRight.latitude, pointTopLeft!!.longitude)
+            ).strokeColor(Color.RED).fillColor(Color.YELLOW)
+            exPolygon = mMap!!.addPolygon(rectangle)
+            exPolygon!!.isClickable = true
+        }
+
+        override fun onMarkerDragEnd(marker: Marker?) {
+            toast("onMarkerDragEnd")
         }
     }
 

@@ -14,28 +14,119 @@
             android:id="@+id/map"
             android:name="com.google.android.gms.maps.SupportMapFragment"
             android:layout_width="match_parent"
-            android:layout_height="480dp"
+            android:layout_height="735dp"
             android:layout_weight="1"
             tools:context="com.rapsealk.mobilesw.WorldPhotoActivity"
             tools:layout_editor_absoluteX="8dp"
             tools:layout_editor_absoluteY="16dp" />
 
-        <!--android:background="@null"-->
         <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:orientation="vertical">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal">
+
+                <ImageButton
+                    android:id="@+id/btnMagnify"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:src="@drawable/ic_add_circle_black_48dp" />
+
+                <Button
+                    android:id="@+id/btnState"
+                    android:layout_width="wrap_content"
+                    android:layout_height="match_parent"
+                    android:layout_weight="1"
+                    android:text="영역 선택" />
+
+                <ImageButton
+                    android:id="@+id/btnReduce"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:src="@drawable/ic_remove_circle_black_48dp" />
+
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:orientation="horizontal">
+
+                <TextView
+                    android:id="@+id/tvLatitude"
+                    android:layout_width="wrap_content"
+                    android:layout_height="match_parent"
+                    android:layout_weight="1"
+                    android:text="Lat"
+                    android:textSize="18sp" />
+
+                <TextView
+                    android:id="@+id/tvLongitude"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="Lon"
+                    android:textSize="18sp" />
+
+                <TextView
+                    android:id="@+id/tvAccuracy"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="Acc"
+                    android:textSize="18sp" />
+
+            </LinearLayout>
+        </LinearLayout>
+
+        <!--android:background="@null"-->
+
+        <!--LinearLayout
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:layout_weight="1"
             android:orientation="horizontal">
 
-            <ImageButton
-                android:id="@+id/btnMagnify"
+            <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:layout_weight="1"
-                android:tint="@android:color/holo_orange_dark"
-                app:srcCompat="@drawable/ic_add_circle_black_48dp"
-                tools:layout_editor_absoluteX="485dp"
-                tools:layout_editor_absoluteY="519dp" />
+                android:orientation="vertical">
+
+                <ImageButton
+                    android:id="@+id/btnMagnify"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:tint="@android:color/holo_orange_dark"
+                    app:srcCompat="@drawable/ic_add_circle_black_48dp"
+                    tools:layout_editor_absoluteX="485dp"
+                    tools:layout_editor_absoluteY="519dp" />
+
+                <Button
+                    android:id="@+id/btnDragState"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="영역 선택" />
+
+                <ImageButton
+                    android:id="@+id/btnReduce"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:tint="@android:color/holo_orange_dark"
+                    app:srcCompat="@drawable/ic_remove_circle_black_48dp"
+                    tools:layout_editor_absoluteX="485dp"
+                    tools:layout_editor_absoluteY="519dp" />
+            </LinearLayout>
 
             <LinearLayout
                 android:layout_width="match_parent"
@@ -68,17 +159,7 @@
                     android:textSize="48sp" />
             </LinearLayout>
 
-            <ImageButton
-                android:id="@+id/btnReduce"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:layout_weight="1"
-                android:tint="@android:color/holo_orange_dark"
-                app:srcCompat="@drawable/ic_remove_circle_black_48dp"
-                tools:layout_editor_absoluteX="485dp"
-                tools:layout_editor_absoluteY="519dp" />
-
-        </LinearLayout>
+        </LinearLayout-->
 
         <!--android:background="@null"-->
     </LinearLayout>

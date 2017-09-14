@@ -20,6 +20,8 @@ class WorldPhotoActivity : FragmentActivity(), OnMapReadyCallback {
 
     private val FINE_LOCATION_CODE: Int = 1
 
+    private var DRAG_STATE: Boolean = false
+
     private var mMap: GoogleMap? = null
     private var mLocationManager: LocationManager? = null
     private var mLocationListener: LocationListener? = null
@@ -54,6 +56,12 @@ class WorldPhotoActivity : FragmentActivity(), OnMapReadyCallback {
             mMap!!.animateCamera(CameraUpdateFactory.zoomOut())
         }
 
+        btnState.setOnClickListener { view ->
+            DRAG_STATE = !DRAG_STATE
+            if (DRAG_STATE) btnState.text = "선택 종료"
+            else btnState.text = "영역 선택"
+        }
+
         // GET GPS DATA
         try {
             mLocationManager = getSystemService(Context.LOCATION_SERVICE) as LocationManager
@@ -81,6 +89,13 @@ class WorldPhotoActivity : FragmentActivity(), OnMapReadyCallback {
         mMap = googleMap
 
         mMap!!.uiSettings.isMapToolbarEnabled = false
+        // mMap!!.uiSettings.isZoomControlsEnabled = true
+        // mMap!!.uiSettings.isCompassEnabled = true
+
+        // TODO : Customizing
+        // https://developer.android.com/reference/android/view/GestureDetector.OnGestureListener.html
+        // https://developer.android.com/reference/android/view/GestureDetector.OnGestureListener.html#onScroll(android.view.MotionEvent, android.view.MotionEvent, float, float)
+        // UiSettings.setScrollGesturesEnabled(boolean)
 
         mMap!!.setOnMapClickListener { point: LatLng ->
             draggableMarker?.remove()
@@ -188,5 +203,8 @@ class WorldPhotoActivity : FragmentActivity(), OnMapReadyCallback {
             toast("onMarkerDragEnd")
         }
     }
+
+    // image overray sample
+    // https://developers.google.com/maps/documentation/android-api/groundoverlay?hl=ko
 
 }

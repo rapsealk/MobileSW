@@ -1,7 +1,10 @@
 package com.example.lg.tttt;
 
+import android.app.Notification;
+import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.app.Service;
+import android.content.Context;
 import android.content.Intent;
 import android.hardware.Camera;
 import android.os.Handler;
@@ -16,6 +19,10 @@ import android.widget.Toast;
 public class MyService extends Service {
     int step=0;
     boolean isStop=false;
+    NotificationManager nm;
+    Notification.Builder builder;
+    Intent push;
+    PendingIntent fullScreenPendingIntent;
 
     @Override
     public IBinder onBind(Intent intent) {
@@ -85,15 +92,17 @@ public class MyService extends Service {
                     startActivity(al);
                     */
 
-                    Intent popupIntent = new Intent(getApplicationContext(), MyAlert.class);
 
+                    /*///////////////////
+
+                    Intent popupIntent = new Intent(getApplicationContext(), MyAlert.class);
                    // popupIntent.putExtras(bun);
                     PendingIntent pie= PendingIntent.getActivity(getApplicationContext(), 0, popupIntent, PendingIntent.FLAG_ONE_SHOT);
                     try {
                         pie.send();
                     } catch (PendingIntent.CanceledException e) {
                        // LogUtil.degug(e.getMessage());
-                    }
+                    */
 
                     /*
                     AlertDialog alertDialog = new AlertDialog.Builder(getApplicationContext())
@@ -104,6 +113,56 @@ public class MyService extends Service {
                     alertDialog.getWindow().setType(WindowManager.LayoutParams.TYPE_SYSTEM_ALERT);
                     alertDialog.show();
                     */
+
+                    /*
+                    NotificationManager notificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
+                    Intent intent = new Intent();
+                    PendingIntent pendingIntent = PendingIntent.getActivity(getApplicationContext(), 0, intent, PendingIntent.FLAG_UPDATE_CURRENT);
+                    Notification.Builder builder = new Notification.Builder(getApplicationContext());
+                    builder.setLargeIcon(BitmapFactory.decodeResource(getResources(), android.R.drawable.star_on));
+                    builder.setSmallIcon(android.R.drawable.star_on);
+                    builder.setTicker("알람 간단한 설명");
+                    builder.setContentTitle("알람 제목");
+                    builder.setContentText("알람 내용");
+                    builder.setWhen(System.currentTimeMillis());
+                    builder.setDefaults(Notification.DEFAULT_SOUND | Notification.DEFAULT_VIBRATE);
+                    builder.setContentIntent(pendingIntent);
+                    builder.setAutoCancel(true);
+                    builder.setNumber(999);
+                    builder.addAction(android.R.drawable.star_on, "반짝", pendingIntent);
+                    builder.addAction(android.R.drawable.star_off, "번쩍", pendingIntent);
+                    notificationManager.notify(0, builder.build());
+                    */
+
+
+
+                    NotificationManager nm = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
+                    Intent push=new Intent();
+                    PendingIntent fullScreenPendingIntent = PendingIntent.getActivity(getApplicationContext(), 0, push, PendingIntent.FLAG_CANCEL_CURRENT);
+                    Notification.Builder builder = new Notification.Builder(getApplicationContext());
+
+
+                    builder.setFullScreenIntent(fullScreenPendingIntent, true);
+                    builder.setSmallIcon(R.mipmap.ic_launcher);
+                    builder.setTicker("Test1"); //** 이 부분은 확인 필요
+                    builder.setWhen(System.currentTimeMillis());
+                    builder.setContentTitle("Test2"); //** 큰 텍스트로 표시
+                    builder.setContentText("Test3"); //** 작은 텍스트로 표시
+                    builder.setAutoCancel(true);
+                    builder.setPriority(Notification.PRIORITY_MAX); //** MAX 나 HIGH로 줘야 가능함
+                    //** Intent와 PendingIntent를 추가해 주는 것으로 헤드업 알림이 가능
+                    //** 없을 경우 이전 버전의 Notification과 동일
+                    builder.addAction(android.R.drawable.star_on, "반짝", fullScreenPendingIntent);
+                    builder.addAction(android.R.drawable.star_off, "번쩍", fullScreenPendingIntent);
+
+                    push.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                    push.setClass(getApplicationContext(), MainActivity.class);
+
+                   // builder.setFullScreenIntent(fullScreenPendingIntent, true);
+                    //** 여기까지 헤드업 알림을 사용하기 위한 필수 조건!
+
+                    nm.notify(123456, builder.build());
+
                     break;
                 }
             }

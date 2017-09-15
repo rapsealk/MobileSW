@@ -13,22 +13,41 @@ import android.location.LocationManager
 import android.location.LocationListener
 import android.support.v4.app.ActivityCompat
 import android.support.v4.content.ContextCompat
+import android.view.ViewGroup
+import android.widget.HorizontalScrollView
+import android.widget.ImageView
+import android.widget.LinearLayout
 import com.google.android.gms.maps.*
 import com.google.android.gms.maps.model.*
+import com.google.firebase.database.*
+import com.squareup.picasso.Picasso
 
 class WorldPhotoActivity : FragmentActivity(), OnMapReadyCallback {
 
     private val FINE_LOCATION_CODE: Int = 1
 
+    // STATE FLAGS
+    private var INITIAL_GPS_SET: Boolean = true
+    private var CAMERA_UPDATE_LOCK_STATE: Boolean = false
     private var DRAG_STATE: Boolean = false
+    private var VIEW_PHOTOS_STATE: Boolean = false
+
+    private var mapFragment: SupportMapFragment? = null
 
     private var mMap: GoogleMap? = null
     private var mLocationManager: LocationManager? = null
     private var mLocationListener: LocationListener? = null
-    private var customMarkerDragListener: CustomDragMarkerListener? = null
     private var draggableMarker: Marker? = null
     private var polygonStartPoint: LatLng? = null
     private var exPolygon: Polygon? = null
+
+    // Runtime UI Component
+    private var horizontalScrollView: HorizontalScrollView? = null
+    private var linearLayout: LinearLayout? = null
+
+    // Firebase Database
+    private val db: FirebaseDatabase = FirebaseDatabase.getInstance()
+    private var ref: DatabaseReference? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -43,16 +62,16 @@ class WorldPhotoActivity : FragmentActivity(), OnMapReadyCallback {
         }
 
         // Obtain the SupportMapFragment and get notified when the map is ready to be used.
-        val mapFragment = supportFragmentManager.findFragmentById(R.id.map) as SupportMapFragment
-        mapFragment.getMapAsync(this)
+        /*val */mapFragment = supportFragmentManager.findFragmentById(R.id.map) as SupportMapFragment
+        mapFragment!!.getMapAsync(this)
 
         btnMagnify.setOnClickListener { view ->
-            toast("Magnifying!")
+            // toast("Magnifying!")
             mMap!!.animateCamera(CameraUpdateFactory.zoomIn())
         }
 
         btnReduce.setOnClickListener { view ->
-            toast("Reducing!")
+            // toast("Reducing!")
             mMap!!.animateCamera(CameraUpdateFactory.zoomOut())
         }
 
@@ -60,6 +79,8 @@ class WorldPhotoActivity : FragmentActivity(), OnMapReadyCallback {
             DRAG_STATE = !DRAG_STATE
             if (DRAG_STATE) btnState.text = "선택 종료"
             else btnState.text = "영역 선택"
+            mMap?.uiSettings!!.isScrollGesturesEnabled = !DRAG_STATE
+            clearScreen()
         }
 
         // GET GPS DATA
@@ -68,7 +89,6 @@ class WorldPhotoActivity : FragmentActivity(), OnMapReadyCallback {
             mLocationListener = CustomLocationListener()
             mLocationManager!!.requestLocationUpdates(LocationManager.GPS_PROVIDER, 5000, 1f, mLocationListener)
             mLocationManager!!.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 5000, 1f, mLocationListener)
-            customMarkerDragListener = CustomDragMarkerListener()
         }
         catch (ex: Exception) {
             toast(ex.toString())
@@ -99,25 +119,69 @@ class WorldPhotoActivity : FragmentActivity(), OnMapReadyCallback {
 
         mMap!!.setOnMapClickListener { point: LatLng ->
             draggableMarker?.remove()
-            exPolygon?.remove()
-            toast("Click :: ("+point.latitude+", "+point.longitude+")")
+            if (DRAG_STATE) {
+                draggableMarker = mMap!!.addMarker(MarkerOptions().position(point).visible(true).draggable(true).apply { CustomDragMarkerListener().onMarkerDragStart(draggableMarker) })
+                polygonStartPoint = point
+            }
         }
 
-        mMap!!.setOnMapLongClickListener { point: LatLng ->
-            draggableMarker?.remove()
-            draggableMarker = mMap!!.addMarker(MarkerOptions().position(point).title("Draggable"))
-            draggableMarker!!.isDraggable = true
-            polygonStartPoint = point
-        }
-
-        mMap!!.setOnMarkerDragListener(customMarkerDragListener)
+        mMap!!.setOnMarkerDragListener(CustomDragMarkerListener())
 
         mMap!!.setOnPolygonClickListener { polygon: Polygon ->
+            VIEW_PHOTOS_STATE = !VIEW_PHOTOS_STATE
+
+            var params: ViewGroup.LayoutParams = mapFragment?.view!!.layoutParams
+            if (!VIEW_PHOTOS_STATE) {
+                params.height += 400
+                linearLayout?.removeAllViewsInLayout()
+                horizontalScrollView?.removeAllViews()
+                rootLinearLayout.removeView(horizontalScrollView)
+            }
+            else {
+                params.height -= 400
+                horizontalScrollView = HorizontalScrollView(this)
+                horizontalScrollView?.x = LinearLayoutGPS.x
+                horizontalScrollView?.y = 0f//LinearLayoutGPS.y// + LinearLayoutGPS.height
+                horizontalScrollView?.layoutParams?.width = LinearLayoutGPS.width
+                horizontalScrollView?.layoutParams?.height = 400
+                linearLayout = LinearLayout(this)
+                linearLayout?.layoutParams?.width = horizontalScrollView?.width
+                linearLayout?.layoutParams?.height = 400
+                // horizontalScrollView?.addView(linearLayout)
+                rootLinearLayout.addView(horizontalScrollView)
+            }
+            mapFragment?.view!!.layoutParams = params
+
             var points: List<LatLng> = polygon.points
             var topLeft: LatLng = points.get(0)
             var bottomRight: LatLng = points.get(2)
             // Check Photos
-            toast("TopLeft: $topLeft, BottomRight: $bottomRight")
+            ref = db.getReference("photos")
+            var child = ref?.child("uid/timestamp")
+            child?.addListenerForSingleValueEvent(object : ValueEventListener {
+            // ref?.addListenerForSingleValueEvent(object : ValueEventListener {
+                override fun onDataChange(snapshot: DataSnapshot?) {
+                    var data: DBScheme = snapshot!!.getValue<DBScheme>(DBScheme::class.java)
+                    var url: String = data.url
+                    var latitude: Double = data.latitude
+                    var longitude: Double = data.longitude
+                    toast("url: $url, lat: $latitude, lon: $longitude")
+                    for (i in 1..5) {
+                        var imageView: ImageView = ImageView(this@WorldPhotoActivity)
+                        Picasso.with(this@WorldPhotoActivity)
+                                .load(url)
+                                .into(imageView)
+                        linearLayout?.addView(imageView)
+                    }
+                    horizontalScrollView?.addView(linearLayout)
+            }
+
+                override fun onCancelled(p0: DatabaseError?) {
+                    //
+                }
+            })
+            //
+            //toast("TopLeft: $topLeft, BottomRight: $bottomRight")
         }
 
         // Add a marker in Seoul and move the camera
@@ -139,6 +203,11 @@ class WorldPhotoActivity : FragmentActivity(), OnMapReadyCallback {
                 finish()
             }
         }
+    }
+
+    private fun clearScreen(): Unit {
+        draggableMarker?.remove()
+        exPolygon?.remove()
     }
 
     // CUSTOM INNER_CLASS IMPLEMENTS INTERFACE:LocationListener
@@ -164,6 +233,10 @@ class WorldPhotoActivity : FragmentActivity(), OnMapReadyCallback {
             tvLatitude.setText(location!!.latitude.toString())
             tvLongitude.setText(location!!.longitude.toString())
             tvAccuracy.setText(location!!.accuracy.toString())
+            if (INITIAL_GPS_SET) {
+                mMap!!.animateCamera(CameraUpdateFactory.zoomBy(100f))
+                INITIAL_GPS_SET = false
+            }
         }
 
         override fun onProviderEnabled(provider: String?) {
@@ -177,9 +250,7 @@ class WorldPhotoActivity : FragmentActivity(), OnMapReadyCallback {
 
     inner class CustomDragMarkerListener : GoogleMap.OnMarkerDragListener {
 
-        constructor() : super() {
-
-        }
+        constructor() : super() {}
 
         override fun onMarkerDragStart(marker: Marker?) {
             toast("onMarkerDragStart")
@@ -208,3 +279,8 @@ class WorldPhotoActivity : FragmentActivity(), OnMapReadyCallback {
     // https://developers.google.com/maps/documentation/android-api/groundoverlay?hl=ko
 
 }
+
+data class DBScheme(
+        val url: String = "",
+        val latitude: Double = 0.0,
+        val longitude: Double = 0.0)

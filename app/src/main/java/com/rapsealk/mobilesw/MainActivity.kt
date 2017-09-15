@@ -17,6 +17,7 @@ class MainActivity : AppCompatActivity() {
         imageButtonWorldPhoto.setOnClickListener { view: View ->
             // toast("WorldPhoto")
             var intent = Intent(this, WorldPhotoActivity::class.java)
+            this.onPause()
             startActivity(intent)
         }
 
@@ -25,12 +26,16 @@ class MainActivity : AppCompatActivity() {
         }
 
         imageButtonMyPage.setOnClickListener { view: View ->
-            toast("MyPage")
+            // toast("MyPage")
+            var intent = Intent(this, LoginActivity::class.java)
+            this.onPause()
+            startActivity(intent)
         }
 
         imageButtonInfo.setOnClickListener { view: View ->
             // toast("Info")
             var intent = Intent(this, InfoActivity::class.java)
+            this.onPause()
             startActivity(intent)
         }
 

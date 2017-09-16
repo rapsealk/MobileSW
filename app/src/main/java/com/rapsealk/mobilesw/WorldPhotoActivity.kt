@@ -3,6 +3,7 @@ package com.rapsealk.mobilesw
 import android.Manifest
 import android.content.Context
 import android.content.pm.PackageManager
+import android.graphics.Bitmap
 import android.graphics.Color
 import android.support.v4.app.FragmentActivity
 import android.os.Bundle
@@ -13,6 +14,7 @@ import android.location.LocationManager
 import android.location.LocationListener
 import android.support.v4.app.ActivityCompat
 import android.support.v4.content.ContextCompat
+import android.util.Log
 import android.view.ViewGroup
 import android.widget.HorizontalScrollView
 import android.widget.ImageView
@@ -21,6 +23,7 @@ import com.google.android.gms.maps.*
 import com.google.android.gms.maps.model.*
 import com.google.firebase.database.*
 import com.squareup.picasso.Picasso
+import com.squareup.picasso.Transformation
 
 class WorldPhotoActivity : FragmentActivity(), OnMapReadyCallback {
 
@@ -147,7 +150,7 @@ class WorldPhotoActivity : FragmentActivity(), OnMapReadyCallback {
                 linearLayout = LinearLayout(this)
                 linearLayout?.layoutParams?.width = horizontalScrollView?.width
                 linearLayout?.layoutParams?.height = 400
-                // horizontalScrollView?.addView(linearLayout)
+                horizontalScrollView?.addView(linearLayout)
                 rootLinearLayout.addView(horizontalScrollView)
             }
             mapFragment?.view!!.layoutParams = params
@@ -157,38 +160,50 @@ class WorldPhotoActivity : FragmentActivity(), OnMapReadyCallback {
             var bottomRight: LatLng = points.get(2)
             // Check Photos
             ref = db.getReference("photos")
-            var child = ref?.child("uid/timestamp")
+            var child = ref?.child("uid")
             child?.addListenerForSingleValueEvent(object : ValueEventListener {
-            // ref?.addListenerForSingleValueEvent(object : ValueEventListener {
                 override fun onDataChange(snapshot: DataSnapshot?) {
-                    var data: DBScheme = snapshot!!.getValue<DBScheme>(DBScheme::class.java)
-                    var url: String = data.url
-                    var latitude: Double = data.latitude
-                    var longitude: Double = data.longitude
-                    toast("url: $url, lat: $latitude, lon: $longitude")
-                    for (i in 1..5) {
-                        var imageView: ImageView = ImageView(this@WorldPhotoActivity)
+                    for (value in snapshot!!.children) {
+                        var data: PhotoScheme = value.getValue<PhotoScheme>(PhotoScheme::class.java)
+                        var url = data.url
+                        Log.d("Snapshot", "url: $url")
+                        var imageView = ImageView(this@WorldPhotoActivity)
                         Picasso.with(this@WorldPhotoActivity)
                                 .load(url)
+                                .transform(object : Transformation {
+
+                                    override fun key(): String = "resizeTransformation#" + System.currentTimeMillis()
+
+                                    override fun transform(source: Bitmap): Bitmap {
+                                        val ratio: Double = source.height.toDouble() / source.width.toDouble()
+                                        val targetHeight: Int = 400
+                                        val targetWidth: Int = (targetHeight * ratio).toInt()
+                                        val result: Bitmap = Bitmap.createScaledBitmap(source, targetWidth, targetHeight, false)
+                                        if (result != source) source.recycle()
+                                        return result
+                                    }
+                                })
                                 .into(imageView)
                         linearLayout?.addView(imageView)
+
+                        imageView.setOnClickListener { view ->
+
+                        }
                     }
-                    horizontalScrollView?.addView(linearLayout)
             }
 
                 override fun onCancelled(p0: DatabaseError?) {
                     //
                 }
             })
-            //
-            //toast("TopLeft: $topLeft, BottomRight: $bottomRight")
         }
 
-        // Add a marker in Seoul and move the camera
+        /* Add a marker in Seoul and move the camera
         val seoul = LatLng(37.56, 126.97)
         mMap!!.animateCamera(CameraUpdateFactory.zoomTo(10f))
         mMap!!.addMarker(MarkerOptions().position(seoul).title("Hi Seoul"))
         mMap!!.moveCamera(CameraUpdateFactory.newLatLng(seoul))
+        */
     }
 
     override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<out String>, grantResults: IntArray) {
@@ -223,16 +238,16 @@ class WorldPhotoActivity : FragmentActivity(), OnMapReadyCallback {
 
         override fun onStatusChanged(provider: String?, status: Int, extras: Bundle?) {}
 
-        override fun onLocationChanged(location: Location?) {
-            var currentLatLng = LatLng(location!!.latitude, location!!.longitude)
-            currentLocation?.latitude = location!!.latitude
-            currentLocation?.longitude = location!!.longitude
+        override fun onLocationChanged(location: Location) {
+            var currentLatLng = LatLng(location.latitude, location.longitude)
+            currentLocation?.latitude = location.latitude
+            currentLocation?.longitude = location.longitude
             exMarker?.remove()
             exMarker = mMap!!.addMarker(MarkerOptions().position(currentLatLng).title("#"+(++counter)))
             mMap!!.moveCamera(CameraUpdateFactory.newLatLng(currentLatLng))
-            tvLatitude.setText(location!!.latitude.toString())
-            tvLongitude.setText(location!!.longitude.toString())
-            tvAccuracy.setText(location!!.accuracy.toString())
+            tvLatitude.setText(location.latitude.toString())
+            tvLongitude.setText(location.longitude.toString())
+            tvAccuracy.setText(location.accuracy.toString())
             if (INITIAL_GPS_SET) {
                 mMap!!.animateCamera(CameraUpdateFactory.zoomBy(100f))
                 INITIAL_GPS_SET = false
@@ -280,7 +295,8 @@ class WorldPhotoActivity : FragmentActivity(), OnMapReadyCallback {
 
 }
 
-data class DBScheme(
+data class PhotoScheme(
         val url: String = "",
         val latitude: Double = 0.0,
-        val longitude: Double = 0.0)
+        val longitude: Double = 0.0
+)

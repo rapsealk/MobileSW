@@ -23,28 +23,39 @@ import android.widget.TextView
 
 import java.util.ArrayList
 import android.Manifest.permission.READ_CONTACTS
-import com.google.firebase.auth.FirebaseAuth
-import com.google.firebase.auth.FirebaseUser
+import android.content.Intent
+import com.google.android.gms.auth.api.Auth;
+import com.google.android.gms.auth.api.signin.GoogleSignInAccount
+import com.google.android.gms.auth.api.signin.GoogleSignInOptions
+import com.google.android.gms.common.ConnectionResult
+import com.google.android.gms.common.api.GoogleApiClient
+import com.google.android.gms.tasks.OnCompleteListener
+import com.google.android.gms.tasks.Task
+import com.google.firebase.auth.*
 
 import kotlinx.android.synthetic.main.activity_login.*
 
 /**
  * A login screen that offers login via email/password.
  */
-class LoginActivity : AppCompatActivity(), LoaderCallbacks<Cursor> {
+class LoginActivity : AppCompatActivity() { // }, LoaderCallbacks<Cursor> {
     /**
      * Keep track of the login task to ensure we can cancel it if requested.
      */
-    private var mAuthTask: UserLoginTask? = null
+    // private var mAuthTask: UserLoginTask? = null
 
-    private var mAuth: FirebaseAuth? = null
-    private var mAuthListener: FirebaseAuth.AuthStateListener? = null
-    // private var user: FirebaseUser? = null
+    private var mFirebaseAuth: FirebaseAuth? = null
+    private var mFirebaseAuthListener: FirebaseAuth.AuthStateListener? = null
+
+    private var mGoogleApiClient: GoogleApiClient? = null
+
+    private val GOOGLE_SIGN_IN_CODE = 9001
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_login)
-        // Set up the login form.
+
+        /* Set up the login form.
         populateAutoComplete()
         password.setOnEditorActionListener(TextView.OnEditorActionListener { _, id, _ ->
             if (id == EditorInfo.IME_ACTION_DONE || id == EditorInfo.IME_NULL) {
@@ -55,20 +66,74 @@ class LoginActivity : AppCompatActivity(), LoaderCallbacks<Cursor> {
         })
 
         btnSignInWithEmail.setOnClickListener { attemptLogin() }
+        */
 
         // Firebase Auth
-        mAuth = FirebaseAuth.getInstance()
-        mAuthListener = FirebaseAuth.AuthStateListener() { auth: FirebaseAuth ->
+        mFirebaseAuth = FirebaseAuth.getInstance()
+        mFirebaseAuthListener = FirebaseAuth.AuthStateListener() { auth: FirebaseAuth ->
             var user: FirebaseUser? = auth.currentUser
             if (user != null) {
-
+                var intent = Intent(this, MainActivity::class.java)
+                startActivity(intent)
+                finish()
             } else {
+
             }
         }
 
+        // Google Auth
+        var gso: GoogleSignInOptions = GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
+                .requestIdToken(getString(R.string.default_web_client_id))
+                .requestEmail()
+                .build()
+
+        mGoogleApiClient = GoogleApiClient.Builder(this)
+                .enableAutoManage(this, object : GoogleApiClient.OnConnectionFailedListener {
+                    override fun onConnectionFailed(result: ConnectionResult) {
+                        //
+                    }
+                })
+                .addApi(Auth.GOOGLE_SIGN_IN_API, gso)
+                .build()
+
+        google_login_button.setOnClickListener { view ->
+            var signInIntent = Auth.GoogleSignInApi.getSignInIntent(mGoogleApiClient)
+            startActivityForResult(signInIntent, GOOGLE_SIGN_IN_CODE)
+        }
 
     }
 
+    override fun onActivityResult(requestCode: Int, resultCode: Int, intent: Intent) {
+        super.onActivityResult(requestCode, resultCode, intent)
+        if (requestCode == GOOGLE_SIGN_IN_CODE) {
+            var result = Auth.GoogleSignInApi.getSignInResultFromIntent(intent)
+            if (result.isSuccess) {
+                var account: GoogleSignInAccount? = result.signInAccount
+                firebaseAuthWithGoogle(account!!)
+            }
+        }
+    }
+
+    private fun firebaseAuthWithGoogle(account: GoogleSignInAccount) {
+        var credential: AuthCredential = GoogleAuthProvider.getCredential(account.idToken, null)
+        mFirebaseAuth?.signInWithCredential(credential)!!
+                .addOnCompleteListener(this, object : OnCompleteListener<AuthResult> {
+                    override fun onComplete(task: Task<AuthResult>) {
+                        if (task.isSuccessful) {
+                            var user: FirebaseUser? = mFirebaseAuth?.currentUser
+                            // TODO
+                            toast(user?.displayName+"님 환영합니다.")
+                            var intent = Intent(this@LoginActivity, MainActivity::class.java)
+                            startActivity(intent)
+                            finish()
+                        } else {
+                            toast("Authentication failed")
+                        }
+                    }
+                })
+    }
+
+    /*
     private fun populateAutoComplete() {
         if (!mayRequestContacts()) {
             return
@@ -93,10 +158,12 @@ class LoginActivity : AppCompatActivity(), LoaderCallbacks<Cursor> {
         }
         return false
     }
+    */
 
     /**
      * Callback received when a permissions request has been completed.
      */
+    /*
     override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<String>,
                                             grantResults: IntArray) {
         if (requestCode == REQUEST_READ_CONTACTS) {
@@ -105,6 +172,7 @@ class LoginActivity : AppCompatActivity(), LoaderCallbacks<Cursor> {
             }
         }
     }
+    */
 
 
     /**
@@ -112,6 +180,7 @@ class LoginActivity : AppCompatActivity(), LoaderCallbacks<Cursor> {
      * If there are form errors (invalid email, missing fields, etc.), the
      * errors are presented and no actual login attempt is made.
      */
+    /*
     private fun attemptLogin() {
         if (mAuthTask != null) {
             return
@@ -168,10 +237,12 @@ class LoginActivity : AppCompatActivity(), LoaderCallbacks<Cursor> {
         //TODO: Replace this with your own logic
         return password.length > 4
     }
+    */
 
     /**
      * Shows the progress UI and hides the login form.
      */
+    /*
     @TargetApi(Build.VERSION_CODES.HONEYCOMB_MR2)
     private fun showProgress(show: Boolean) {
         // On Honeycomb MR2 we have the ViewPropertyAnimator APIs, which allow
@@ -252,11 +323,13 @@ class LoginActivity : AppCompatActivity(), LoaderCallbacks<Cursor> {
         val ADDRESS = 0
         val IS_PRIMARY = 1
     }
+    */
 
     /**
      * Represents an asynchronous login/registration task used to authenticate
      * the user.
      */
+    /*
     inner class UserLoginTask internal constructor(private val mEmail: String, private val mPassword: String) : AsyncTask<Void, Void, Boolean>() {
 
         override fun doInBackground(vararg params: Void): Boolean? {
@@ -297,17 +370,17 @@ class LoginActivity : AppCompatActivity(), LoaderCallbacks<Cursor> {
         }
     }
 
-    companion object {
+    companion object {*/
 
         /**
          * Id to identity READ_CONTACTS permission request.
          */
-        private val REQUEST_READ_CONTACTS = 0
+        //private val REQUEST_READ_CONTACTS = 0
 
         /**
          * A dummy authentication store containing known user names and passwords.
          * TODO: remove after connecting to a real authentication system.
          */
-        private val DUMMY_CREDENTIALS = arrayOf("foo@example.com:hello", "bar@example.com:world")
-    }
+        //private val DUMMY_CREDENTIALS = arrayOf("foo@example.com:hello", "bar@example.com:world")
+    //}
 }

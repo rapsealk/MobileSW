@@ -158,7 +158,7 @@ class WorldPhotoActivity : FragmentActivity(), OnMapReadyCallback {
             var points: List<LatLng> = polygon.points
             var topLeft: LatLng = points.get(0)
             var bottomRight: LatLng = points.get(2)
-            // Check Photos
+            // Check Photos : Query https://firebase.google.com/docs/database/android/lists-of-data?hl=ko
             ref = db.getReference("photos")
             var child = ref?.child("uid")
             child?.addListenerForSingleValueEvent(object : ValueEventListener {
@@ -187,7 +187,7 @@ class WorldPhotoActivity : FragmentActivity(), OnMapReadyCallback {
                         linearLayout?.addView(imageView)
 
                         imageView.setOnClickListener { view ->
-
+                            toast(url)
                         }
                     }
             }
@@ -223,6 +223,13 @@ class WorldPhotoActivity : FragmentActivity(), OnMapReadyCallback {
     private fun clearScreen(): Unit {
         draggableMarker?.remove()
         exPolygon?.remove()
+        if (VIEW_PHOTOS_STATE) {
+            VIEW_PHOTOS_STATE = !VIEW_PHOTOS_STATE
+            mapFragment?.view!!.layoutParams.height += 400
+            linearLayout?.removeAllViewsInLayout()
+            horizontalScrollView?.removeAllViews()
+            rootLinearLayout.removeView(horizontalScrollView)
+        }
     }
 
     // CUSTOM INNER_CLASS IMPLEMENTS INTERFACE:LocationListener

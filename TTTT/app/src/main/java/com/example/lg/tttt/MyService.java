@@ -85,57 +85,6 @@ public class MyService extends Service {
                     Log.d("test", "카메라 OFF2222222");
                     step = 0;
 
-                    /*
-                    Intent al;
-                    al = new Intent(getApplicationContext(), MyAlert.class);
-                    al.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                    startActivity(al);
-                    */
-
-
-                    /*///////////////////
-
-                    Intent popupIntent = new Intent(getApplicationContext(), MyAlert.class);
-                   // popupIntent.putExtras(bun);
-                    PendingIntent pie= PendingIntent.getActivity(getApplicationContext(), 0, popupIntent, PendingIntent.FLAG_ONE_SHOT);
-                    try {
-                        pie.send();
-                    } catch (PendingIntent.CanceledException e) {
-                       // LogUtil.degug(e.getMessage());
-                    */
-
-                    /*
-                    AlertDialog alertDialog = new AlertDialog.Builder(getApplicationContext())
-                            .setTitle("Title")
-                            .setMessage("Are you sure?")
-                            .create();
-
-                    alertDialog.getWindow().setType(WindowManager.LayoutParams.TYPE_SYSTEM_ALERT);
-                    alertDialog.show();
-                    */
-
-                    /*
-                    NotificationManager notificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
-                    Intent intent = new Intent();
-                    PendingIntent pendingIntent = PendingIntent.getActivity(getApplicationContext(), 0, intent, PendingIntent.FLAG_UPDATE_CURRENT);
-                    Notification.Builder builder = new Notification.Builder(getApplicationContext());
-                    builder.setLargeIcon(BitmapFactory.decodeResource(getResources(), android.R.drawable.star_on));
-                    builder.setSmallIcon(android.R.drawable.star_on);
-                    builder.setTicker("알람 간단한 설명");
-                    builder.setContentTitle("알람 제목");
-                    builder.setContentText("알람 내용");
-                    builder.setWhen(System.currentTimeMillis());
-                    builder.setDefaults(Notification.DEFAULT_SOUND | Notification.DEFAULT_VIBRATE);
-                    builder.setContentIntent(pendingIntent);
-                    builder.setAutoCancel(true);
-                    builder.setNumber(999);
-                    builder.addAction(android.R.drawable.star_on, "반짝", pendingIntent);
-                    builder.addAction(android.R.drawable.star_off, "번쩍", pendingIntent);
-                    notificationManager.notify(0, builder.build());
-                    */
-
-
-
                     NotificationManager nm = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
                     Intent push=new Intent();
                     PendingIntent fullScreenPendingIntent = PendingIntent.getActivity(getApplicationContext(), 0, push, PendingIntent.FLAG_CANCEL_CURRENT);

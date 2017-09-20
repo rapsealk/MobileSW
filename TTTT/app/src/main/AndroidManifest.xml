@@ -26,9 +26,6 @@
 
         <service android:name=".MyService" />
 
-        <activity
-            android:name=".MyAlert">
-        </activity>
     </application>
 
 </manifest>

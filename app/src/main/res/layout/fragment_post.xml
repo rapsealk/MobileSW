@@ -1,0 +1,127 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:orientation="vertical" android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <Button
+        android:id="@+id/buttonClose"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="X" />
+
+    <ImageView
+        android:id="@+id/imageView"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:contentDescription="@string/viewImageAsPost"
+        app:srcCompat="@mipmap/rx" />
+
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+        <LinearLayout
+            android:id="@+id/linearLayoutComment"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical">
+
+            <TextView
+                android:id="@+id/textViewComment1"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="와 정말 멋져요"
+                android:textSize="32sp"
+                android:textStyle="bold" />
+
+            <TextView
+                android:id="@+id/textViewComment2"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="textViewComment2"
+                android:textSize="32sp"
+                android:textStyle="bold" />
+
+            <TextView
+                android:id="@+id/textViewComment3"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="textViewComment3"
+                android:textSize="32sp"
+                android:textStyle="bold" />
+
+            <TextView
+                android:id="@+id/textViewComment4"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="textViewComment4"
+                android:textSize="32sp"
+                android:textStyle="bold" />
+
+            <TextView
+                android:id="@+id/textViewComment5"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="textViewComment5"
+                android:textSize="32sp"
+                android:textStyle="bold" />
+
+            <TextView
+                android:id="@+id/textViewComment6"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="textViewComment6"
+                android:textSize="32sp"
+                android:textStyle="bold" />
+
+            <TextView
+                android:id="@+id/textViewComment7"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="textViewComment7"
+                android:textSize="32sp"
+                android:textStyle="bold" />
+
+            <TextView
+                android:id="@+id/textViewComment8"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="textViewComment8"
+                android:textSize="32sp"
+                android:textStyle="bold" />
+
+            <TextView
+                android:id="@+id/textViewComment9"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="textViewComment9"
+                android:textSize="32sp"
+                android:textStyle="bold" />
+
+            <TextView
+                android:id="@+id/textViewComment10"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="textViewComment10"
+                android:textSize="32sp"
+                android:textStyle="bold" />
+
+            <TextView
+                android:id="@+id/textViewComment11"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="textViewComment11"
+                android:textSize="32sp"
+                android:textStyle="bold" />
+
+            <TextView
+                android:id="@+id/textViewComment12"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="textViewComment12"
+                android:textSize="32sp"
+                android:textStyle="bold" />
+        </LinearLayout>
+    </ScrollView>
+</LinearLayout>

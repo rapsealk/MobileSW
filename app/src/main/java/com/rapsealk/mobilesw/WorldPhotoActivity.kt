@@ -16,18 +16,22 @@ import android.support.v4.app.ActivityCompat
 import android.support.v4.content.ContextCompat
 import android.util.Log
 import android.view.ViewGroup
-import android.widget.HorizontalScrollView
-import android.widget.ImageView
-import android.widget.LinearLayout
+import android.widget.*
 import com.google.android.gms.maps.*
 import com.google.android.gms.maps.model.*
+import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.auth.FirebaseUser
 import com.google.firebase.database.*
+import com.rapsealk.mobilesw.fragment.PostFragment
 import com.squareup.picasso.Picasso
 import com.squareup.picasso.Transformation
 
 class WorldPhotoActivity : FragmentActivity(), OnMapReadyCallback {
 
     private val FINE_LOCATION_CODE: Int = 1
+
+    private var mFirebaseAuth: FirebaseAuth? = null
+    private var mFirebaseAuthListener: FirebaseAuth.AuthStateListener? = null
 
     // STATE FLAGS
     private var INITIAL_GPS_SET: Boolean = true
@@ -47,6 +51,8 @@ class WorldPhotoActivity : FragmentActivity(), OnMapReadyCallback {
     // Runtime UI Component
     private var horizontalScrollView: HorizontalScrollView? = null
     private var linearLayout: LinearLayout? = null
+    private var postImageView: ImageView? = null
+    private var commentZone: ScrollView? = null
 
     // Firebase Database
     private val db: FirebaseDatabase = FirebaseDatabase.getInstance()
@@ -62,6 +68,19 @@ class WorldPhotoActivity : FragmentActivity(), OnMapReadyCallback {
                 toast("위치 정보를 이용하기 위해서는 권한이 필요합니다.")
             }
             ActivityCompat.requestPermissions(this, Array<String>(1) { Manifest.permission.ACCESS_FINE_LOCATION }, FINE_LOCATION_CODE)
+        }
+
+        // Firebase Auth
+        mFirebaseAuth = FirebaseAuth.getInstance()
+        mFirebaseAuthListener = FirebaseAuth.AuthStateListener() { auth: FirebaseAuth ->
+            var user: FirebaseUser? = auth.currentUser
+            if (user != null) {
+                // var intent = Intent(this, MainActivity::class.java)
+                // startActivity(intent)
+                // finish()
+            } else {
+
+            }
         }
 
         // Obtain the SupportMapFragment and get notified when the map is ready to be used.
@@ -159,6 +178,9 @@ class WorldPhotoActivity : FragmentActivity(), OnMapReadyCallback {
             var topLeft: LatLng = points.get(0)
             var bottomRight: LatLng = points.get(2)
             // Check Photos : Query https://firebase.google.com/docs/database/android/lists-of-data?hl=ko
+            var user = mFirebaseAuth?.currentUser
+            var uid = user?.uid
+            toast("uid: " + uid)
             ref = db.getReference("photos")
             var child = ref?.child("uid")
             child?.addListenerForSingleValueEvent(object : ValueEventListener {
@@ -187,6 +209,58 @@ class WorldPhotoActivity : FragmentActivity(), OnMapReadyCallback {
                         linearLayout?.addView(imageView)
 
                         imageView.setOnClickListener { view ->
+
+                            if (postImageView != null) return@setOnClickListener
+
+                            try {
+
+                                commentZone = ScrollView(this@WorldPhotoActivity)
+                                var commentLinearLayout = LinearLayout(this@WorldPhotoActivity)
+                                commentLinearLayout.orientation = LinearLayout.VERTICAL
+                                for (i in 1..10) {
+                                    var textView: TextView = TextView(this@WorldPhotoActivity)
+                                    textView.text = "$(i)번째 댓글"
+                                    textView.textSize = 32f
+                                    commentLinearLayout.addView(textView)
+                                }
+                                commentLinearLayout.layoutParams?.width = rootLinearLayout.width
+                                commentLinearLayout.layoutParams?.height = 800
+                                commentZone!!.addView(commentLinearLayout)
+                                rootLinearLayout.addView(commentZone, 0)
+
+                                postImageView = ImageView(this@WorldPhotoActivity)
+                                Picasso.with(this@WorldPhotoActivity)
+                                        .load(url)
+                                        .transform(object : Transformation {
+
+                                            override fun key(): String = "resizeTransformation#" + System.currentTimeMillis()
+
+                                            override fun transform(source: Bitmap): Bitmap {
+                                                val ratio: Double = source.height.toDouble() / source.width.toDouble()
+                                                val targetHeight: Int = rootLinearLayout.height - 1000
+                                                val targetWidth: Int = (targetHeight * ratio).toInt()
+                                                val result: Bitmap = Bitmap.createScaledBitmap(source, targetWidth, targetHeight, false)
+                                                if (result != source) source.recycle()
+                                                return result
+                                            }
+                                        })
+                                        .into(postImageView)
+                                postImageView!!.setOnClickListener { view ->
+                                    commentLinearLayout.removeAllViewsInLayout()
+                                    commentZone!!.removeAllViews()
+                                    rootLinearLayout.removeViewAt(1)
+                                    rootLinearLayout.removeViewAt(0)
+                                    postImageView = null
+                                    commentZone = null
+                                }
+
+                                rootLinearLayout.addView(postImageView, 0)
+                            }
+                            catch (e: Exception) {
+                                Log.d("Error", e.toString())
+                                toast(e.toString())
+                            }
+
                             toast(url)
                         }
                     }

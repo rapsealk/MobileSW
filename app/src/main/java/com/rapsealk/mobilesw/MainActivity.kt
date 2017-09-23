@@ -6,6 +6,7 @@ import android.support.v7.app.AppCompatActivity
 import android.os.Bundle
 import android.view.View
 import android.widget.Toast
+import com.google.firebase.auth.FirebaseAuth
 import kotlinx.android.synthetic.main.activity_main.*
 
 class MainActivity : AppCompatActivity() {
@@ -14,8 +15,13 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
+        var mFirebaseAuth: FirebaseAuth = FirebaseAuth.getInstance()
+        if (mFirebaseAuth.currentUser == null) {
+            startActivity(Intent(this, LoginActivity::class.java))
+            finish()
+        }
+
         imageButtonWorldPhoto.setOnClickListener { view: View ->
-            // toast("WorldPhoto")
             var intent = Intent(this, WorldPhotoActivity::class.java)
             this.onPause()
             startActivity(intent)
@@ -27,13 +33,14 @@ class MainActivity : AppCompatActivity() {
 
         imageButtonMyPage.setOnClickListener { view: View ->
             // toast("MyPage")
+            mFirebaseAuth.signOut()
             var intent = Intent(this, LoginActivity::class.java)
-            this.onPause()
+            // this.onPause()
             startActivity(intent)
+            finish()
         }
 
         imageButtonInfo.setOnClickListener { view: View ->
-            // toast("Info")
             var intent = Intent(this, InfoActivity::class.java)
             this.onPause()
             startActivity(intent)

@@ -14,8 +14,8 @@
         android:id="@+id/imageView"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:contentDescription="@string/viewImageAsPost"
-        app:srcCompat="@mipmap/rx" />
+        android:contentDescription=""
+        app:srcCompat="@mipmap/ic_instagram" />
 
     <ScrollView
         android:layout_width="match_parent"

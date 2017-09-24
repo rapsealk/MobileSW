@@ -44,7 +44,8 @@ class MainActivity : AppCompatActivity() {
         }
 
         imageButtonSetting.setOnClickListener { view: View ->
-            toast("Setting")
+            // toast("Setting")
+            startActivity(Intent(this, SettingsActivity::class.java))
         }
 
         imageButtonMyPage.setOnClickListener { view: View ->

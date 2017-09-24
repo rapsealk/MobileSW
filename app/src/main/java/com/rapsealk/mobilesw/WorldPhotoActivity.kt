@@ -22,7 +22,7 @@ import com.google.android.gms.maps.model.*
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseUser
 import com.google.firebase.database.*
-import com.rapsealk.mobilesw.fragment.PostFragment
+import com.squareup.picasso.Callback
 import com.squareup.picasso.Picasso
 import com.squareup.picasso.Transformation
 
@@ -54,6 +54,8 @@ class WorldPhotoActivity : FragmentActivity(), OnMapReadyCallback {
     private var postImageView: ImageView? = null
     private var commentZone: ScrollView? = null
 
+    private var defaultPostImageLoadingView: ImageView? = null
+
     // Firebase Database
     private val db: FirebaseDatabase = FirebaseDatabase.getInstance()
     private var ref: DatabaseReference? = null
@@ -61,6 +63,21 @@ class WorldPhotoActivity : FragmentActivity(), OnMapReadyCallback {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_world_photo)
+
+        defaultPostImageLoadingView = ImageView(this)
+        Picasso.with(this@WorldPhotoActivity)
+                .load(R.drawable.default_image)
+                .transform(object : Transformation {
+                    override fun key() : String = ""
+                    override fun transform(source: Bitmap): Bitmap {
+                        var ratio: Double = source.height.toDouble() / source.width.toDouble()
+                        var targetHeight: Int = rootLinearLayout.height - 1000
+                        var targetWidth: Int = (targetHeight * ratio).toInt()
+                        var result: Bitmap = Bitmap.createScaledBitmap(source, targetWidth, targetHeight, false)
+                        if (result != source) source.recycle()
+                        return result
+                    }
+                }).into(defaultPostImageLoadingView)
 
         // Permission Check
         if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
@@ -217,10 +234,10 @@ class WorldPhotoActivity : FragmentActivity(), OnMapReadyCallback {
                                 commentZone = ScrollView(this@WorldPhotoActivity)
                                 var commentLinearLayout = LinearLayout(this@WorldPhotoActivity)
                                 commentLinearLayout.orientation = LinearLayout.VERTICAL
-                                for (i in 1..10) {
+                                for (i in 1..20) {
                                     var textView: TextView = TextView(this@WorldPhotoActivity)
-                                    textView.text = "$(i)번째 댓글"
-                                    textView.textSize = 32f
+                                    textView.text = i.toString()+"번째 댓글"
+                                    textView.textSize = 24f
                                     commentLinearLayout.addView(textView)
                                 }
                                 commentLinearLayout.layoutParams?.width = rootLinearLayout.width
@@ -228,7 +245,19 @@ class WorldPhotoActivity : FragmentActivity(), OnMapReadyCallback {
                                 commentZone!!.addView(commentLinearLayout)
                                 rootLinearLayout.addView(commentZone, 0)
 
+                                rootLinearLayout.addView(defaultPostImageLoadingView, 0)
+
                                 postImageView = ImageView(this@WorldPhotoActivity)
+
+                                postImageView!!.setOnClickListener { view ->
+                                    commentLinearLayout.removeAllViewsInLayout()
+                                    commentZone!!.removeAllViews()
+                                    rootLinearLayout.removeViewAt(1)
+                                    rootLinearLayout.removeViewAt(0)
+                                    postImageView = null
+                                    commentZone = null
+                                }
+
                                 Picasso.with(this@WorldPhotoActivity)
                                         .load(url)
                                         .transform(object : Transformation {
@@ -244,17 +273,15 @@ class WorldPhotoActivity : FragmentActivity(), OnMapReadyCallback {
                                                 return result
                                             }
                                         })
-                                        .into(postImageView)
-                                postImageView!!.setOnClickListener { view ->
-                                    commentLinearLayout.removeAllViewsInLayout()
-                                    commentZone!!.removeAllViews()
-                                    rootLinearLayout.removeViewAt(1)
-                                    rootLinearLayout.removeViewAt(0)
-                                    postImageView = null
-                                    commentZone = null
-                                }
-
-                                rootLinearLayout.addView(postImageView, 0)
+                                        .into(postImageView, object : Callback {
+                                            override fun onSuccess() {
+                                                rootLinearLayout.addView(postImageView, 0)
+                                                rootLinearLayout.removeViewAt(1)
+                                            }
+                                            override fun onError() {
+                                                toast("이미지 로딩에 실패했습니다.")
+                                            }
+                                        })
                             }
                             catch (e: Exception) {
                                 Log.d("Error", e.toString())

@@ -51,6 +51,7 @@
             android:name=".WorldPhotoActivity"
             android:label="@string/title_activity_world_photo" />
         <activity android:name=".SettingsActivity"></activity>
+        <service android:name=".service.CameraObservingService"></service>
     </application>
 
 </manifest>

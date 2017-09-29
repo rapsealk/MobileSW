@@ -9,6 +9,7 @@ import android.content.Intent
 import android.hardware.Camera
 import android.os.Handler
 import android.os.IBinder
+import android.util.Log
 import android.widget.Toast
 import com.rapsealk.mobilesw.MainActivity
 import com.rapsealk.mobilesw.R
@@ -18,27 +19,59 @@ import com.rapsealk.mobilesw.R
  */
 class CameraObservingService : Service {
 
-    private var step = 0
+    private var cameraOnUse = false
     private var isStop = false
 
     constructor() : super() {}
-
-    override fun onBind(intent: Intent?): IBinder? = null
 
     override fun onCreate() {
         super.onCreate()
     }
 
-    override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
-        var counter = Thread(Runnable {
-            while (!isStop) {
-                if (!onCameraUse() && step == 0) { }
-                else if (onCameraUse() && step == 0) { step = 1}
-                else if (onCameraUse() && step == 1) { }
-                else if (!onCameraUse() && step == 1) {
-                    step = 0
+    override fun onBind(intent: Intent?): IBinder? = null
 
-                    var notificationManager = this.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+    override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
+        var counter = Thread(CameraObserver())
+        counter.start()
+        return super.onStartCommand(intent, flags, startId)
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        isStop = true
+    }
+
+    fun onCameraUse(): Boolean {
+        var camera: Camera? = null
+
+        try {
+            camera = Camera.open()
+        }
+        catch (e: RuntimeException) {
+            return true
+        }
+        finally {
+            if (camera != null) camera.release()
+        }
+        return false
+    }
+
+    private inner class CameraObserver : Runnable {
+
+        private val handler: Handler = Handler()
+
+        override fun run() {
+            Log.d("CameraObserver", "Run")
+            while (!isStop) {
+                Log.d("CameraObserver", "inside while loop")
+                if (!onCameraUse() && !cameraOnUse) { }
+                else if (onCameraUse() && !cameraOnUse) { cameraOnUse = true }
+                else if (onCameraUse() && cameraOnUse) { }
+                else if (!onCameraUse() && cameraOnUse) {
+
+                    cameraOnUse = false
+
+                    var notificationManager = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
                     var pushIntent = Intent()
                     var fullScreenPendingIntent = PendingIntent.getActivity(applicationContext, 0, pushIntent, PendingIntent.FLAG_CANCEL_CURRENT)
                     var builder = Notification.Builder(applicationContext)
@@ -61,28 +94,11 @@ class CameraObservingService : Service {
 
                     break
                 }
-
             }
-            Handler().post(Runnable {
+            handler.post(Runnable {
                 Toast.makeText(applicationContext, "Service closed", Toast.LENGTH_SHORT).show()
             })
-        })
-        return super.onStartCommand(intent, flags, startId)
-    }
-
-    fun onCameraUse(): Boolean {
-        var camera: Camera? = null
-
-        try {
-            camera = Camera.open()
         }
-        catch (e: RuntimeException) {
-            return true
-        }
-        finally {
-            if (camera != null) camera.release()
-        }
-        return false
     }
 
 }

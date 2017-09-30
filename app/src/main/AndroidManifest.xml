@@ -10,8 +10,10 @@
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
     <uses-permission android:name="android.permission.INTERNET" />
-    
     <uses-permission android:name="android.permission.CAMERA" />
+
+    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
+
     <uses-feature android:name="android.hardware.camera" />
 
     <!-- To auto-complete the email text field in the login form with the user's emails -->
@@ -50,8 +52,15 @@
         <activity
             android:name=".WorldPhotoActivity"
             android:label="@string/title_activity_world_photo" />
-        <activity android:name=".SettingsActivity"></activity>
-        <service android:name=".service.CameraObservingService"></service>
+        <activity android:name=".SettingsActivity" />
+
+        <service android:name=".service.CameraObservingService" />
+
+        <activity
+            android:name=".UploadPhotoActivity"
+            android:launchMode="singleTask"
+            android:taskAffinity=""
+            android:excludeFromRecents="true" />
     </application>
 
 </manifest>

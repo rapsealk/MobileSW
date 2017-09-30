@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="utf-8"?>
+<android.support.constraint.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context="com.rapsealk.mobilesw.UploadPhotoActivity">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical">
+
+        <ImageView
+            android:id="@+id/imageViewUpload"
+            android:layout_width="match_parent"
+            android:layout_height="273dp"
+            android:contentDescription="@string/title_activity_image_upload"
+            app:srcCompat="@drawable/default_image"
+            tools:layout_editor_absoluteX="95dp"
+            tools:layout_editor_absoluteY="71dp" />
+
+        <EditText
+            android:id="@+id/editTextContent"
+            android:layout_width="match_parent"
+            android:layout_height="138dp"
+            android:ems="10"
+            android:inputType="textMultiLine" />
+
+        <Button
+            android:id="@+id/btnCommit"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="등록하기" />
+
+        <Button
+            android:id="@+id/btnRollback"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="돌아가기" />
+    </LinearLayout>
+
+</android.support.constraint.ConstraintLayout>

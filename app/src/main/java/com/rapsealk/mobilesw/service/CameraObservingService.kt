@@ -9,10 +9,10 @@ import android.content.Intent
 import android.hardware.Camera
 import android.os.Handler
 import android.os.IBinder
-import android.util.Log
+import android.support.v4.app.NotificationCompat
 import android.widget.Toast
-import com.rapsealk.mobilesw.MainActivity
 import com.rapsealk.mobilesw.R
+import com.rapsealk.mobilesw.UploadPhotoActivity
 
 /**
  * Created by rapsealk on 2017. 9. 24..
@@ -56,14 +56,18 @@ class CameraObservingService : Service {
         return false
     }
 
+    fun startActivity() {
+        var pm = packageManager
+        var intent = pm.getLaunchIntentForPackage("")
+        this.startActivity(intent)
+    }
+
     private inner class CameraObserver : Runnable {
 
         private val handler: Handler = Handler()
 
         override fun run() {
-            Log.d("CameraObserver", "Run")
             while (!isStop) {
-                Log.d("CameraObserver", "inside while loop")
                 if (!onCameraUse() && !cameraOnUse) { }
                 else if (onCameraUse() && !cameraOnUse) { cameraOnUse = true }
                 else if (onCameraUse() && cameraOnUse) { }
@@ -72,11 +76,30 @@ class CameraObservingService : Service {
                     cameraOnUse = false
 
                     var notificationManager = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
-                    var pushIntent = Intent()
-                    var fullScreenPendingIntent = PendingIntent.getActivity(applicationContext, 0, pushIntent, PendingIntent.FLAG_CANCEL_CURRENT)
+                    var uploadImageIntent = Intent(this@CameraObservingService, UploadPhotoActivity::class.java)
+                    // var uploadImageIntent = Intent(applicationContext, UploadPhotoActivity::class.java)
+                            .setFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                            .setFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK)
+                            .setFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP)
+
+                    var uploadImagePendingIntent = PendingIntent.getActivity(this@CameraObservingService, 1, uploadImageIntent, PendingIntent.FLAG_UPDATE_CURRENT)
+                    var fullScreenPendingIntent = PendingIntent.getActivity(applicationContext, 0, uploadImageIntent, PendingIntent.FLAG_CANCEL_CURRENT)
+
+                    var ncbuilder: NotificationCompat.Builder = NotificationCompat.Builder(applicationContext)
+                            .setFullScreenIntent(uploadImagePendingIntent, true)
+                            .setContentIntent(uploadImagePendingIntent)
+                            .setSmallIcon(R.mipmap.ic_launcher)
+                            .setContentTitle("ContentTitle")
+                            .setContentText("ContextText")
+                            .setPriority(NotificationCompat.PRIORITY_MAX)
+                            .setAutoCancel(true)
+                            .setContentIntent(uploadImagePendingIntent)
+
+                    /*
                     var builder = Notification.Builder(applicationContext)
 
-                    builder.setFullScreenIntent(fullScreenPendingIntent, true)
+                    builder.setFullScreenIntent(uploadImagePendingIntent, true)
+                    // builder.setFullScreenIntent(fullScreenPendingIntent, true)
                     builder.setSmallIcon(R.mipmap.ic_launcher)
                     builder.setTicker("Ticker")
                     builder.setWhen(System.currentTimeMillis())
@@ -84,13 +107,16 @@ class CameraObservingService : Service {
                     builder.setContentText("ContentText")
                     builder.setAutoCancel(true)
                     builder.setPriority(Notification.PRIORITY_MAX)
-                    builder.addAction(android.R.drawable.star_big_on, "On", fullScreenPendingIntent)
+                    builder.addAction(android.R.drawable.star_big_on, "On", uploadImagePendingIntent)
                     builder.addAction(android.R.drawable.star_big_off, "Off", fullScreenPendingIntent)
 
-                    pushIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-                    pushIntent.setClass(applicationContext, MainActivity::class.java)
+                    // pushIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                    // pushIntent.setClass(applicationContext, MainActivity::class.java)
 
                     notificationManager.notify(9999, builder.build())
+                    */
+
+                    notificationManager.notify(9999, ncbuilder.build())
 
                     break
                 }

@@ -35,7 +35,6 @@ class WorldPhotoActivity : FragmentActivity(), OnMapReadyCallback {
 
     // STATE FLAGS
     private var INITIAL_GPS_SET: Boolean = true
-    private var CAMERA_UPDATE_LOCK_STATE: Boolean = false
     private var DRAG_STATE: Boolean = false
     private var VIEW_PHOTOS_STATE: Boolean = false
 

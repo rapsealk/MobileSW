@@ -62,6 +62,11 @@ class WorldPhotoActivity : FragmentActivity(), OnMapReadyCallback {
     private val db: FirebaseDatabase = FirebaseDatabase.getInstance()
     private var ref: DatabaseReference? = null
 
+    override fun onBackPressed() {
+        finish()
+        super.onBackPressed()
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_world_photo)
@@ -196,13 +201,19 @@ class WorldPhotoActivity : FragmentActivity(), OnMapReadyCallback {
             mapFragment?.view!!.layoutParams = params
 
             var points: List<LatLng> = polygon.points
+            // safety block
             var topLeft: LatLng = points.get(0)
             var bottomRight: LatLng = points.get(2)
             // Check Photos : Query https://firebase.google.com/docs/database/android/lists-of-data?hl=ko
             var user = mFirebaseAuth?.currentUser
             var uid = user?.uid
-            toast("uid: " + uid)
+            // toast("uid: " + uid)
+            Log.d("POSITION", "TopLeft: ("+topLeft.latitude+","+topLeft.longitude+") BottomRight:("+bottomRight.latitude+","+bottomRight.longitude+")")
+            toast("TopLeft: ("+topLeft.latitude+","+topLeft.longitude+") BottomRight:("+bottomRight.latitude+","+bottomRight.longitude+")")
             ref = db.getReference("photos")
+            // var query: Query? = ref?.orderByChild("latitude")?.startAt(bottomRight.latitude)?.endAt(topLeft.latitude)
+            //         ?.orderByChild("longitude")?.startAt(topLeft.longitude)?.endAt(bottomRight.longitude)
+            // query?.addListenerForSingleValueEvent(object : ValueEventListener {
             ref?.addListenerForSingleValueEvent(object : ValueEventListener {
                 override fun onDataChange(snapshot: DataSnapshot?) {
                     for (value in snapshot!!.children) {

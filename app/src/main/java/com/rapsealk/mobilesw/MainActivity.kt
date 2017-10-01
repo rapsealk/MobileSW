@@ -12,19 +12,23 @@ import kotlinx.android.synthetic.main.activity_main.*
 
 class MainActivity : AppCompatActivity() {
 
-    private val CAMERA_REQUEST_CODE = 100
-    private val ALERT_REQUEST_CODE = 101
+    private var isFirstRun = true
 
     private var mSharedPreference: SharedPreferenceManager? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
+        setSupportActionBar(custom_toolbar)
+
+        if (isFirstRun) {
+            isFirstRun = false
+            startActivity(Intent(this, SplashActivity::class.java))
+        }
 
         var mFirebaseAuth: FirebaseAuth = FirebaseAuth.getInstance()
         if (mFirebaseAuth.currentUser == null) {
             startActivity(Intent(this, LoginActivity::class.java))
-            finish()
         }
 
         mSharedPreference = SharedPreferenceManager.getInstance(this)
@@ -40,6 +44,7 @@ class MainActivity : AppCompatActivity() {
 
         imageButtonSetting.setOnClickListener { view: View ->
             // toast("Setting")
+            this.onPause()
             startActivity(Intent(this, SettingsActivity::class.java))
         }
 
@@ -47,9 +52,8 @@ class MainActivity : AppCompatActivity() {
             // toast("MyPage")
             mFirebaseAuth.signOut()
             var intent = Intent(this, LoginActivity::class.java)
-            // this.onPause()
+            this.onPause()
             startActivity(intent)
-            finish()
         }
 
         imageButtonInfo.setOnClickListener { view: View ->

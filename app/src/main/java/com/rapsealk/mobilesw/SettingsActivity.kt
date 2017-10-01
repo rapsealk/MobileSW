@@ -14,6 +14,7 @@ import kotlinx.android.synthetic.main.activity_settings.*
 class SettingsActivity : AppCompatActivity() {
 
     private val CAMERA_REQUEST_CODE: Int = 10
+    private var mSharedPreference: SharedPreferenceManager? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -24,6 +25,13 @@ class SettingsActivity : AppCompatActivity() {
                 toast("카메라 정보를 이용하기 위해서는 권한이 필요합니다.")
             }
             ActivityCompat.requestPermissions(this, Array<String>(1) { Manifest.permission.CAMERA }, CAMERA_REQUEST_CODE)
+        }
+
+        mSharedPreference = SharedPreferenceManager.getInstance(this)
+
+        if (mSharedPreference!!.getCameraObservingService(true)) {
+            startService(Intent(applicationContext, CameraObservingService::class.java))
+            switchCameraService.isChecked = true
         }
 
         switchCameraService.setOnCheckedChangeListener { buttonView, isChecked ->

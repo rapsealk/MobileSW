@@ -1,22 +1,21 @@
 package com.rapsealk.mobilesw
 
-import android.Manifest
 import android.app.Activity
 import android.content.Intent
-import android.content.pm.PackageManager
 import android.support.v7.app.AppCompatActivity
 import android.os.Bundle
-import android.support.v4.app.ActivityCompat
-import android.support.v4.content.ContextCompat
 import android.view.View
 import android.widget.Toast
 import com.google.firebase.auth.FirebaseAuth
+import com.rapsealk.mobilesw.service.CameraObservingService
 import kotlinx.android.synthetic.main.activity_main.*
 
 class MainActivity : AppCompatActivity() {
 
     private val CAMERA_REQUEST_CODE = 100
     private val ALERT_REQUEST_CODE = 101
+
+    private var mSharedPreference: SharedPreferenceManager? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -28,14 +27,10 @@ class MainActivity : AppCompatActivity() {
             finish()
         }
 
-        /* Permission Check
-        if (ContextCompat.checkSelfPermission(this, Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED) {
-            if (ActivityCompat.shouldShowRequestPermissionRationale(this, Manifest.permission.CAMERA)) {
-                toast("카메라 정보를 이용하기 위해서는 권한이 필요합니다.")
-            }
-            ActivityCompat.requestPermissions(this, Array<String>(1) { Manifest.permission.CAMERA }, CAMERA_REQUEST_CODE)
+        mSharedPreference = SharedPreferenceManager.getInstance(this)
+        if (mSharedPreference!!.getCameraObservingService(true)) {
+            startService(Intent(applicationContext, CameraObservingService::class.java))
         }
-        */
 
         imageButtonWorldPhoto.setOnClickListener { view: View ->
             var intent = Intent(this, WorldPhotoActivity::class.java)

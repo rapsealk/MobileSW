@@ -1,7 +1,6 @@
 package com.rapsealk.mobilesw
 
 import android.Manifest
-import android.Manifest.permission_group.CAMERA
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.support.v7.app.AppCompatActivity
@@ -30,7 +29,7 @@ class SettingsActivity : AppCompatActivity() {
         mSharedPreference = SharedPreferenceManager.getInstance(this)
 
         if (mSharedPreference!!.getCameraObservingService(true)) {
-            startService(Intent(applicationContext, CameraObservingService::class.java))
+            // startService(Intent(applicationContext, CameraObservingService::class.java))
             switchCameraService.isChecked = true
         }
 

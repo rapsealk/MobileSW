@@ -11,5 +11,6 @@ data class Photo (
     val latitude: Double = 127.0,
     val longitude: Double = 37.0,
     val timestamp: Long = 0,
+    val uid: String = "",
     val url: String = ""
 )

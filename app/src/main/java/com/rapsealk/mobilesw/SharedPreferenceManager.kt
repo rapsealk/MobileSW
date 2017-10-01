@@ -2,6 +2,7 @@ package com.rapsealk.mobilesw
 
 import android.content.Context
 import android.content.SharedPreferences
+import com.google.android.gms.maps.model.LatLng
 
 /**
  * Created by rapsealk on 2017. 10. 1..
@@ -16,6 +17,7 @@ public class SharedPreferenceManager {
 
         private val FILE_NAME = "MobileSWPreference"
 
+        private val LAST_KNOWN_LOCATION = "LAST_KNOWN_LOCATION"
         private val CAMERA_OBSERVING_SERVICE = "CAMERA_OBSERVING_SERVICE_ON"
 
         public fun getInstance(context: Context): SharedPreferenceManager {
@@ -30,6 +32,22 @@ public class SharedPreferenceManager {
     private constructor(context: Context) {
         mSharedPreference = context.getSharedPreferences(SharedPreferenceManager.FILE_NAME, Context.MODE_PRIVATE)
         mEdit = mSharedPreference?.edit()
+    }
+
+    public fun setLastKnownLocation(latLng: LatLng): SharedPreferenceManager {
+        var latitude = latLng.latitude
+        var longitude = latLng.longitude
+        mEdit?.putString(LAST_KNOWN_LOCATION, "$latitude/$longitude")
+        mEdit?.commit()
+        return mInstance!!
+    }
+
+    public fun getLastKnownLocation(): LatLng {
+        var lastKnown = mSharedPreference!!.getString(LAST_KNOWN_LOCATION, "DEFAULT")
+        if (lastKnown == null) return LatLng(127.0, 37.0)
+        var lastKnowns = lastKnown.split("/")
+        var location = LatLng(lastKnowns.get(0).toDouble(), lastKnowns.get(1).toDouble())
+        return location
     }
 
     public fun setCameraObservingService(boolean: Boolean): SharedPreferenceManager {

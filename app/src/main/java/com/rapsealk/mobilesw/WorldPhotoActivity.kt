@@ -22,6 +22,7 @@ import com.google.android.gms.maps.model.*
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseUser
 import com.google.firebase.database.*
+import com.rapsealk.mobilesw.schema.Photo
 import com.squareup.picasso.Callback
 import com.squareup.picasso.Picasso
 import com.squareup.picasso.Transformation
@@ -32,6 +33,8 @@ class WorldPhotoActivity : FragmentActivity(), OnMapReadyCallback {
 
     private var mFirebaseAuth: FirebaseAuth? = null
     private var mFirebaseAuthListener: FirebaseAuth.AuthStateListener? = null
+
+    private var mSharedPreference: SharedPreferenceManager? = null
 
     // STATE FLAGS
     private var INITIAL_GPS_SET: Boolean = true
@@ -98,6 +101,8 @@ class WorldPhotoActivity : FragmentActivity(), OnMapReadyCallback {
 
             }
         }
+
+        mSharedPreference = SharedPreferenceManager.getInstance(this)
 
         // Obtain the SupportMapFragment and get notified when the map is ready to be used.
         /*val */mapFragment = supportFragmentManager.findFragmentById(R.id.map) as SupportMapFragment
@@ -198,12 +203,13 @@ class WorldPhotoActivity : FragmentActivity(), OnMapReadyCallback {
             var uid = user?.uid
             toast("uid: " + uid)
             ref = db.getReference("photos")
-            var child = ref?.child("uid")
-            child?.addListenerForSingleValueEvent(object : ValueEventListener {
+            ref?.addListenerForSingleValueEvent(object : ValueEventListener {
                 override fun onDataChange(snapshot: DataSnapshot?) {
                     for (value in snapshot!!.children) {
-                        var data: PhotoScheme = value.getValue<PhotoScheme>(PhotoScheme::class.java)
+                        var data = value.getValue<Photo>(Photo::class.java)
+                        Log.d("Content", "content: " + data.content)
                         var url = data.url
+                        if (url == null) url = "https://firebasestorage.googleapis.com/v0/b/mobilesw-178816.appspot.com/o/ReactiveX.jpg?alt=media&token=510350fe-ac5b-4f01-9d9a-2fecf8428940"
                         Log.d("Snapshot", "url: $url")
                         var imageView = ImageView(this@WorldPhotoActivity)
                         Picasso.with(this@WorldPhotoActivity)
@@ -230,6 +236,7 @@ class WorldPhotoActivity : FragmentActivity(), OnMapReadyCallback {
 
                             try {
 
+                                // Fake Comments Generator
                                 commentZone = ScrollView(this@WorldPhotoActivity)
                                 var commentLinearLayout = LinearLayout(this@WorldPhotoActivity)
                                 commentLinearLayout.orientation = LinearLayout.VERTICAL
@@ -347,6 +354,7 @@ class WorldPhotoActivity : FragmentActivity(), OnMapReadyCallback {
 
         override fun onLocationChanged(location: Location) {
             var currentLatLng = LatLng(location.latitude, location.longitude)
+            mSharedPreference?.setLastKnownLocation(currentLatLng)
             currentLocation?.latitude = location.latitude
             currentLocation?.longitude = location.longitude
             exMarker?.remove()
@@ -401,9 +409,3 @@ class WorldPhotoActivity : FragmentActivity(), OnMapReadyCallback {
     // https://developers.google.com/maps/documentation/android-api/groundoverlay?hl=ko
 
 }
-
-data class PhotoScheme(
-        val url: String = "",
-        val latitude: Double = 0.0,
-        val longitude: Double = 0.0
-)

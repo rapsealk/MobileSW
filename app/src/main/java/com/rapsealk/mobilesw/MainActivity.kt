@@ -32,7 +32,7 @@ class MainActivity : AppCompatActivity() {
         }
 
         mSharedPreference = SharedPreferenceManager.getInstance(this)
-        if (mSharedPreference!!.getCameraObservingService(true)) {
+        if (mSharedPreference!!.getCameraObservingService(false)) {
             startService(Intent(applicationContext, CameraObservingService::class.java))
         }
 

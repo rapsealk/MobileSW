@@ -36,6 +36,7 @@ class SettingsActivity : AppCompatActivity() {
             var serviceIntent = Intent(applicationContext, CameraObservingService::class.java)
             if (isChecked) { startService(serviceIntent) }
             else { stopService(serviceIntent) }
+            mSharedPreference!!.setCameraObservingService(isChecked)
         }
     }
 

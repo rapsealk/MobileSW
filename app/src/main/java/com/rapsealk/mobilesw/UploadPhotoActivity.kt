@@ -110,7 +110,7 @@ class UploadPhotoActivity : AppCompatActivity() {
                     .addOnCompleteListener { task: Task<UploadTask.TaskSnapshot> ->
                         var url = task.result.downloadUrl.toString()
                         var ref = mFirebaseDatabase.getReference()
-                        var photoData = Photo(HashMap<String, Comment>(), content, latitude, longitude, timestamp, uid, url)
+                        var photoData = Photo(HashMap<String, Comment>(), content, latitude, longitude, HashMap<String, Long>(), timestamp, uid, url)
                         ref.child("users/$uid/photos/$timestamp").setValue(photoData)
                         ref.child("photos/$timestamp").setValue(photoData)
                         toast("Upload succeed.")

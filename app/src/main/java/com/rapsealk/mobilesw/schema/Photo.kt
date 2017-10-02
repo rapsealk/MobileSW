@@ -12,6 +12,7 @@ data class Photo (
     val content: String = "",
     val latitude: Double = 127.0,
     val longitude: Double = 37.0,
+    val phopls: Map<String, Long> = HashMap<String, Long>(),
     val timestamp: Long = 0,
     val uid: String = "",
     val url: String = ""

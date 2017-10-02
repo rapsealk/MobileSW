@@ -35,7 +35,7 @@ class LoginActivity : AppCompatActivity() {
             if (user != null) {
                 // var intent = Intent(this, MainActivity::class.java)
                 // startActivity(intent)
-                finish()
+                // finish()
             } else {
 
             }
@@ -83,8 +83,8 @@ class LoginActivity : AppCompatActivity() {
                             var user: FirebaseUser? = mFirebaseAuth?.currentUser
                             // TODO
                             toast(user?.displayName + "님 환영합니다.")
-                            // var intent = Intent(this@LoginActivity, MainActivity::class.java)
-                            // startActivity(intent)
+                            var intent = Intent(this@LoginActivity, MainActivity::class.java)
+                            startActivity(intent)
                             finish()
                         } else {
                             toast("Authentication failed")

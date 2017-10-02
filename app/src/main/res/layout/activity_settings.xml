@@ -42,11 +42,11 @@
             android:orientation="horizontal">
 
             <Button
-                android:id="@+id/button2"
+                android:id="@+id/btnLogout"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
-                android:text="CameraService OFF"
+                android:text="로그아웃"
                 android:textAlignment="center"
                 android:textSize="24sp"
                 android:textStyle="bold" />

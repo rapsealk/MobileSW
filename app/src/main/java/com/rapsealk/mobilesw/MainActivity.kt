@@ -12,7 +12,9 @@ import kotlinx.android.synthetic.main.activity_main.*
 
 class MainActivity : AppCompatActivity() {
 
-    private var isFirstRun = true
+    companion object {
+        private var isFirstRun = true
+    }
 
     private var mSharedPreference: SharedPreferenceManager? = null
 
@@ -24,6 +26,7 @@ class MainActivity : AppCompatActivity() {
         var mFirebaseAuth: FirebaseAuth = FirebaseAuth.getInstance()
         if (mFirebaseAuth.currentUser == null) {
             startActivity(Intent(this, LoginActivity::class.java))
+            finish()
         }
 
         if (isFirstRun) {
@@ -50,10 +53,8 @@ class MainActivity : AppCompatActivity() {
 
         imageButtonMyPage.setOnClickListener { view: View ->
             // toast("MyPage")
-            mFirebaseAuth.signOut()
-            var intent = Intent(this, LoginActivity::class.java)
             this.onPause()
-            startActivity(intent)
+            startActivity(Intent(this, MyPageActivity::class.java))
         }
 
         imageButtonInfo.setOnClickListener { view: View ->
@@ -62,22 +63,6 @@ class MainActivity : AppCompatActivity() {
             startActivity(intent)
         }
     }
-
-    /*
-    override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<out String>, grantResults: IntArray) {
-        when (requestCode) {
-            CAMERA_REQUEST_CODE -> {
-                if (grantResults.size > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED)
-                    toast("CAMERA PERMISSION GRANTED")
-                else finish()
-                return
-            }
-            else -> {
-                finish()
-            }
-        }
-    }
-    */
 }
 
 // Extension

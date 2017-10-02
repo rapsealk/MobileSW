@@ -64,7 +64,8 @@
             android:launchMode="singleTask"
             android:taskAffinity="" />
         <activity android:name=".SplashActivity" />
-        <activity android:name=".PostActivity"></activity>
+        <activity android:name=".PostActivity" />
+        <activity android:name=".MyPageActivity"></activity>
     </application>
 
 </manifest>

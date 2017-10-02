@@ -7,10 +7,14 @@ import android.support.v7.app.AppCompatActivity
 import android.os.Bundle
 import android.support.v4.app.ActivityCompat
 import android.support.v4.content.ContextCompat
+import android.view.View
+import com.google.firebase.auth.FirebaseAuth
 import com.rapsealk.mobilesw.service.CameraObservingService
 import kotlinx.android.synthetic.main.activity_settings.*
 
 class SettingsActivity : AppCompatActivity() {
+
+    private var mFirebaseAuth: FirebaseAuth? = null
 
     private val CAMERA_REQUEST_CODE: Int = 10
     private var mSharedPreference: SharedPreferenceManager? = null
@@ -18,6 +22,8 @@ class SettingsActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_settings)
+
+        mFirebaseAuth = FirebaseAuth.getInstance()
 
         if (ContextCompat.checkSelfPermission(this, Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED) {
             if (ActivityCompat.shouldShowRequestPermissionRationale(this, Manifest.permission.CAMERA)) {
@@ -37,6 +43,14 @@ class SettingsActivity : AppCompatActivity() {
             if (isChecked) { startService(serviceIntent) }
             else { stopService(serviceIntent) }
             mSharedPreference!!.setCameraObservingService(isChecked)
+        }
+
+        btnLogout.setOnClickListener { v: View? ->
+            mFirebaseAuth?.signOut()
+            var intent = Intent(this, LoginActivity::class.java)
+            intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK)
+            startActivity(intent)
+            finish()
         }
     }
 

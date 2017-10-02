@@ -13,6 +13,7 @@ import android.location.Location
 import android.location.LocationManager
 import android.location.LocationListener
 import android.support.v4.app.ActivityCompat
+import android.content.Intent
 import android.support.v4.content.ContextCompat
 import android.util.Log
 import android.view.ViewGroup
@@ -125,7 +126,7 @@ class WorldPhotoActivity : FragmentActivity(), OnMapReadyCallback {
 
         btnState.setOnClickListener { view ->
             DRAG_STATE = !DRAG_STATE
-            if (DRAG_STATE) btnState.text = "선택 종료"
+            if (DRAG_STATE) btnState.text = "드래그!"
             else btnState.text = "영역 선택"
             mMap?.uiSettings!!.isScrollGesturesEnabled = !DRAG_STATE
             clearScreen()
@@ -243,6 +244,13 @@ class WorldPhotoActivity : FragmentActivity(), OnMapReadyCallback {
 
                         imageView.setOnClickListener { view ->
 
+                            var intent = Intent(applicationContext, PostActivity::class.java)
+                                    .putExtra("SerializedData", data)
+                            startActivity(intent)
+                            this@WorldPhotoActivity.onPause()
+
+                            /*
+
                             if (postImageView != null) return@setOnClickListener
 
                             try {
@@ -306,6 +314,7 @@ class WorldPhotoActivity : FragmentActivity(), OnMapReadyCallback {
                             }
 
                             toast(url)
+                            */
                         }
                     }
             }
@@ -322,6 +331,11 @@ class WorldPhotoActivity : FragmentActivity(), OnMapReadyCallback {
         mMap!!.addMarker(MarkerOptions().position(seoul).title("Hi Seoul"))
         mMap!!.moveCamera(CameraUpdateFactory.newLatLng(seoul))
         */
+        var lastKnownLocation = mSharedPreference?.getLastKnownLocation()
+        if (lastKnownLocation != null) {
+            mMap!!.animateCamera(CameraUpdateFactory.zoomTo(100f))
+            mMap!!.moveCamera(CameraUpdateFactory.newLatLng(lastKnownLocation))
+        }
     }
 
     override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<out String>, grantResults: IntArray) {

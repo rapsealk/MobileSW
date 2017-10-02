@@ -15,7 +15,7 @@
             android:id="@+id/map"
             android:name="com.google.android.gms.maps.SupportMapFragment"
             android:layout_width="match_parent"
-            android:layout_height="735dp"
+            android:layout_height="911dp"
             android:layout_weight="1"
             tools:context="com.rapsealk.mobilesw.WorldPhotoActivity"
             tools:layout_editor_absoluteX="8dp"

@@ -27,6 +27,7 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/Theme.AppCompat.Light.NoActionBar">
+
         <!-- android:theme="@style/AppTheme" -->
 
         <activity android:name=".MainActivity">
@@ -48,7 +49,7 @@
         -->
         <meta-data
             android:name="com.google.android.geo.API_KEY"
-            android:value="AIzaSyBzBIBT3tGkvsihDCjpd0xFDMARk48hoq4" />
+            android:value="AIzaSyA-F5Xx2o5SyzksPQByzwTr4hxGkG0oluM" />
 
         <activity
             android:name=".WorldPhotoActivity"
@@ -62,7 +63,8 @@
             android:excludeFromRecents="true"
             android:launchMode="singleTask"
             android:taskAffinity="" />
-        <activity android:name=".SplashActivity"></activity>
+        <activity android:name=".SplashActivity" />
+        <activity android:name=".PostActivity"></activity>
     </application>
 
 </manifest>

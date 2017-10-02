@@ -15,6 +15,7 @@ class PostFragment : Fragment { // TODO https://developer.android.com/guide/comp
 
     constructor () : super() {}
 
+    /*
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
@@ -22,15 +23,18 @@ class PostFragment : Fragment { // TODO https://developer.android.com/guide/comp
             super.onDestroyView()
         }
     }
+    */
 
     override fun onCreateView(inflater: LayoutInflater?, container: ViewGroup?, savedInstanceState: Bundle?): View {
         // return super.onCreateView(inflater, container, savedInstanceState)
         return inflater!!.inflate(R.layout.fragment_post, container, false)
     }
 
+    /*
     override fun onPause() {
         super.onPause()
     }
+    */
 
     /*
      * onAttach

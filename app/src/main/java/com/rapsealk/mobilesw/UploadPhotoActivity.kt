@@ -24,6 +24,7 @@ import com.google.firebase.database.FirebaseDatabase
 import com.google.firebase.storage.FirebaseStorage
 import com.google.firebase.storage.StorageReference
 import com.google.firebase.storage.UploadTask
+import com.rapsealk.mobilesw.schema.Comment
 import com.rapsealk.mobilesw.schema.Photo
 import kotlinx.android.synthetic.main.activity_upload_photo.*
 import java.io.ByteArrayOutputStream
@@ -71,7 +72,9 @@ class UploadPhotoActivity : AppCompatActivity() {
             ActivityCompat.requestPermissions(this, Array<String>(1) { Manifest.permission.ACCESS_FINE_LOCATION }, FINE_LOCATION_CODE)
         }
 
-        // var mLocationManager = getSystemService(Context.LOCATION_SERVICE) as LocationManager
+        imageViewUpload.setOnClickListener { v: View? ->
+            acquirePhotosFromGallery()
+        }
 
         btnRollback.setOnClickListener { v: View? ->
             var intent = Intent(this, MainActivity::class.java)
@@ -107,7 +110,7 @@ class UploadPhotoActivity : AppCompatActivity() {
                     .addOnCompleteListener { task: Task<UploadTask.TaskSnapshot> ->
                         var url = task.result.downloadUrl.toString()
                         var ref = mFirebaseDatabase.getReference()
-                        var photoData = Photo(content, latitude, longitude, timestamp, uid, url)
+                        var photoData = Photo(HashMap<String, Comment>(), content, latitude, longitude, timestamp, uid, url)
                         ref.child("users/$uid/photos/$timestamp").setValue(photoData)
                         ref.child("photos/$timestamp").setValue(photoData)
                         toast("Upload succeed.")

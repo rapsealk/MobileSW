@@ -28,14 +28,12 @@ class SettingsActivity : AppCompatActivity() {
 
         mSharedPreference = SharedPreferenceManager.getInstance(this)
 
-        if (mSharedPreference!!.getCameraObservingService(true)) {
-            // startService(Intent(applicationContext, CameraObservingService::class.java))
+        if (mSharedPreference!!.getCameraObservingService(false)) {
             switchCameraService.isChecked = true
         }
 
         switchCameraService.setOnCheckedChangeListener { buttonView, isChecked ->
             var serviceIntent = Intent(applicationContext, CameraObservingService::class.java)
-            toast("isChecked: " + isChecked.toString())
             if (isChecked) { startService(serviceIntent) }
             else { stopService(serviceIntent) }
         }

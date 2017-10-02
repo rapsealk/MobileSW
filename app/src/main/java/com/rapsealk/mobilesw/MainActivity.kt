@@ -21,14 +21,14 @@ class MainActivity : AppCompatActivity() {
         setContentView(R.layout.activity_main)
         setSupportActionBar(custom_toolbar)
 
-        if (isFirstRun) {
-            isFirstRun = false
-            startActivity(Intent(this, SplashActivity::class.java))
-        }
-
         var mFirebaseAuth: FirebaseAuth = FirebaseAuth.getInstance()
         if (mFirebaseAuth.currentUser == null) {
             startActivity(Intent(this, LoginActivity::class.java))
+        }
+
+        if (isFirstRun) {
+            isFirstRun = false
+            startActivity(Intent(this, SplashActivity::class.java))
         }
 
         mSharedPreference = SharedPreferenceManager.getInstance(this)

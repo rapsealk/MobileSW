@@ -52,18 +52,16 @@
 
         </LinearLayout>
 
-        <ScrollView
+        <ListView
+            android:id="@+id/commentListView"
+            android:layout_width="match_parent"
+            android:layout_height="181dp" />
+
+        <!--ScrollView
             android:layout_width="match_parent"
             android:layout_height="169dp">
 
-            <LinearLayout
-                android:id="@+id/commentLayout"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="vertical">
-
-            </LinearLayout>
-        </ScrollView>
+        </ScrollView-->
 
         <LinearLayout
             android:layout_width="match_parent"

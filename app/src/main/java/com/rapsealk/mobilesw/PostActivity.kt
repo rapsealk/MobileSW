@@ -1,31 +1,28 @@
 package com.rapsealk.mobilesw
 
-import android.graphics.drawable.Drawable
 import android.support.v7.app.AppCompatActivity
 import android.os.Bundle
 import android.view.View
 import android.widget.ImageView
-import android.widget.TextView
 import com.google.android.gms.tasks.Task
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseError
 import com.google.firebase.database.FirebaseDatabase
 import com.google.firebase.database.ValueEventListener
+import com.rapsealk.mobilesw.adapter.CommentAdapter
 import com.rapsealk.mobilesw.schema.Comment
 import com.rapsealk.mobilesw.schema.Photo
 import com.squareup.picasso.Picasso
 import kotlinx.android.synthetic.main.activity_post.*
 import java.lang.Exception
-import java.sql.Timestamp
-import java.text.SimpleDateFormat
 
 class PostActivity : AppCompatActivity() {
 
     private var mFirebaseAuth: FirebaseAuth? = null
     private var mFirebaseDatabase: FirebaseDatabase? = null
-    // private var serializedData: Photo? = null
 
+    private var commentAdapter: CommentAdapter? = null
     private var commentCount: Long = 0
     private var phoplCount: Long = 0
     private var isPhoPled: Boolean = false
@@ -43,16 +40,6 @@ class PostActivity : AppCompatActivity() {
         var serializedData = intent.getSerializableExtra("SerializedData") as Photo
         var postTimestamp = serializedData.timestamp
 
-        /*
-        var phopls = serializedData.phopls
-        var phoplTimestamp = phopls.get(uid)
-        // phopls.plus(Pair<String, Long>(uid, System.currentTimeMillis()))
-        if (phoplTimestamp != null) {
-            isPhoPled = true
-            btnPhoPl.setImageResource(R.drawable.star_yellow)
-        }
-        */
-
         Picasso.with(this)
                 .load(serializedData?.url)
                 .into(imageViewPost as ImageView)
@@ -62,17 +49,19 @@ class PostActivity : AppCompatActivity() {
                     override fun onDataChange(snapshot: DataSnapshot?) {
 
                         commentCount = snapshot!!.childrenCount
-                        updateCommentCount(commentCount)
+                        // updateCommentCount(commentCount)
+
+                        var comments: ArrayList<Comment> = arrayListOf()
 
                         for (value in snapshot!!.children) {
-                            var comment = value.getValue<Comment>(Comment::class.java)
-                            var oldComment = TextView(this@PostActivity)
-                            var writer = comment.uid
-                            var timestamp = SimpleDateFormat("yyyy-MM-dd H:m:s:S").format(Timestamp(comment.timestamp))
-                            var text = comment.comment
-                            oldComment.text = "$writer: $text ($timestamp)"
-                            commentLayout.addView(oldComment)
+                            comments.add(value.getValue<Comment>(Comment::class.java))
                         }
+
+                        commentAdapter = CommentAdapter(this@PostActivity, comments)
+
+                        commentListView.adapter = commentAdapter
+
+                        updateCommentCount()
                     }
 
                     override fun onCancelled(p0: DatabaseError?) {
@@ -107,12 +96,10 @@ class PostActivity : AppCompatActivity() {
             var ref = mFirebaseDatabase?.reference
             ref?.child("photos/$postTimestamp/comments/$commentTimestamp")?.setValue(Comment)
                     ?.addOnCompleteListener { task: Task<Void> ->
-                        var newComment = TextView(this)
-                        var formatstamp = SimpleDateFormat("yyyy-MM-dd H:m:s:S").format(Timestamp(commentTimestamp))
-                        newComment.text = "$uid: $comment ($formatstamp)"
-                        commentLayout.addView(newComment)
+                        commentAdapter?.comments?.add(Comment)
+                        commentAdapter?.notifyDataSetChanged()
                         editTextComment.setText("")
-                        updateCommentCount(++commentCount)
+                        updateCommentCount()
                     }
                     ?.addOnFailureListener { exception: Exception ->
                         toast("댓글 달기에 실패했습니다.")
@@ -135,7 +122,7 @@ class PostActivity : AppCompatActivity() {
     }
 
     override fun onBackPressed() {
-        // finish()
+        finish()
         super.onBackPressed()
     }
 
@@ -143,7 +130,8 @@ class PostActivity : AppCompatActivity() {
         commentPhoPl.text = "포플 ($count)"
     }
 
-    fun updateCommentCount(count: Long) {
-        commentInfo.text = "댓글 ($count)"
+    fun updateCommentCount() {
+        var count = commentAdapter?.count
+        commentInfo.text ="댓글 ($count)"
     }
 }

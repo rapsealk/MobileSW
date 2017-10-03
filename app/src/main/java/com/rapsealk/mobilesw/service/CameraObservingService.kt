@@ -77,12 +77,20 @@ class CameraObservingService : Service {
 
                     var uploadImagePendingIntent = PendingIntent.getActivity(this@CameraObservingService, 1, uploadImageIntent, PendingIntent.FLAG_UPDATE_CURRENT)
 
+                    var contentTitleList: Array<String> = arrayOf(
+                            "이곳에서 찍은 사진이 마음에 드시나요?",
+                            "다른 사람들에게 소개하고 싶은 곳인가요?",
+                            "추억을 공유하고 싶으신가요?"
+                    )
+
+                    var titleIndex = ((System.currentTimeMillis().toInt() % contentTitleList.size.toInt()) + contentTitleList.size.toInt()) % contentTitleList.size.toInt()
+
                     var ncbuilder: NotificationCompat.Builder = NotificationCompat.Builder(applicationContext)
                             .setFullScreenIntent(uploadImagePendingIntent, true)
                             .setContentIntent(uploadImagePendingIntent)
-                            .setSmallIcon(R.mipmap.ic_launcher)
-                            .setContentTitle("ContentTitle")
-                            .setContentText("ContextText")
+                            .setSmallIcon(R.mipmap.ic_instagram)
+                            .setContentTitle(contentTitleList.get(titleIndex))
+                            .setContentText("지금 포플에 업로드하세요!")
                             .setPriority(NotificationCompat.PRIORITY_MAX)
                             .setAutoCancel(true)
                             .setContentIntent(uploadImagePendingIntent)

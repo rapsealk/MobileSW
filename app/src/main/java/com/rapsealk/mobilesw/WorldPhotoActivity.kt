@@ -203,86 +203,34 @@ class WorldPhotoActivity : FragmentActivity(), OnMapReadyCallback {
 
             var points: List<LatLng> = polygon.points
             // safety block
-            var topLeft: LatLng = points.get(0)
-            var bottomRight: LatLng = points.get(2)
+            var startPoint: LatLng = points.get(0)
+            var endPoint: LatLng = points.get(2)
+
             // Check Photos : Query https://firebase.google.com/docs/database/android/lists-of-data?hl=ko
             var user = mFirebaseAuth?.currentUser
             var uid = user?.uid
-            // toast("uid: " + uid)
-            Log.d("POSITION", "TopLeft: ("+topLeft.latitude+","+topLeft.longitude+") BottomRight:("+bottomRight.latitude+","+bottomRight.longitude+")")
-            toast("TopLeft: ("+topLeft.latitude+","+topLeft.longitude+") BottomRight:("+bottomRight.latitude+","+bottomRight.longitude+")")
+
             ref = db.getReference("photos")
-            // var query: Query? = ref?.orderByChild("latitude")?.startAt(bottomRight.latitude)?.endAt(topLeft.latitude)
-            //         ?.orderByChild("longitude")?.startAt(topLeft.longitude)?.endAt(bottomRight.longitude)
-            // query?.addListenerForSingleValueEvent(object : ValueEventListener {
-            ref?.addListenerForSingleValueEvent(object : ValueEventListener {
+
+            var query: Query? = ref?.orderByChild("latitude")
+                    ?.startAt(min(startPoint.latitude, endPoint.latitude))
+                    ?.endAt(max(startPoint.latitude, endPoint.latitude))
+
+            query?.addListenerForSingleValueEvent(object : ValueEventListener {
                 override fun onDataChange(snapshot: DataSnapshot?) {
-                    for (value in snapshot!!.children) {
-                        var data = value.getValue<Photo>(Photo::class.java)
-                        Log.d("Content", "content: " + data.content)
-                        var url = data.url
-                        if (url == null) url = "https://firebasestorage.googleapis.com/v0/b/mobilesw-178816.appspot.com/o/ReactiveX.jpg?alt=media&token=510350fe-ac5b-4f01-9d9a-2fecf8428940"
-                        Log.d("Snapshot", "url: $url")
-                        var imageView = ImageView(this@WorldPhotoActivity)
-                        Picasso.with(this@WorldPhotoActivity)
-                                .load(url)
-                                .transform(object : Transformation {
 
-                                    override fun key(): String = "resizeTransformation#" + System.currentTimeMillis()
+                    var ref2 = snapshot?.ref?.orderByChild("longitude")
+                            ?.startAt(min(startPoint.longitude, endPoint.longitude))
+                            ?.endAt(max(startPoint.longitude, endPoint.longitude))
 
-                                    override fun transform(source: Bitmap): Bitmap {
-                                        val ratio: Double = source.height.toDouble() / source.width.toDouble()
-                                        val targetHeight: Int = 400
-                                        val targetWidth: Int = (targetHeight * ratio).toInt()
-                                        val result: Bitmap = Bitmap.createScaledBitmap(source, targetWidth, targetHeight, false)
-                                        if (result != source) source.recycle()
-                                        return result
-                                    }
-                                })
-                                .into(imageView)
-                        linearLayout?.addView(imageView)
+                    ref2?.addListenerForSingleValueEvent(object : ValueEventListener {
+                        override fun onDataChange(snapshot: DataSnapshot?) {
 
-                        imageView.setOnClickListener { view ->
-
-                            var intent = Intent(applicationContext, PostActivity::class.java)
-                                    .putExtra("SerializedData", data)
-                            startActivity(intent)
-                            this@WorldPhotoActivity.onPause()
-
-                            /*
-
-                            if (postImageView != null) return@setOnClickListener
-
-                            try {
-
-                                // Fake Comments Generator
-                                commentZone = ScrollView(this@WorldPhotoActivity)
-                                var commentLinearLayout = LinearLayout(this@WorldPhotoActivity)
-                                commentLinearLayout.orientation = LinearLayout.VERTICAL
-                                for (i in 1..20) {
-                                    var textView: TextView = TextView(this@WorldPhotoActivity)
-                                    textView.text = i.toString()+"번째 댓글"
-                                    textView.textSize = 24f
-                                    commentLinearLayout.addView(textView)
-                                }
-                                commentLinearLayout.layoutParams?.width = rootLinearLayout.width
-                                commentLinearLayout.layoutParams?.height = 800
-                                commentZone!!.addView(commentLinearLayout)
-                                rootLinearLayout.addView(commentZone, 0)
-
-                                rootLinearLayout.addView(defaultPostImageLoadingView, 0)
-
-                                postImageView = ImageView(this@WorldPhotoActivity)
-
-                                postImageView!!.setOnClickListener { view ->
-                                    commentLinearLayout.removeAllViewsInLayout()
-                                    commentZone!!.removeAllViews()
-                                    rootLinearLayout.removeViewAt(1)
-                                    rootLinearLayout.removeViewAt(0)
-                                    postImageView = null
-                                    commentZone = null
-                                }
-
+                            for (value in snapshot!!.children) {
+                                var data = value.getValue<Photo>(Photo::class.java)
+                                var url = data.url
+                                if (url == null) url = "https://firebasestorage.googleapis.com/v0/b/mobilesw-178816.appspot.com/o/ReactiveX.jpg?alt=media&token=510350fe-ac5b-4f01-9d9a-2fecf8428940"
+                                var imageView = ImageView(this@WorldPhotoActivity)
                                 Picasso.with(this@WorldPhotoActivity)
                                         .load(url)
                                         .transform(object : Transformation {
@@ -291,32 +239,30 @@ class WorldPhotoActivity : FragmentActivity(), OnMapReadyCallback {
 
                                             override fun transform(source: Bitmap): Bitmap {
                                                 val ratio: Double = source.height.toDouble() / source.width.toDouble()
-                                                val targetHeight: Int = rootLinearLayout.height - 1000
+                                                val targetHeight: Int = 400
                                                 val targetWidth: Int = (targetHeight * ratio).toInt()
                                                 val result: Bitmap = Bitmap.createScaledBitmap(source, targetWidth, targetHeight, false)
                                                 if (result != source) source.recycle()
                                                 return result
                                             }
                                         })
-                                        .into(postImageView, object : Callback {
-                                            override fun onSuccess() {
-                                                rootLinearLayout.addView(postImageView, 0)
-                                                rootLinearLayout.removeViewAt(1)
-                                            }
-                                            override fun onError() {
-                                                toast("이미지 로딩에 실패했습니다.")
-                                            }
-                                        })
-                            }
-                            catch (e: Exception) {
-                                Log.d("Error", e.toString())
-                                toast(e.toString())
-                            }
+                                        .into(imageView)
+                                linearLayout?.addView(imageView)
 
-                            toast(url)
-                            */
+                                imageView.setOnClickListener { view ->
+
+                                    var intent = Intent(applicationContext, PostActivity::class.java)
+                                            .putExtra("SerializedData", data)
+                                    startActivity(intent)
+                                    this@WorldPhotoActivity.onPause()
+                                }
+                            }
                         }
-                    }
+
+                        override fun onCancelled(p0: DatabaseError?) {
+                            //
+                        }
+                    })
             }
 
                 override fun onCancelled(p0: DatabaseError?) {
@@ -432,5 +378,8 @@ class WorldPhotoActivity : FragmentActivity(), OnMapReadyCallback {
 
     // image overray sample
     // https://developers.google.com/maps/documentation/android-api/groundoverlay?hl=ko
+
+    fun max(a: Double, b: Double): Double = if (a > b) a else b
+    fun min(a: Double, b: Double): Double = if (a < b) a else b
 
 }

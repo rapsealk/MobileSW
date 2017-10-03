@@ -21,7 +21,7 @@
                 android:layout_width="92dp"
                 android:layout_height="match_parent"
                 android:layout_weight="1"
-                android:textAlignment="viewStart"
+                android:textAlignment="center"
                 android:textSize="30sp"
                 android:textStyle="bold"
                 tools:text="CameraService" />

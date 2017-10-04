@@ -1,9 +1,11 @@
 package com.rapsealk.mobilesw
 
+import android.app.ProgressDialog
 import android.support.v7.app.AppCompatActivity
 
 import android.content.Intent
 import android.os.Bundle
+import android.view.View
 import com.google.android.gms.auth.api.Auth;
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions
@@ -24,21 +26,67 @@ class LoginActivity : AppCompatActivity() {
 
     private val GOOGLE_SIGN_IN_CODE = 9001
 
+    private var progressDialog: ProgressDialog? = null
+
+    override fun onStart() {
+        super.onStart()
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_login)
 
+        progressDialog = ProgressDialog(this)
+        progressDialog?.isIndeterminate = true
+        progressDialog?.setProgressStyle(ProgressDialog.STYLE_SPINNER)
+
         // Firebase Auth
         mFirebaseAuth = FirebaseAuth.getInstance()
-        mFirebaseAuthListener = FirebaseAuth.AuthStateListener() { auth: FirebaseAuth ->
+        mFirebaseAuthListener = FirebaseAuth.AuthStateListener { auth: FirebaseAuth ->
             var user: FirebaseUser? = auth.currentUser
             if (user != null) {
-                // var intent = Intent(this, MainActivity::class.java)
-                // startActivity(intent)
-                // finish()
+                // TODO
             } else {
-
+                // TODO
             }
+        }
+
+        // FIXME : MOVE TO REGISTER_ACTIVITY & DisplayName
+        btnRegister.setOnClickListener { v: View? ->
+            progressDialog?.setMessage("회원가입 중")
+            progressDialog?.show()
+            var email = editTextEmail.text.toString()
+            var password = editTextPassword.text.toString()
+            mFirebaseAuth?.createUserWithEmailAndPassword(email, password)
+                    ?.addOnCompleteListener(this, object : OnCompleteListener<AuthResult> {
+                        override fun onComplete(task: Task<AuthResult>) {
+                            progressDialog?.dismiss()
+                            if (task.isSuccessful()) {
+                                toast("회원가입이 완료되었습니다.")
+                                btnLogin.performClick()
+                            } else {
+                                toast("회원가입에 실패했습니다.")
+                            }
+                        }
+                    })
+        }
+
+        btnLogin.setOnClickListener { v: View? ->
+            progressDialog?.setMessage("로그인 중")
+            progressDialog?.show()
+            var email = editTextEmail.text.toString()
+            var password = editTextPassword.text.toString()
+            mFirebaseAuth?.signInWithEmailAndPassword(email, password)
+                    ?.addOnCompleteListener(this, object : OnCompleteListener<AuthResult> {
+                        override fun onComplete(task: Task<AuthResult>) {
+                            progressDialog?.dismiss()
+                            if (task.isSuccessful()) {
+                                welcomeUser(mFirebaseAuth?.currentUser)
+                            } else {
+                                toast("로그인에 실패했습니다.")
+                            }
+                        }
+                    })
         }
 
         // Google Auth
@@ -50,13 +98,15 @@ class LoginActivity : AppCompatActivity() {
         mGoogleApiClient = GoogleApiClient.Builder(this)
                 .enableAutoManage(this, object : GoogleApiClient.OnConnectionFailedListener {
                     override fun onConnectionFailed(result: ConnectionResult) {
-                        //
+                        // TODO
                     }
                 })
                 .addApi(Auth.GOOGLE_SIGN_IN_API, gso)
                 .build()
 
         google_login_button.setOnClickListener { view ->
+            progressDialog?.setMessage("구글 로그인 중")
+            progressDialog?.show()
             var signInIntent = Auth.GoogleSignInApi.getSignInIntent(mGoogleApiClient)
             startActivityForResult(signInIntent, GOOGLE_SIGN_IN_CODE)
         }
@@ -79,17 +129,20 @@ class LoginActivity : AppCompatActivity() {
         mFirebaseAuth?.signInWithCredential(credential)!!
                 .addOnCompleteListener(this, object : OnCompleteListener<AuthResult> {
                     override fun onComplete(task: Task<AuthResult>) {
+                        progressDialog?.dismiss()
                         if (task.isSuccessful) {
-                            var user: FirebaseUser? = mFirebaseAuth?.currentUser
-                            // TODO
-                            toast(user?.displayName + "님 환영합니다.")
-                            var intent = Intent(this@LoginActivity, MainActivity::class.java)
-                            startActivity(intent)
-                            finish()
+                            welcomeUser(mFirebaseAuth?.currentUser)
                         } else {
                             toast("Authentication failed")
                         }
                     }
                 })
+    }
+
+    private fun welcomeUser(user: FirebaseUser?) {
+        toast(user?.displayName + "님 환영합니다.")
+        var intent = Intent(this@LoginActivity, MainActivity::class.java)
+        startActivity(intent)
+        finish()
     }
 }

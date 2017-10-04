@@ -52,8 +52,6 @@ class WorldPhotoActivity : FragmentActivity(), OnMapReadyCallback {
     // Runtime UI Component
     private var horizontalScrollView: HorizontalScrollView? = null
     private var linearLayout: LinearLayout? = null
-    private var postImageView: ImageView? = null
-    private var commentZone: ScrollView? = null
 
     private var defaultPostImageLoadingView: ImageView? = null
 

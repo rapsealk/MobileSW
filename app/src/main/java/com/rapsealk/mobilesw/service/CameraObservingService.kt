@@ -31,8 +31,8 @@ class CameraObservingService : Service {
     override fun onBind(intent: Intent?): IBinder? = null
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
-        var counter = Thread(CameraObserver())
-        counter.start()
+        var observer = Thread(CameraObserver())
+        observer.start()
         return super.onStartCommand(intent, flags, startId)
     }
 
@@ -93,7 +93,6 @@ class CameraObservingService : Service {
                             .setContentText("지금 포플에 업로드하세요!")
                             .setPriority(NotificationCompat.PRIORITY_MAX)
                             .setAutoCancel(true)
-                            .setContentIntent(uploadImagePendingIntent)
 
                     notificationManager.notify(9999, ncbuilder.build())
 

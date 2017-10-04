@@ -31,6 +31,7 @@ class MainActivity : AppCompatActivity() {
 
         if (isFirstRun) {
             isFirstRun = false
+            this.onPause()
             startActivity(Intent(this, SplashActivity::class.java))
         }
 
@@ -46,13 +47,11 @@ class MainActivity : AppCompatActivity() {
         }
 
         imageButtonSetting.setOnClickListener { view: View ->
-            // toast("Setting")
             this.onPause()
             startActivity(Intent(this, SettingsActivity::class.java))
         }
 
         imageButtonMyPage.setOnClickListener { view: View ->
-            // toast("MyPage")
             this.onPause()
             startActivity(Intent(this, MyPageActivity::class.java))
         }
@@ -62,6 +61,10 @@ class MainActivity : AppCompatActivity() {
             this.onPause()
             startActivity(intent)
         }
+    }
+
+    override fun onResume() {
+        super.onResume()
     }
 }
 

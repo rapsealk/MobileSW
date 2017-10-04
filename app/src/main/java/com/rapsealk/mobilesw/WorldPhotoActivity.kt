@@ -15,7 +15,6 @@ import android.location.LocationListener
 import android.support.v4.app.ActivityCompat
 import android.content.Intent
 import android.support.v4.content.ContextCompat
-import android.util.Log
 import android.view.ViewGroup
 import android.widget.*
 import com.google.android.gms.maps.*
@@ -24,7 +23,6 @@ import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseUser
 import com.google.firebase.database.*
 import com.rapsealk.mobilesw.schema.Photo
-import com.squareup.picasso.Callback
 import com.squareup.picasso.Picasso
 import com.squareup.picasso.Transformation
 

@@ -8,6 +8,7 @@ import android.view.View
 import android.widget.Toast
 import com.google.firebase.auth.FirebaseAuth
 import com.rapsealk.mobilesw.service.CameraObservingService
+import com.rapsealk.mobilesw.service.RecallService
 import kotlinx.android.synthetic.main.activity_main.*
 
 class MainActivity : AppCompatActivity() {
@@ -38,6 +39,9 @@ class MainActivity : AppCompatActivity() {
         mSharedPreference = SharedPreferenceManager.getInstance(this)
         if (mSharedPreference!!.getCameraObservingService(false)) {
             startService(Intent(applicationContext, CameraObservingService::class.java))
+        }
+        if (mSharedPreference!!.getRecallService(false)) {
+            startService(Intent(applicationContext, RecallService::class.java))
         }
 
         imageButtonWorldPhoto.setOnClickListener { view: View ->

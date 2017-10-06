@@ -19,7 +19,9 @@ public class SharedPreferenceManager {
 
         private val LAST_KNOWN_LOCATION = "LAST_KNOWN_LOCATION"
         private val CAMERA_OBSERVING_SERVICE = "CAMERA_OBSERVING_SERVICE_ON"
+        private val RECALL_SERVICE = "RECALL_SERVICE_ON"
 
+        // Singleton - Anti Pattern
         public fun getInstance(context: Context): SharedPreferenceManager {
 
             if (mInstance == null) mInstance = SharedPreferenceManager(context)
@@ -58,5 +60,15 @@ public class SharedPreferenceManager {
 
     public fun getCameraObservingService(boolean: Boolean): Boolean {
         return mSharedPreference!!.getBoolean(CAMERA_OBSERVING_SERVICE, boolean)
+    }
+
+    public fun setRecallService(boolean: Boolean): SharedPreferenceManager {
+        mEdit?.putBoolean(RECALL_SERVICE, boolean)
+        mEdit?.commit()
+        return mInstance!!
+    }
+
+    public fun getRecallService(boolean: Boolean): Boolean {
+        return mSharedPreference!!.getBoolean(RECALL_SERVICE, boolean)
     }
 }

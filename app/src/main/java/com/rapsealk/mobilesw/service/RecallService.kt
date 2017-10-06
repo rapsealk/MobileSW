@@ -73,6 +73,7 @@ class RecallService : Service, LocationListener {
         override fun run() {
 
             while (isOn) { }
+            stopLocationUpdates()
         }
     }
 
@@ -136,5 +137,9 @@ class RecallService : Service, LocationListener {
 
     override fun onProviderDisabled(provider: String?) {
         isOn = false
+    }
+
+    fun stopLocationUpdates() {
+        mLocationManager?.removeUpdates(this)
     }
 }

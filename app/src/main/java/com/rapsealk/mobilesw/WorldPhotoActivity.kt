@@ -14,6 +14,7 @@ import android.location.LocationManager
 import android.location.LocationListener
 import android.support.v4.app.ActivityCompat
 import android.content.Intent
+import android.os.AsyncTask
 import android.support.v4.content.ContextCompat
 import android.view.ViewGroup
 import android.widget.*
@@ -39,6 +40,9 @@ class WorldPhotoActivity : FragmentActivity(), OnMapReadyCallback {
     private var INITIAL_GPS_SET: Boolean = true
     private var DRAG_STATE: Boolean = false
     private var VIEW_PHOTOS_STATE: Boolean = false
+    private var overlayState: Boolean = false
+
+    private var overlays: ArrayList<GroundOverlay>? = null
 
     private var mapFragment: SupportMapFragment? = null
 
@@ -107,16 +111,14 @@ class WorldPhotoActivity : FragmentActivity(), OnMapReadyCallback {
         mSharedPreference = SharedPreferenceManager.getInstance(this)
 
         // Obtain the SupportMapFragment and get notified when the map is ready to be used.
-        /*val */mapFragment = supportFragmentManager.findFragmentById(R.id.map) as SupportMapFragment
+        mapFragment = supportFragmentManager.findFragmentById(R.id.map) as SupportMapFragment
         mapFragment!!.getMapAsync(this)
 
         btnMagnify.setOnClickListener { view ->
-            // toast("Magnifying!")
             mMap!!.animateCamera(CameraUpdateFactory.zoomIn())
         }
 
         btnReduce.setOnClickListener { view ->
-            // toast("Reducing!")
             mMap!!.animateCamera(CameraUpdateFactory.zoomOut())
         }
 
@@ -126,6 +128,25 @@ class WorldPhotoActivity : FragmentActivity(), OnMapReadyCallback {
             else btnState.text = "영역 선택"
             mMap?.uiSettings!!.isScrollGesturesEnabled = !DRAG_STATE
             clearScreen()
+        }
+
+        btnOverlay.setOnClickListener { view ->
+            overlayState = overlayState.not()
+            if (overlayState) {
+                overlays = arrayListOf()
+                db.getReference("photos").addListenerForSingleValueEvent(object : ValueEventListener {
+                    override fun onDataChange(snapshot: DataSnapshot?) {
+                        for (value in snapshot!!.children) {
+                            var photo = value.getValue<Photo>(Photo::class.java)
+                            GroundOverlayGenerator(this@WorldPhotoActivity, LatLng(photo.latitude, photo.longitude)).execute(photo.url)
+                        }
+                    }
+
+                    override fun onCancelled(p0: DatabaseError?) { }
+                })
+            } else {
+                overlays?.forEach { overlay -> overlay.remove() }
+            }
         }
 
         // GET GPS DATA
@@ -165,7 +186,12 @@ class WorldPhotoActivity : FragmentActivity(), OnMapReadyCallback {
         mMap!!.setOnMapClickListener { point: LatLng ->
             draggableMarker?.remove()
             if (DRAG_STATE) {
-                draggableMarker = mMap!!.addMarker(MarkerOptions().position(point).visible(true).draggable(true).apply { CustomDragMarkerListener().onMarkerDragStart(draggableMarker) })
+                draggableMarker = mMap!!.addMarker(MarkerOptions()
+                        .position(point)
+                        .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_ORANGE))
+                        .visible(true)
+                        .draggable(true)
+                        .apply { CustomDragMarkerListener().onMarkerDragStart(draggableMarker) })
                 polygonStartPoint = point
             }
         }
@@ -186,7 +212,7 @@ class WorldPhotoActivity : FragmentActivity(), OnMapReadyCallback {
                 params.height -= 400
                 horizontalScrollView = HorizontalScrollView(this)
                 horizontalScrollView?.x = LinearLayoutGPS.x
-                horizontalScrollView?.y = 0f//LinearLayoutGPS.y// + LinearLayoutGPS.height
+                horizontalScrollView?.y = 0f
                 horizontalScrollView?.layoutParams?.width = LinearLayoutGPS.width
                 horizontalScrollView?.layoutParams?.height = 400
                 linearLayout = LinearLayout(this)
@@ -203,9 +229,6 @@ class WorldPhotoActivity : FragmentActivity(), OnMapReadyCallback {
             var endPoint: LatLng = points.get(2)
 
             // Check Photos : Query https://firebase.google.com/docs/database/android/lists-of-data?hl=ko
-            var user = mFirebaseAuth?.currentUser
-            var uid = user?.uid
-
             ref = db.getReference("photos")
 
             var query: Query? = ref?.orderByChild("latitude")
@@ -254,25 +277,13 @@ class WorldPhotoActivity : FragmentActivity(), OnMapReadyCallback {
                                 }
                             }
                         }
-
-                        override fun onCancelled(p0: DatabaseError?) {
-                            //
-                        }
+                        override fun onCancelled(p0: DatabaseError?) { }
                     })
-            }
-
-                override fun onCancelled(p0: DatabaseError?) {
-                    //
                 }
+                override fun onCancelled(p0: DatabaseError?) { }
             })
         }
 
-        /* Add a marker in Seoul and move the camera
-        val seoul = LatLng(37.56, 126.97)
-        mMap!!.animateCamera(CameraUpdateFactory.zoomTo(10f))
-        mMap!!.addMarker(MarkerOptions().position(seoul).title("Hi Seoul"))
-        mMap!!.moveCamera(CameraUpdateFactory.newLatLng(seoul))
-        */
         var lastKnownLocation = mSharedPreference?.getLastKnownLocation()
         if (lastKnownLocation != null) {
             mMap!!.animateCamera(CameraUpdateFactory.zoomTo(100f))
@@ -378,4 +389,29 @@ class WorldPhotoActivity : FragmentActivity(), OnMapReadyCallback {
     fun max(a: Double, b: Double): Double = if (a > b) a else b
     fun min(a: Double, b: Double): Double = if (a < b) a else b
 
+    inner class GroundOverlayGenerator : AsyncTask<String, Int, BitmapDescriptor> {
+
+        private val context: Context
+        private val latlng: LatLng
+        private var bitmapDescriptor: BitmapDescriptor? = null
+
+        constructor(context: Context, latlng: LatLng) : super() {
+            this.context = context
+            this.latlng = latlng
+        }
+
+        override fun doInBackground(vararg params: String?): BitmapDescriptor {
+            var url = params.get(0)
+            bitmapDescriptor = BitmapDescriptorFactory.fromBitmap(Picasso.with(context).load(url).get())
+            return bitmapDescriptor!!
+        }
+
+        override fun onPostExecute(result: BitmapDescriptor?) {
+            overlays?.add(
+                mMap?.addGroundOverlay(GroundOverlayOptions()
+                        .image(bitmapDescriptor!!)
+                        .position(latlng, 16f, 16f))!!
+            )
+        }
+    }
 }

@@ -58,6 +58,7 @@
         <activity android:name=".SettingsActivity" />
 
         <service android:name=".service.CameraObservingService" />
+        <service android:name=".service.RecallService" />
 
         <activity
             android:name=".UploadPhotoActivity"

@@ -7,6 +7,7 @@ import android.support.v7.app.AppCompatActivity
 import android.os.Bundle
 import android.support.v4.app.ActivityCompat
 import android.support.v4.content.ContextCompat
+import android.util.Log
 import android.view.View
 import com.google.firebase.auth.FirebaseAuth
 import com.rapsealk.mobilesw.service.CameraObservingService
@@ -54,6 +55,7 @@ class SettingsActivity : AppCompatActivity() {
         }
 
         switchRecallService.setOnCheckedChangeListener { buttonView, isChecked ->
+            Log.d("Service", "SwitchRecallService::$isChecked")
             var serviceIntent = Intent(applicationContext, RecallService::class.java)
             if (isChecked) startService(serviceIntent) else stopService(serviceIntent)
             mSharedPreference!!.setRecallService(isChecked)

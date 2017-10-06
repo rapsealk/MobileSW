@@ -25,6 +25,8 @@ import com.rapsealk.mobilesw.R
 class RecallService : Service, LocationListener {
 
     private var isOn = true
+    private var lastLatitude: Double = -10000.0
+    private var lastLongitude: Double = -10000.0
 
     private var mLocationManager: LocationManager? = null
     private var mFirebaseDatabase: FirebaseDatabase? = null
@@ -70,15 +72,17 @@ class RecallService : Service, LocationListener {
 
         override fun run() {
 
-            while (isOn) {
-
-            }
+            while (isOn) { }
         }
     }
 
     override fun onLocationChanged(location: Location?) {
+
         var latitude = location?.latitude
         var longitude = location?.longitude
+
+        if ((Math.abs(latitude!!.minus(lastLatitude)) < 0.0005).and(Math.abs(longitude!!.minus(lastLongitude)) < 0.0005)) return
+
         ref?.orderByChild("latitude")
                 ?.startAt(latitude!!.minus(0.0005))
                 ?.endAt(latitude.plus(0.0005))
@@ -96,6 +100,8 @@ class RecallService : Service, LocationListener {
                                 var count = snapshot!!.childrenCount
 
                                 if (count > 0) {
+                                    lastLatitude = latitude
+                                    lastLongitude = longitude
                                     var recallIntent = Intent(this@RecallService, MainActivity::class.java)
                                             .setFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
                                     var recallPendingIntent = PendingIntent.getActivity(this@RecallService, 1, recallIntent, PendingIntent.FLAG_UPDATE_CURRENT)
@@ -104,7 +110,7 @@ class RecallService : Service, LocationListener {
                                             .setContentIntent(recallPendingIntent)
                                             .setSmallIcon(R.mipmap.ic_instagram)
                                             .setContentTitle("이곳에서 $count 장의 기록이 있습니다.")
-                                            .setContentText("지금 포플에서 확인해보세요!")
+                                            .setContentText("지금 포플에서 확인해보세요! ($latitude, $longitude)")
                                             .setPriority(NotificationCompat.PRIORITY_HIGH)
                                             .setAutoCancel(true)
 

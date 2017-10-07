@@ -37,4 +37,6 @@ class ProgressDialog : AsyncTask<Int, String, Int> {
         return taskCount
     }
 
+    override fun onCancelled() { }
+
 }

@@ -12,6 +12,8 @@ import android.support.v4.content.ContextCompat
 import android.view.View
 import android.widget.ImageView
 import android.widget.LinearLayout
+import android.widget.ProgressBar
+import android.widget.ViewSwitcher
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseError
@@ -19,6 +21,7 @@ import com.google.firebase.database.FirebaseDatabase
 import com.google.firebase.database.ValueEventListener
 import com.rapsealk.mobilesw.misc.MediaScanner
 import com.rapsealk.mobilesw.schema.Photo
+import com.squareup.picasso.Callback
 import com.squareup.picasso.Picasso
 import com.squareup.picasso.Transformation
 import kotlinx.android.synthetic.main.activity_my_page.*
@@ -74,7 +77,13 @@ class MyPageActivity : AppCompatActivity() {
 
                         snapshot!!.children.forEachIndexed { index, child ->
                             var photo = child.getValue<Photo>(Photo::class.java)
+                            var viewSwitcher = ViewSwitcher(this@MyPageActivity)
+                            var progressBar = ProgressBar(this@MyPageActivity)
+                            progressBar.isIndeterminate = true
+                            progressBar.visibility = ProgressBar.VISIBLE
+                            viewSwitcher.addView(progressBar)
                             var imageView = ImageView(this@MyPageActivity)
+                            viewSwitcher.addView(imageView)
                             Picasso.with(this@MyPageActivity)
                                     .load(photo.url)
                                     .transform(object: Transformation {
@@ -125,8 +134,14 @@ class MyPageActivity : AppCompatActivity() {
                                             return result
                                         }
                                     })
-                                    .into(imageView) //, object : Callback {})
-                            horizontalLayout.addView(imageView)
+                                    .into(imageView, object : Callback {
+                                        override fun onSuccess() {
+                                            viewSwitcher.showNext()
+                                        }
+
+                                        override fun onError() { }
+                                    })
+                            horizontalLayout.addView(viewSwitcher)
                             if (index % 3 == 2 || index == lastIndex) {
                                 verticalLayout.addView(horizontalLayout)
                                 horizontalLayout = LinearLayout(this@MyPageActivity)

@@ -45,7 +45,7 @@ public class SharedPreferenceManager {
     }
 
     public fun getLastKnownLocation(): LatLng {
-        var lastKnown = mSharedPreference!!.getString(LAST_KNOWN_LOCATION, "DEFAULT")
+        var lastKnown = mSharedPreference!!.getString(LAST_KNOWN_LOCATION, null)
         if (lastKnown == null) return LatLng(127.0, 37.0)
         var lastKnowns = lastKnown.split("/")
         var location = LatLng(lastKnowns.get(0).toDouble(), lastKnowns.get(1).toDouble())

@@ -1,4 +1,4 @@
-package com.rapsealk.mobilesw
+package com.rapsealk.mobilesw.misc
 
 import android.content.Context
 import android.content.SharedPreferences
@@ -32,7 +32,7 @@ public class SharedPreferenceManager {
     }
 
     private constructor(context: Context) {
-        mSharedPreference = context.getSharedPreferences(SharedPreferenceManager.FILE_NAME, Context.MODE_PRIVATE)
+        mSharedPreference = context.getSharedPreferences(FILE_NAME, Context.MODE_PRIVATE)
         mEdit = mSharedPreference?.edit()
     }
 

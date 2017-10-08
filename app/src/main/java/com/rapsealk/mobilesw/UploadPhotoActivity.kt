@@ -1,13 +1,12 @@
 package com.rapsealk.mobilesw
 
 import android.Manifest
-import android.content.Context
+import android.app.ProgressDialog
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.database.Cursor
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
-import android.location.LocationManager
 import android.media.ExifInterface
 import android.net.Uri
 import android.support.v7.app.AppCompatActivity
@@ -24,14 +23,13 @@ import com.google.firebase.database.FirebaseDatabase
 import com.google.firebase.storage.FirebaseStorage
 import com.google.firebase.storage.StorageReference
 import com.google.firebase.storage.UploadTask
+import com.rapsealk.mobilesw.misc.SharedPreferenceManager
 import com.rapsealk.mobilesw.schema.Comment
 import com.rapsealk.mobilesw.schema.Photo
 import kotlinx.android.synthetic.main.activity_upload_photo.*
-import java.io.ByteArrayOutputStream
 import java.io.File
 import java.io.IOException
 import java.lang.Exception
-import kotlin.system.measureTimeMillis
 
 class UploadPhotoActivity : AppCompatActivity() {
 
@@ -84,6 +82,12 @@ class UploadPhotoActivity : AppCompatActivity() {
 
         btnCommit.setOnClickListener { v: View? ->
 
+            var progressDialog = ProgressDialog(this)
+            progressDialog.isIndeterminate = true
+            progressDialog.setProgressStyle(ProgressDialog.STYLE_SPINNER)
+            progressDialog.setMessage("이미지 업로드 중...")
+            progressDialog.show()
+
             var storageRef: StorageReference = mFirebaseStorage.getReference()
 
             var uid = mFirebaseUser!!.uid
@@ -113,6 +117,7 @@ class UploadPhotoActivity : AppCompatActivity() {
                         var photoData = Photo(HashMap<String, Comment>(), content, latitude, longitude, HashMap<String, Long>(), timestamp, uid, url)
                         ref.child("users/$uid/photos/$timestamp").setValue(photoData)
                         ref.child("photos/$timestamp").setValue(photoData)
+                        progressDialog.dismiss()
                         toast("Upload succeed.")
                         btnRollback.performClick()
                     }

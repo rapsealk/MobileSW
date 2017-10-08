@@ -4,9 +4,11 @@ import android.Manifest
 import android.app.ProgressDialog
 import android.content.pm.PackageManager
 import android.graphics.Bitmap
+import android.os.AsyncTask
 import android.support.v7.app.AppCompatActivity
 import android.os.Bundle
 import android.os.Environment
+import android.os.Handler
 import android.support.v4.app.ActivityCompat
 import android.support.v4.content.ContextCompat
 import android.view.View
@@ -70,8 +72,6 @@ class MyPageActivity : AppCompatActivity() {
                         var children = snapshot!!.children
                         var lastIndex = children.count() - 1
 
-                        var targetWidth = (verticalLayout.width / 3).toInt()
-
                         var horizontalLayout = LinearLayout(this@MyPageActivity)
                         horizontalLayout.layoutMode = LinearLayout.HORIZONTAL
 
@@ -89,44 +89,15 @@ class MyPageActivity : AppCompatActivity() {
                                     .transform(object: Transformation {
                                         override fun key(): String = ""
                                         override fun transform(source: Bitmap): Bitmap {
-                                            var ratio = source.width / source.height
-                                            var targetHeight = (targetWidth * ratio).toInt()
-                                            var result = Bitmap.createScaledBitmap(source, targetWidth, targetHeight, false)
+
+                                            var result = Bitmap.createScaledBitmap(source, 480, 640, false)
 
                                             // TODO : DOWNLOAD
                                             imageView.setOnClickListener { v: View? ->
-                                                var thread = object : Runnable {
-                                                    override fun run() {
-                                                        var mime = photo.url.split(".").last().split("?").first()
-                                                        var timestamp = System.currentTimeMillis()
-                                                        var filename = "$timestamp.$mime"
-
-                                                        var directory = File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DCIM), "PhotoPlace")
-                                                        if (!directory.exists()) directory.mkdir()
-
-                                                        var file = File(directory.path + File.separator + filename)
-                                                        try {
-                                                            file.createNewFile()
-                                                            var ostream = FileOutputStream(file)
-                                                            when (mime.toLowerCase()) {
-                                                                "jpg", "jpeg" -> {
-                                                                    result.compress(Bitmap.CompressFormat.JPEG, 100, ostream)
-                                                                }
-                                                                "png" -> {
-                                                                    result.compress(Bitmap.CompressFormat.PNG, 100, ostream)
-                                                                }
-                                                            }
-                                                            ostream.flush()
-                                                            ostream.close()
-                                                            MediaScanner(this@MyPageActivity, file)
-                                                            toast("사진이 저장됐습니다.")
-                                                        }
-                                                        catch (exception: IOException) {
-                                                            toast(exception.toString())
-                                                        }
-                                                    }
-                                                }
-                                                thread.run()
+                                                var mime = photo.url.split(".").last().split("?").first()
+                                                var timestamp = System.currentTimeMillis()
+                                                var filename = "$timestamp.$mime"
+                                                OriginalImageRetreiver(filename).execute(photo.url)
                                             }
 
                                             if (result != source) source.recycle()
@@ -168,6 +139,57 @@ class MyPageActivity : AppCompatActivity() {
             }
             else -> {
                 // finish()
+            }
+        }
+    }
+
+    inner class OriginalImageRetreiver: AsyncTask<String, Int, Bitmap> {
+
+        private val progressDialog: ProgressDialog
+        private val filename: String
+        private val handler: Handler
+
+        constructor(filename: String): super() {
+            this.filename = filename
+            progressDialog = ProgressDialog(this@MyPageActivity)
+            progressDialog.isIndeterminate = true
+            progressDialog.setProgressStyle(ProgressDialog.STYLE_SPINNER)
+            progressDialog.setMessage("사진 저장 중")
+            handler = Handler()
+        }
+
+        override fun doInBackground(vararg params: String?): Bitmap {
+            handler.post(Runnable { progressDialog.show() })
+            var url = params.get(0)
+            return Picasso.with(this@MyPageActivity).load(url).get()
+        }
+
+        override fun onPostExecute(result: Bitmap?) {
+
+            var directory = File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DCIM), "PhotoPlace")
+            if (!directory.exists()) directory.mkdir()
+
+            var file = File(directory.path + File.separator + filename)
+            try {
+                file.createNewFile()
+                var ostream = FileOutputStream(file)
+                var mime = filename.split(".").last()
+                when (mime.toLowerCase()) {
+                    "jpg", "jpeg" -> {
+                        result?.compress(Bitmap.CompressFormat.JPEG, 100, ostream)
+                    }
+                    "png" -> {
+                        result?.compress(Bitmap.CompressFormat.PNG, 100, ostream)
+                    }
+                }
+                ostream.flush()
+                ostream.close()
+                MediaScanner(this@MyPageActivity, file)
+                handler.post(Runnable { progressDialog.dismiss() })
+                toast("사진이 저장됐습니다.")
+            }
+            catch (exception: IOException) {
+                toast(exception.toString())
             }
         }
     }

@@ -23,6 +23,7 @@ import com.google.android.gms.maps.model.*
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseUser
 import com.google.firebase.database.*
+import com.rapsealk.mobilesw.misc.SharedPreferenceManager
 import com.rapsealk.mobilesw.schema.Photo
 import com.squareup.picasso.Picasso
 import com.squareup.picasso.Transformation

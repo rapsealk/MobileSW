@@ -7,6 +7,7 @@ import android.os.Bundle
 import android.view.View
 import android.widget.Toast
 import com.google.firebase.auth.FirebaseAuth
+import com.rapsealk.mobilesw.misc.SharedPreferenceManager
 import com.rapsealk.mobilesw.service.CameraObservingService
 import com.rapsealk.mobilesw.service.RecallService
 import kotlinx.android.synthetic.main.activity_main.*

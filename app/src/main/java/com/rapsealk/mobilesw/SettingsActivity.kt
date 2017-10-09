@@ -29,6 +29,8 @@ class SettingsActivity : AppCompatActivity() {
 
         mFirebaseAuth = FirebaseAuth.getInstance()
 
+        btnBack.setOnClickListener { v: View? -> finish() }
+
         if (ContextCompat.checkSelfPermission(this, Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED) {
             if (ActivityCompat.shouldShowRequestPermissionRationale(this, Manifest.permission.CAMERA)) {
                 toast("카메라 정보를 이용하기 위해서는 권한이 필요합니다.")

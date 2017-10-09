@@ -18,6 +18,10 @@ import android.os.AsyncTask
 import android.support.v4.content.ContextCompat
 import android.view.ViewGroup
 import android.widget.*
+import com.bumptech.glide.DrawableTypeRequest
+import com.bumptech.glide.Glide
+import com.bumptech.glide.load.engine.bitmap_recycle.BitmapPool
+import com.bumptech.glide.load.resource.bitmap.BitmapTransformation
 import com.google.android.gms.maps.*
 import com.google.android.gms.maps.model.*
 import com.google.firebase.auth.FirebaseAuth
@@ -163,26 +167,12 @@ class WorldPhotoActivity : FragmentActivity(), OnMapReadyCallback {
         }
     }
 
-    /**
-     * Manipulates the map once available.
-     * This callback is triggered when the map is ready to be used.
-     * This is where we can add markers or lines, add listeners or move the camera. In this case,
-     * we just add a marker near Sydney, Australia.
-     * If Google Play services is not installed on the device, the user will be prompted to install
-     * it inside the SupportMapFragment. This method will only be triggered once the user has
-     * installed Google Play services and returned to the app.
-     */
     override fun onMapReady(googleMap: GoogleMap) {
         mMap = googleMap
 
         mMap!!.uiSettings.isMapToolbarEnabled = false
         // mMap!!.uiSettings.isZoomControlsEnabled = true
         // mMap!!.uiSettings.isCompassEnabled = true
-
-        // TODO : Customizing
-        // https://developer.android.com/reference/android/view/GestureDetector.OnGestureListener.html
-        // https://developer.android.com/reference/android/view/GestureDetector.OnGestureListener.html#onScroll(android.view.MotionEvent, android.view.MotionEvent, float, float)
-        // UiSettings.setScrollGesturesEnabled(boolean)
 
         mMap!!.setOnMapClickListener { point: LatLng ->
             draggableMarker?.remove()
@@ -251,6 +241,12 @@ class WorldPhotoActivity : FragmentActivity(), OnMapReadyCallback {
                                 var url = data.url
                                 if (url == null) url = "https://firebasestorage.googleapis.com/v0/b/mobilesw-178816.appspot.com/o/ReactiveX.jpg?alt=media&token=510350fe-ac5b-4f01-9d9a-2fecf8428940"
                                 var imageView = ImageView(this@WorldPhotoActivity)
+                                Glide.with(this@WorldPhotoActivity)
+                                        .load(url)
+                                        .fitCenter()
+                                        //.override(480, 640)
+                                        .into(imageView)
+                                /*
                                 Picasso.with(this@WorldPhotoActivity)
                                         .load(url)
                                         .transform(object : Transformation {
@@ -267,6 +263,7 @@ class WorldPhotoActivity : FragmentActivity(), OnMapReadyCallback {
                                             }
                                         })
                                         .into(imageView)
+                                */
                                 linearLayout?.addView(imageView)
 
                                 imageView.setOnClickListener { view ->
@@ -291,6 +288,14 @@ class WorldPhotoActivity : FragmentActivity(), OnMapReadyCallback {
             mMap!!.moveCamera(CameraUpdateFactory.newLatLng(lastKnownLocation))
         }
     }
+
+    /* FIXME : OnCameraIdleListener
+    override fun onCameraIdle() {
+        var zoomLevel = mMap?.cameraPosition?.zoom
+        var imageSize = zoomLevel!! * 0.16f
+        if (overlayState) overlays?.forEach { overlay ->  }
+    }
+    */
 
     override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<out String>, grantResults: IntArray) {
         when (requestCode) {
@@ -383,9 +388,6 @@ class WorldPhotoActivity : FragmentActivity(), OnMapReadyCallback {
             toast("onMarkerDragEnd")
         }
     }
-
-    // image overray sample
-    // https://developers.google.com/maps/documentation/android-api/groundoverlay?hl=ko
 
     fun max(a: Double, b: Double): Double = if (a > b) a else b
     fun min(a: Double, b: Double): Double = if (a < b) a else b

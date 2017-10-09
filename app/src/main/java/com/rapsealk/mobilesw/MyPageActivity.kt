@@ -65,17 +65,18 @@ class MyPageActivity : AppCompatActivity() {
 
         progressDialog.show()
         var ref = mFirebaseDatabase?.getReference("users")
-        ref?.child("$uid/photos")
+        // TODO : add a descending element
+        ref?.child("$uid/photos")?.orderByChild("timestamp")
                 ?.addListenerForSingleValueEvent(object : ValueEventListener {
                     override fun onDataChange(snapshot: DataSnapshot?) {
 
-                        var children = snapshot!!.children
+                        var children = snapshot!!.children.reversed()
                         var lastIndex = children.count() - 1
 
                         var horizontalLayout = LinearLayout(this@MyPageActivity)
                         horizontalLayout.layoutMode = LinearLayout.HORIZONTAL
 
-                        snapshot!!.children.forEachIndexed { index, child ->
+                        children.forEachIndexed { index, child ->
                             var photo = child.getValue<Photo>(Photo::class.java)
                             var viewSwitcher = ViewSwitcher(this@MyPageActivity)
                             var progressBar = ProgressBar(this@MyPageActivity)

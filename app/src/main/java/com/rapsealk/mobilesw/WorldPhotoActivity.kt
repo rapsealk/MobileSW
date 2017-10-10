@@ -16,6 +16,7 @@ import android.support.v4.app.ActivityCompat
 import android.content.Intent
 import android.os.AsyncTask
 import android.support.v4.content.ContextCompat
+import android.util.Log
 import android.view.ViewGroup
 import android.widget.*
 import com.bumptech.glide.DrawableTypeRequest
@@ -136,6 +137,7 @@ class WorldPhotoActivity : FragmentActivity(), OnMapReadyCallback {
         }
 
         btnOverlay.setOnClickListener { view ->
+            toast("TODO : OutOfMemoryError")
             overlayState = overlayState.not()
             if (overlayState) {
                 overlays = arrayListOf()
@@ -145,6 +147,7 @@ class WorldPhotoActivity : FragmentActivity(), OnMapReadyCallback {
                             var photo = value.getValue<Photo>(Photo::class.java)
                             GroundOverlayGenerator(this@WorldPhotoActivity, LatLng(photo.latitude, photo.longitude)).execute(photo.url)
                         }
+                        // GroundOverlayGenerator().execute(snapshot!!.children)
                     }
 
                     override fun onCancelled(p0: DatabaseError?) { }
@@ -243,8 +246,8 @@ class WorldPhotoActivity : FragmentActivity(), OnMapReadyCallback {
                                 var imageView = ImageView(this@WorldPhotoActivity)
                                 Glide.with(this@WorldPhotoActivity)
                                         .load(url)
-                                        .fitCenter()
-                                        //.override(480, 640)
+                                        //.fitCenter()
+                                        .override(480, 640)
                                         .into(imageView)
                                 /*
                                 Picasso.with(this@WorldPhotoActivity)
@@ -405,7 +408,7 @@ class WorldPhotoActivity : FragmentActivity(), OnMapReadyCallback {
 
         override fun doInBackground(vararg params: String?): BitmapDescriptor {
             var url = params.get(0)
-            bitmapDescriptor = BitmapDescriptorFactory.fromBitmap(Picasso.with(context).load(url).get())
+            bitmapDescriptor = BitmapDescriptorFactory.fromBitmap(Picasso.with(context).load(url).resize(160, 160).get())
             return bitmapDescriptor!!
         }
 
@@ -417,4 +420,30 @@ class WorldPhotoActivity : FragmentActivity(), OnMapReadyCallback {
             )
         }
     }
+
+    /*
+    inner class GroundOverlayGenerator : AsyncTask<Iterable<DataSnapshot>, Int, Unit> {
+
+        constructor() {
+            Log.d("GroundOverlay", "GroundOverlayGenerator::CONSTRUCTED")
+        }
+
+        override fun doInBackground(vararg params: Iterable<DataSnapshot>) {
+            var children = params.get(0)
+            for (value in children) {
+                var photo = value.getValue<Photo>(Photo::class.java)
+                var url = photo.url
+                Log.d("GroundOverlay", "url: $url")
+                var latlng = LatLng(photo.latitude, photo.longitude)
+                var bitmapDescriptor = BitmapDescriptorFactory.fromBitmap(Picasso.with(this@WorldPhotoActivity).load(url).get())
+                overlays?.add(
+                        mMap?.addGroundOverlay(GroundOverlayOptions()
+                        .image(bitmapDescriptor)
+                        .position(latlng, 16f, 16f))!!
+                )
+            }
+        }
+
+    }
+    */
 }

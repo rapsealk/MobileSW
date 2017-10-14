@@ -2,20 +2,26 @@ package com.rapsealk.mobilesw
 
 import android.Manifest
 import android.app.ProgressDialog
+import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.database.Cursor
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
+import android.location.Location
+import android.location.LocationListener
+import android.location.LocationManager
 import android.media.ExifInterface
 import android.net.Uri
 import android.support.v7.app.AppCompatActivity
 import android.os.Bundle
+import android.os.Looper
 import android.provider.MediaStore
 import android.support.v4.app.ActivityCompat
 import android.support.v4.content.ContextCompat
 import android.util.Log
 import android.view.View
+import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.tasks.Task
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseUser
@@ -37,6 +43,7 @@ class UploadPhotoActivity : AppCompatActivity() {
     private val ACQUIRE_FROM_GALLERY_CODE = 400
     private val READ_STORAGE_CODE = 410
 
+    private var mLocationManager: LocationManager? = null
     private var mSharedPreference: SharedPreferenceManager? = null
 
     private var photoPath: String? = null
@@ -54,6 +61,8 @@ class UploadPhotoActivity : AppCompatActivity() {
         }
         var mFirebaseDatabase: FirebaseDatabase = FirebaseDatabase.getInstance()
         var mFirebaseStorage: FirebaseStorage = FirebaseStorage.getInstance()
+
+        mLocationManager = getSystemService(Context.LOCATION_SERVICE) as LocationManager
 
         mSharedPreference = SharedPreferenceManager.getInstance(this)
 
@@ -93,34 +102,34 @@ class UploadPhotoActivity : AppCompatActivity() {
             var uid = mFirebaseUser!!.uid
             var content = editTextContent.text.toString()
 
-            // Get LastKnown Position
-            var location = mSharedPreference?.getLastKnownLocation()
-            // var location = mLocationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER)
-            var latitude = 127.0
-            var longitude = 37.0
-            if (location != null) {
-                latitude = location.latitude
-                longitude = location.longitude
-                Log.d("LOCATION", location.toString())
-            } else Log.d("LOCATION", "LastKnownLocation is NULL")
+            mLocationManager?.requestSingleUpdate(LocationManager.GPS_PROVIDER, object : LocationListener {
+                override fun onLocationChanged(location: Location?) {
+                    var latitude = location!!.latitude
+                    var longitude = location.longitude
+                    mSharedPreference?.setLastKnownLocation(LatLng(latitude, longitude))
 
-            var file = Uri.fromFile(File(photoPath))
-            var timestamp = System.currentTimeMillis()
-            var imageFileName = file.lastPathSegment
-            var uploadTask = storageRef.child("$uid/$imageFileName").putFile(file)
-            
-            uploadTask
-                    .addOnFailureListener { exception: Exception -> toast(exception.toString()) }
-                    .addOnCompleteListener { task: Task<UploadTask.TaskSnapshot> ->
-                        var url = task.result.downloadUrl.toString()
-                        var ref = mFirebaseDatabase.getReference()
-                        var photoData = Photo(HashMap<String, Comment>(), content, latitude, longitude, HashMap<String, Long>(), timestamp, uid, url)
-                        ref.child("users/$uid/photos/$timestamp").setValue(photoData)
-                        ref.child("photos/$timestamp").setValue(photoData)
-                        progressDialog.dismiss()
-                        toast("Upload succeed.")
-                        btnRollback.performClick()
-                    }
+                    var file = Uri.fromFile(File(photoPath))
+                    var timestamp = System.currentTimeMillis()
+                    var imageFileName = file.lastPathSegment
+                    var uploadTask = storageRef.child("$uid/$imageFileName").putFile(file)
+
+                    uploadTask
+                            .addOnFailureListener { exception: Exception -> toast(exception.toString()) }
+                            .addOnCompleteListener { task: Task<UploadTask.TaskSnapshot> ->
+                                var url = task.result.downloadUrl.toString()
+                                var ref = mFirebaseDatabase.getReference()
+                                var photoData = Photo(HashMap<String, Comment>(), content, latitude, longitude, HashMap<String, Long>(), timestamp, uid, url)
+                                ref.child("users/$uid/photos/$timestamp").setValue(photoData)
+                                ref.child("photos/$timestamp").setValue(photoData)
+                                progressDialog.dismiss()
+                                toast("Upload succeed.")
+                                btnRollback.performClick()
+                            }
+                }
+                override fun onStatusChanged(provider: String?, status: Int, extras: Bundle?) { }
+                override fun onProviderEnabled(provider: String?) { }
+                override fun onProviderDisabled(provider: String?) { }
+            }, Looper.getMainLooper())
         }
 
         acquirePhotosFromGallery()

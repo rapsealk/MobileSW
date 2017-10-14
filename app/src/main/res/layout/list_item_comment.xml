@@ -14,15 +14,15 @@
 
             <ImageView
                 android:id="@+id/profileImage"
-                android:layout_width="32dp"
-                android:layout_height="32dp"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
                 android:layout_weight="1"
                 app:srcCompat="@drawable/artist_button" />
 
             <TextView
                 android:id="@+id/commentWriter"
                 android:layout_width="wrap_content"
-                android:layout_height="match_parent"
+                android:layout_height="wrap_content"
                 android:layout_weight="1"
                 android:text="TextView"
                 android:textSize="18sp"
@@ -31,7 +31,7 @@
             <TextView
                 android:id="@+id/commentContent"
                 android:layout_width="wrap_content"
-                android:layout_height="match_parent"
+                android:layout_height="wrap_content"
                 android:layout_weight="1"
                 android:text="TextView"
                 android:textSize="16sp" />
@@ -39,7 +39,7 @@
             <TextView
                 android:id="@+id/commentTimestamp"
                 android:layout_width="wrap_content"
-                android:layout_height="match_parent"
+                android:layout_height="wrap_content"
                 android:layout_weight="1"
                 android:text="TextView"
                 android:textSize="12sp" />

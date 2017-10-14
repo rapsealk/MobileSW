@@ -345,13 +345,13 @@ class WorldPhotoActivity : FragmentActivity(), OnMapReadyCallback {
             currentLocation?.latitude = location.latitude
             currentLocation?.longitude = location.longitude
             exMarker?.remove()
-            exMarker = mMap!!.addMarker(MarkerOptions().position(currentLatLng).title("#"+(++counter)))
-            mMap!!.moveCamera(CameraUpdateFactory.newLatLng(currentLatLng))
+            exMarker = mMap?.addMarker(MarkerOptions().position(currentLatLng).title("#"+(++counter)))
+            mMap?.moveCamera(CameraUpdateFactory.newLatLng(currentLatLng))
             tvLatitude.setText(location.latitude.toString())
             tvLongitude.setText(location.longitude.toString())
             tvAccuracy.setText(location.accuracy.toString())
             if (INITIAL_GPS_SET) {
-                mMap!!.animateCamera(CameraUpdateFactory.zoomBy(100f))
+                mMap?.animateCamera(CameraUpdateFactory.zoomBy(100f))
                 INITIAL_GPS_SET = false
             }
         }

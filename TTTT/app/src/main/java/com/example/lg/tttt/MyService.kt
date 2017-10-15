@@ -87,7 +87,9 @@ class MyService : Service() {
 
                     val nm = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
                     val push = Intent()
+                    val select = Intent(applicationContext,SelectActivity::class.java)
                     val fullScreenPendingIntent = PendingIntent.getActivity(applicationContext, 0, push, PendingIntent.FLAG_CANCEL_CURRENT)
+                    val selectPendingIntent = PendingIntent.getActivity(applicationContext, 0, select, PendingIntent.FLAG_CANCEL_CURRENT)
                     val builder = Notification.Builder(applicationContext)
 
 
@@ -101,8 +103,8 @@ class MyService : Service() {
                     builder.setPriority(Notification.PRIORITY_MAX) //** MAX 나 HIGH로 줘야 가능함
                     //** Intent와 PendingIntent를 추가해 주는 것으로 헤드업 알림이 가능
                     //** 없을 경우 이전 버전의 Notification과 동일
-                    builder.addAction(android.R.drawable.star_on, "반짝", fullScreenPendingIntent)
-                    builder.addAction(android.R.drawable.star_off, "번쩍", fullScreenPendingIntent)
+                    builder.addAction(android.R.drawable.star_on, "올리기", selectPendingIntent)
+                    builder.addAction(android.R.drawable.star_off, "닫기", fullScreenPendingIntent)
 
                     push.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
                     push.setClass(applicationContext, MainActivity::class.java)

@@ -30,21 +30,12 @@
         android:layout_below="@+id/button1"
         android:layout_marginTop="30dp"
         android:text="서비스 종료하기" />
-    <TextureView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:id="@+id/textureView"
-        android:layout_alignParentTop="true"
-        android:layout_alignParentStart="true" />
 
-    <TextView
-        android:id="@+id/textView"
+    <Button
+        android:id="@+id/button"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_alignParentBottom="true"
-        android:layout_centerHorizontal="true"
-        android:layout_marginBottom="105dp"
-        android:text="TextView" />
+        android:text="Button" />
 
 
 </RelativeLayout>

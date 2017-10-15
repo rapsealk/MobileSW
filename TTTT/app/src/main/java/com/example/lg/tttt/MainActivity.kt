@@ -26,6 +26,7 @@ class MainActivity : AppCompatActivity() {
 
         val b1 = findViewById(R.id.button1) as Button
         val b2 = findViewById(R.id.button2) as Button
+        val b = findViewById(R.id.button) as Button
         val APIVersion = android.os.Build.VERSION.SDK_INT
 
 
@@ -36,6 +37,13 @@ class MainActivity : AppCompatActivity() {
             } else {  //카메라 권한을 요청한다.
                 ActivityCompat.requestPermissions(this, arrayOf(Manifest.permission.CAMERA), CAMERA_REQUEST_CODE)
             }
+        }
+
+        b.setOnClickListener {
+            // 서비스 시작하기
+            val intent = Intent(applicationContext, //현재제어권자
+                    Main2Activity::class.java) // 이동할 컴포넌트
+            startActivity(intent) // 서비스 시작
         }
 
         //

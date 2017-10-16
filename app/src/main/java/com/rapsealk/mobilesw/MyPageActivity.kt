@@ -21,7 +21,7 @@ import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseError
 import com.google.firebase.database.FirebaseDatabase
 import com.google.firebase.database.ValueEventListener
-import com.rapsealk.mobilesw.misc.MediaScanner
+import com.rapsealk.mobilesw.util.MediaScanner
 import com.rapsealk.mobilesw.schema.Photo
 import com.squareup.picasso.Callback
 import com.squareup.picasso.Picasso

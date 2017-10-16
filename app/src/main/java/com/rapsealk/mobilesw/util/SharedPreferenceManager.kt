@@ -1,4 +1,4 @@
-package com.rapsealk.mobilesw.misc
+package com.rapsealk.mobilesw.util
 
 import android.content.Context
 import android.content.SharedPreferences

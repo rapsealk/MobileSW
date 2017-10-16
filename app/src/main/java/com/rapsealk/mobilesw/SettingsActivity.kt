@@ -10,7 +10,7 @@ import android.support.v4.content.ContextCompat
 import android.util.Log
 import android.view.View
 import com.google.firebase.auth.FirebaseAuth
-import com.rapsealk.mobilesw.misc.SharedPreferenceManager
+import com.rapsealk.mobilesw.util.SharedPreferenceManager
 import com.rapsealk.mobilesw.service.CameraObservingService
 import com.rapsealk.mobilesw.service.RecallService
 import kotlinx.android.synthetic.main.activity_settings.*

@@ -1,31 +1,55 @@
 package com.rapsealk.mobilesw.service
 
+import android.Manifest
 import android.app.Notification
 import android.app.NotificationManager
 import android.app.PendingIntent
 import android.app.Service
 import android.content.Context
 import android.content.Intent
+import android.content.pm.PackageManager
 import android.hardware.Camera
+import android.location.Location
+import android.location.LocationListener
+import android.location.LocationManager
+import android.os.Bundle
 import android.os.Handler
 import android.os.IBinder
 import android.support.v4.app.NotificationCompat
+import android.support.v4.content.ContextCompat
 import android.widget.Toast
+import com.google.android.gms.maps.model.LatLng
 import com.rapsealk.mobilesw.R
 import com.rapsealk.mobilesw.UploadPhotoActivity
+import com.rapsealk.mobilesw.util.SharedPreferenceManager
 
 /**
  * Created by rapsealk on 2017. 9. 24..
  */
-class CameraObservingService : Service {
+class CameraObservingService : Service, LocationListener {
 
     private var cameraOnUse = false
     private var isStop = false
+
+    private var mLocationManager: LocationManager? = null
+    private var mSharedPreference: SharedPreferenceManager? = null
 
     constructor() : super() {}
 
     override fun onCreate() {
         super.onCreate()
+
+        if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+            isStop = true
+            Toast.makeText(applicationContext, "CameraService는 위치 정보에 대한 권한이 필요합니다.", Toast.LENGTH_SHORT).show()
+            return
+        }
+
+        mSharedPreference = SharedPreferenceManager.getInstance(applicationContext)
+
+        mLocationManager = getSystemService(Context.LOCATION_SERVICE) as LocationManager
+        mLocationManager?.requestLocationUpdates(LocationManager.GPS_PROVIDER, 3000, 1f, this)
+        mLocationManager?.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 3000, 1f, this)
     }
 
     override fun onBind(intent: Intent?): IBinder? = null
@@ -39,6 +63,7 @@ class CameraObservingService : Service {
     override fun onDestroy() {
         super.onDestroy()
         isStop = true
+        mLocationManager?.removeUpdates(this)
     }
 
     fun onCameraUse(): Boolean {
@@ -105,4 +130,11 @@ class CameraObservingService : Service {
         }
     }
 
+    override fun onLocationChanged(location: Location?) {
+        mSharedPreference?.setLastKnownLocation(LatLng(location!!.latitude, location.longitude))
+    }
+
+    override fun onStatusChanged(provider: String?, status: Int, extras: Bundle?) { }
+    override fun onProviderEnabled(provider: String?) { }
+    override fun onProviderDisabled(provider: String?) { }
 }

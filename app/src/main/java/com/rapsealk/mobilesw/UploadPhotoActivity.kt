@@ -19,7 +19,6 @@ import android.os.Looper
 import android.provider.MediaStore
 import android.support.v4.app.ActivityCompat
 import android.support.v4.content.ContextCompat
-import android.util.Log
 import android.view.View
 import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.tasks.Task
@@ -29,7 +28,7 @@ import com.google.firebase.database.FirebaseDatabase
 import com.google.firebase.storage.FirebaseStorage
 import com.google.firebase.storage.StorageReference
 import com.google.firebase.storage.UploadTask
-import com.rapsealk.mobilesw.misc.SharedPreferenceManager
+import com.rapsealk.mobilesw.util.SharedPreferenceManager
 import com.rapsealk.mobilesw.schema.Comment
 import com.rapsealk.mobilesw.schema.Photo
 import kotlinx.android.synthetic.main.activity_upload_photo.*
@@ -72,12 +71,14 @@ class UploadPhotoActivity : AppCompatActivity() {
             }
             ActivityCompat.requestPermissions(this, Array<String>(1) { Manifest.permission.READ_EXTERNAL_STORAGE }, READ_STORAGE_CODE)
         }
+        /*
         if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
             if (ActivityCompat.shouldShowRequestPermissionRationale(this, Manifest.permission.ACCESS_FINE_LOCATION)) {
                 toast("위치 정보를 이용하기 위해서는 권한이 필요합니다.")
             }
             ActivityCompat.requestPermissions(this, Array<String>(1) { Manifest.permission.ACCESS_FINE_LOCATION }, FINE_LOCATION_CODE)
         }
+        */
 
         imageViewUpload.setOnClickListener { v: View? ->
             acquirePhotosFromGallery()
@@ -102,6 +103,29 @@ class UploadPhotoActivity : AppCompatActivity() {
             var uid = mFirebaseUser!!.uid
             var content = editTextContent.text.toString()
 
+            var location = mSharedPreference!!.getLastKnownLocation()
+            var latitude = location.latitude
+            var longitude = location.longitude
+
+            var file = Uri.fromFile(File(photoPath))
+            var timestamp = System.currentTimeMillis()
+            var imageFileName = file.lastPathSegment
+            var uploadTask = storageRef.child("$uid/$imageFileName").putFile(file)
+
+            uploadTask
+                    .addOnFailureListener { exception: Exception -> toast(exception.toString()) }
+                    .addOnCompleteListener { task: Task<UploadTask.TaskSnapshot> ->
+                        var url = task.result.downloadUrl.toString()
+                        var ref = mFirebaseDatabase.getReference()
+                        var photoData = Photo(HashMap<String, Comment>(), content, latitude, longitude, HashMap<String, Long>(), timestamp, uid, url)
+                        ref.child("users/$uid/photos/$timestamp").setValue(photoData)
+                        ref.child("photos/$timestamp").setValue(photoData)
+                        progressDialog.dismiss()
+                        toast("Upload succeed.")
+                        btnRollback.performClick()
+                    }
+
+            /*
             mLocationManager?.requestSingleUpdate(LocationManager.GPS_PROVIDER, object : LocationListener {
                 override fun onLocationChanged(location: Location?) {
                     var latitude = location!!.latitude
@@ -130,6 +154,7 @@ class UploadPhotoActivity : AppCompatActivity() {
                 override fun onProviderEnabled(provider: String?) { }
                 override fun onProviderDisabled(provider: String?) { }
             }, Looper.getMainLooper())
+            */
         }
 
         acquirePhotosFromGallery()

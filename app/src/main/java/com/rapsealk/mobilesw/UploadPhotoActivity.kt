@@ -8,19 +8,15 @@ import android.content.pm.PackageManager
 import android.database.Cursor
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
-import android.location.Location
-import android.location.LocationListener
 import android.location.LocationManager
 import android.media.ExifInterface
 import android.net.Uri
 import android.support.v7.app.AppCompatActivity
 import android.os.Bundle
-import android.os.Looper
 import android.provider.MediaStore
 import android.support.v4.app.ActivityCompat
 import android.support.v4.content.ContextCompat
 import android.view.View
-import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.tasks.Task
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseUser
@@ -71,14 +67,6 @@ class UploadPhotoActivity : AppCompatActivity() {
             }
             ActivityCompat.requestPermissions(this, Array<String>(1) { Manifest.permission.READ_EXTERNAL_STORAGE }, READ_STORAGE_CODE)
         }
-        /*
-        if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-            if (ActivityCompat.shouldShowRequestPermissionRationale(this, Manifest.permission.ACCESS_FINE_LOCATION)) {
-                toast("위치 정보를 이용하기 위해서는 권한이 필요합니다.")
-            }
-            ActivityCompat.requestPermissions(this, Array<String>(1) { Manifest.permission.ACCESS_FINE_LOCATION }, FINE_LOCATION_CODE)
-        }
-        */
 
         imageViewUpload.setOnClickListener { v: View? ->
             acquirePhotosFromGallery()
@@ -124,37 +112,6 @@ class UploadPhotoActivity : AppCompatActivity() {
                         toast("Upload succeed.")
                         btnRollback.performClick()
                     }
-
-            /*
-            mLocationManager?.requestSingleUpdate(LocationManager.GPS_PROVIDER, object : LocationListener {
-                override fun onLocationChanged(location: Location?) {
-                    var latitude = location!!.latitude
-                    var longitude = location.longitude
-                    mSharedPreference?.setLastKnownLocation(LatLng(latitude, longitude))
-
-                    var file = Uri.fromFile(File(photoPath))
-                    var timestamp = System.currentTimeMillis()
-                    var imageFileName = file.lastPathSegment
-                    var uploadTask = storageRef.child("$uid/$imageFileName").putFile(file)
-
-                    uploadTask
-                            .addOnFailureListener { exception: Exception -> toast(exception.toString()) }
-                            .addOnCompleteListener { task: Task<UploadTask.TaskSnapshot> ->
-                                var url = task.result.downloadUrl.toString()
-                                var ref = mFirebaseDatabase.getReference()
-                                var photoData = Photo(HashMap<String, Comment>(), content, latitude, longitude, HashMap<String, Long>(), timestamp, uid, url)
-                                ref.child("users/$uid/photos/$timestamp").setValue(photoData)
-                                ref.child("photos/$timestamp").setValue(photoData)
-                                progressDialog.dismiss()
-                                toast("Upload succeed.")
-                                btnRollback.performClick()
-                            }
-                }
-                override fun onStatusChanged(provider: String?, status: Int, extras: Bundle?) { }
-                override fun onProviderEnabled(provider: String?) { }
-                override fun onProviderDisabled(provider: String?) { }
-            }, Looper.getMainLooper())
-            */
         }
 
         acquirePhotosFromGallery()

@@ -7,8 +7,10 @@ import android.os.Bundle
 import android.view.View
 import android.widget.Toast
 import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.iid.FirebaseInstanceId
 import com.rapsealk.mobilesw.util.SharedPreferenceManager
 import com.rapsealk.mobilesw.service.CameraObservingService
+import com.rapsealk.mobilesw.service.FirebaseInstanceIDService
 import com.rapsealk.mobilesw.service.RecallService
 import kotlinx.android.synthetic.main.activity_main.*
 
@@ -45,6 +47,12 @@ class MainActivity : AppCompatActivity() {
             startService(Intent(applicationContext, RecallService::class.java))
         }
 
+        startService(Intent(applicationContext, FirebaseInstanceIDService::class.java))
+        if (!mSharedPreference!!.isInstanceIdAlive()) {
+            var id: String = FirebaseInstanceId.getInstance().getToken()!!
+            mSharedPreference!!.updateInstanceId(id)
+        }
+
         imageButtonWorldPhoto.setOnClickListener { view: View ->
             var intent = Intent(this, WorldPhotoActivity::class.java)
             this.onPause()
@@ -70,6 +78,11 @@ class MainActivity : AppCompatActivity() {
 
     override fun onResume() {
         super.onResume()
+    }
+
+    override fun onDestroy() {
+        stopService(Intent(applicationContext, FirebaseInstanceIDService::class.java))
+        super.onDestroy()
     }
 }
 

@@ -1,6 +1,4 @@
-.idea/
-/.idea
-TEST/.idea/*
+.idea
 
 *.iml
 .gradle
@@ -11,3 +9,6 @@ TEST/.idea/*
 /build
 /captures
 .externalNativeBuild
+
+admin/node_modules
+admin/config/*

@@ -119,21 +119,17 @@ class RecallService : Service, LocationListener {
                                 }
                             }
 
-                            override fun onCancelled(error: DatabaseError?) {
-                                //
-                            }
+                            override fun onCancelled(error: DatabaseError?) { }
                         })
             }
 
-            override fun onCancelled(error: DatabaseError?) {
-                //
-            }
+            override fun onCancelled(error: DatabaseError?) { }
         })
     }
 
-    override fun onStatusChanged(provider: String?, status: Int, extras: Bundle?) {}
+    override fun onStatusChanged(provider: String?, status: Int, extras: Bundle?) { }
 
-    override fun onProviderEnabled(provider: String?) {}
+    override fun onProviderEnabled(provider: String?) { }
 
     override fun onProviderDisabled(provider: String?) {
         isOn = false

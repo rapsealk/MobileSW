@@ -17,6 +17,7 @@ public class SharedPreferenceManager {
 
         private val FILE_NAME = "MobileSWPreference"
 
+        private val INSTANCE_ID = "INSTANCE_ID"
         private val LAST_KNOWN_LOCATION = "LAST_KNOWN_LOCATION"
         private val CAMERA_OBSERVING_SERVICE = "CAMERA_OBSERVING_SERVICE_ON"
         private val RECALL_SERVICE = "RECALL_SERVICE_ON"
@@ -34,6 +35,14 @@ public class SharedPreferenceManager {
     private constructor(context: Context) {
         mSharedPreference = context.getSharedPreferences(FILE_NAME, Context.MODE_PRIVATE)
         mEdit = mSharedPreference?.edit()
+    }
+
+    public fun updateInstanceId(id: String) {
+        mEdit?.putString(INSTANCE_ID, id)
+    }
+
+    public fun isInstanceIdAlive(): Boolean {
+        return mSharedPreference!!.getString(INSTANCE_ID, null) != null
     }
 
     public fun setLastKnownLocation(latLng: LatLng): SharedPreferenceManager {

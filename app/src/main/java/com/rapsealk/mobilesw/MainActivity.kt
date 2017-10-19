@@ -7,6 +7,9 @@ import android.os.Bundle
 import android.util.Log
 import android.view.View
 import android.widget.Toast
+import com.google.android.gms.ads.AdListener
+import com.google.android.gms.ads.AdRequest
+import com.google.android.gms.ads.MobileAds
 import com.google.android.gms.tasks.Task
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.database.FirebaseDatabase
@@ -56,11 +59,9 @@ class MainActivity : AppCompatActivity() {
         if (!mSharedPreference!!.isInstanceIdAlive()) {
             val id = FirebaseInstanceId.getInstance().getToken()!!
             Log.d("token:", id);
-            toast("if $id")
             mSharedPreference!!.updateInstanceId(id)
         } else {
             val instanceIdToken = mSharedPreference!!.retrieveInstanceId()!!
-            toast("else $instanceIdToken")
             val uid = user.uid
             Log.d("User", "uid: $uid")
             FirebaseDatabase.getInstance().getReference("users").child(uid).child("instanceIdToken")
@@ -75,6 +76,40 @@ class MainActivity : AppCompatActivity() {
                         exception.printStackTrace()
                     }
         }
+
+        // TODO: AdMob (https://developers.google.com/admob/android/banner?hl=ko)
+        /*
+        AdView adView = new AdView(this);
+        adView.setAdSize(AdSize.BANNER);
+        adView.setAdUnitId("ca-app-pub-3940256099942544/6300978111");
+         */
+        MobileAds.initialize(this, "ca-app-pub-3646601663753152~4242295983")
+        val adRequest = AdRequest.Builder()
+                .addTestDevice("11FA7C8BEAD9541214256C4099D5D934")
+                .build()
+        toast("Test Device: " + adRequest.isTestDevice(this).toString())
+        adView.loadAd(adRequest)
+        adView.setAdListener(object : AdListener() {
+            override fun onAdLoaded() {
+                super.onAdLoaded()
+            }
+
+            override fun onAdFailedToLoad(p0: Int) {
+                super.onAdFailedToLoad(p0)
+            }
+
+            override fun onAdOpened() {
+                super.onAdOpened()
+            }
+
+            override fun onAdLeftApplication() {
+                super.onAdLeftApplication()
+            }
+
+            override fun onAdClosed() {
+                super.onAdClosed()
+            }
+        })
 
         imageButtonWorldPhoto.setOnClickListener { view: View ->
             val intent = Intent(this, WorldPhotoActivity::class.java)

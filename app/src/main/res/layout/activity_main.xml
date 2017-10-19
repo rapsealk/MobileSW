@@ -13,10 +13,10 @@
         android:layout_height="match_parent"
         android:orientation="vertical">
 
-        <!--RelativeLayout
+        <RelativeLayout
             android:layout_width="match_parent"
             android:layout_height="100dp"
-            android:layout_weight="1">
+            android:layout_weight="0.5">
 
             <android.support.v7.widget.Toolbar
                 android:id="@+id/custom_toolbar"
@@ -41,9 +41,9 @@
                 android:scaleY="0.5"
                 app:srcCompat="@drawable/if_menu_hamburger" />
 
-        </RelativeLayout-->
+        </RelativeLayout>
 
-        <android.support.v7.widget.Toolbar
+        <!--android.support.v7.widget.Toolbar
             android:id="@+id/custom_toolbar"
             android:layout_width="match_parent"
             android:layout_height="100dp"
@@ -53,7 +53,7 @@
             android:theme="@style/ThemeOverlay.AppCompat.ActionBar"
             app:popupTheme="@style/ThemeOverlay.AppCompat.Light">
 
-        </android.support.v7.widget.Toolbar>
+        </android.support.v7.widget.Toolbar-->
 
         <LinearLayout
             android:layout_width="match_parent"
@@ -82,9 +82,7 @@
                     android:layout_weight="1"
                     android:backgroundTint="@android:color/background_dark"
                     android:tint="@android:color/darker_gray"
-                    app:srcCompat="@drawable/ic_settings_black_48dp"
-                    tools:layout_editor_absoluteX="282dp"
-                    tools:layout_editor_absoluteY="266dp" />
+                    app:srcCompat="@drawable/ic_settings_black_48dp" />
 
             </LinearLayout>
 
@@ -93,9 +91,7 @@
                 android:layout_height="match_parent"
                 android:layout_weight="1"
                 android:orientation="vertical"
-                android:weightSum="1"
-                tools:layout_editor_absoluteX="8dp"
-                tools:layout_editor_absoluteY="8dp">
+                android:weightSum="1">
 
                 <ImageButton
                     android:id="@+id/imageButtonMyPage"
@@ -104,9 +100,7 @@
                     android:layout_weight="0.52"
                     android:backgroundTint="@android:color/background_light"
                     android:tint="@android:color/holo_orange_dark"
-                    app:srcCompat="@drawable/ic_person_black_48dp"
-                    tools:layout_editor_absoluteX="296dp"
-                    tools:layout_editor_absoluteY="171dp" />
+                    app:srcCompat="@drawable/ic_person_black_48dp" />
 
                 <ImageButton
                     android:id="@+id/imageButtonInfo"
@@ -114,12 +108,21 @@
                     android:layout_height="match_parent"
                     android:layout_weight="0.49"
                     android:tint="@color/colorPrimaryDark"
-                    app:srcCompat="@drawable/ic_info_black_48dp"
-                    tools:layout_editor_absoluteX="282dp"
-                    tools:layout_editor_absoluteY="427dp" />
+                    app:srcCompat="@drawable/ic_info_black_48dp" />
             </LinearLayout>
 
         </LinearLayout>
+
+        <com.google.android.gms.ads.AdView
+            xmlns:ads="http://schemas.android.com/apk/res-auto"
+            android:id="@+id/adView"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_centerHorizontal="true"
+            android:layout_alignParentBottom="true"
+            ads:adSize="BANNER"
+            ads:adUnitId="ca-app-pub-3646601663753152/6336663202">
+        </com.google.android.gms.ads.AdView>
 
     </LinearLayout>
 

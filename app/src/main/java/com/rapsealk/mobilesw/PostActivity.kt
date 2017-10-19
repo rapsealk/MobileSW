@@ -1,7 +1,9 @@
 package com.rapsealk.mobilesw
 
+import android.os.AsyncTask
 import android.support.v7.app.AppCompatActivity
 import android.os.Bundle
+import android.os.Message
 import android.util.Log
 import android.view.View
 import android.widget.ImageView
@@ -15,6 +17,7 @@ import com.google.firebase.messaging.FirebaseMessaging
 import com.google.firebase.messaging.RemoteMessage
 import com.rapsealk.mobilesw.adapter.CommentAdapter
 import com.rapsealk.mobilesw.retrofit.CloudMessageService
+import com.rapsealk.mobilesw.retrofit.MessageAsyncTask
 import com.rapsealk.mobilesw.retrofit.MessageResponse
 import com.rapsealk.mobilesw.retrofit.SendingMessage
 import com.rapsealk.mobilesw.schema.Comment
@@ -73,25 +76,6 @@ class PostActivity : AppCompatActivity() {
                         commentListView.adapter = commentAdapter
 
                         updateCommentCount()
-
-                        /* FCM REQUEST
-                        val fm: FirebaseMessaging = FirebaseMessaging.getInstance()
-                        fm.send(RemoteMessage.Builder("$SENDER_ID@gcm.googleapis.com")
-                                .setMessageId(System.currentTimeMillis().toString())
-                                .addData("key", "value")
-                                .addData("", "")
-                                .build())
-                        */
-                        var cmService = CloudMessageService.create()
-                        // var cmCall: Observable<MessageResponse> =
-                        cmService.sendMessage(SendingMessage(currentUser.displayName!!, serializedData.uid))
-                                .observeOn(AndroidSchedulers.mainThread())
-                                .subscribeOn(Schedulers.io())
-                                .subscribe({ result ->
-                                    Log.d("RxLog", result.toString())
-                                }, { error ->
-                                    error.printStackTrace()
-                                })
                     }
 
                     override fun onCancelled(p0: DatabaseError?) {
@@ -130,6 +114,29 @@ class PostActivity : AppCompatActivity() {
                         commentAdapter?.notifyDataSetChanged()
                         editTextComment.setText("")
                         updateCommentCount()
+
+                        /* FCM REQUEST
+                        val fm: FirebaseMessaging = FirebaseMessaging.getInstance()
+                        fm.send(RemoteMessage.Builder("$SENDER_ID@gcm.googleapis.com")
+                                .setMessageId(System.currentTimeMillis().toString())
+                                .addData("key", "value")
+                                .addData("", "")
+                                .build())
+                        */
+                        var cmService = CloudMessageService.create()
+                        // var cmCall: Observable<MessageResponse> =
+                        var cmCall = cmService.sendMessage(SendingMessage(currentUser.displayName!!, serializedData.uid))
+                        MessageAsyncTask<MessageResponse>(applicationContext).execute(cmCall)
+                        /*
+                        cmService.sendMessage(SendingMessage(currentUser.displayName!!, serializedData.uid))
+                                .observeOn(AndroidSchedulers.mainThread())
+                                .subscribeOn(Schedulers.io())
+                                .subscribe({ result ->
+                                    Log.d("RxLog", result.toString())
+                                }, { error ->
+                                    error.printStackTrace()
+                                })
+                        */
                     }
                     ?.addOnFailureListener { exception: Exception ->
                         toast("댓글 달기에 실패했습니다.")

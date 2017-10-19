@@ -9,6 +9,3 @@
 /build
 /captures
 .externalNativeBuild
-
-admin/node_modules
-admin/config/*

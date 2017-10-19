@@ -2,6 +2,7 @@ package com.rapsealk.mobilesw
 
 import android.support.v7.app.AppCompatActivity
 import android.os.Bundle
+import android.util.Log
 import android.view.View
 import android.widget.ImageView
 import com.google.android.gms.tasks.Task
@@ -10,14 +11,24 @@ import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseError
 import com.google.firebase.database.FirebaseDatabase
 import com.google.firebase.database.ValueEventListener
+import com.google.firebase.messaging.FirebaseMessaging
+import com.google.firebase.messaging.RemoteMessage
 import com.rapsealk.mobilesw.adapter.CommentAdapter
+import com.rapsealk.mobilesw.retrofit.CloudMessageService
+import com.rapsealk.mobilesw.retrofit.MessageResponse
+import com.rapsealk.mobilesw.retrofit.SendingMessage
 import com.rapsealk.mobilesw.schema.Comment
 import com.rapsealk.mobilesw.schema.Photo
 import com.squareup.picasso.Picasso
+import io.reactivex.Observable
+import io.reactivex.android.schedulers.AndroidSchedulers
+import io.reactivex.schedulers.Schedulers
 import kotlinx.android.synthetic.main.activity_post.*
 import java.lang.Exception
 
 class PostActivity : AppCompatActivity() {
+
+    val SENDER_ID = "519279191468"
 
     private var mFirebaseAuth: FirebaseAuth? = null
     private var mFirebaseDatabase: FirebaseDatabase? = null
@@ -62,6 +73,25 @@ class PostActivity : AppCompatActivity() {
                         commentListView.adapter = commentAdapter
 
                         updateCommentCount()
+
+                        /* FCM REQUEST
+                        val fm: FirebaseMessaging = FirebaseMessaging.getInstance()
+                        fm.send(RemoteMessage.Builder("$SENDER_ID@gcm.googleapis.com")
+                                .setMessageId(System.currentTimeMillis().toString())
+                                .addData("key", "value")
+                                .addData("", "")
+                                .build())
+                        */
+                        var cmService = CloudMessageService.create()
+                        // var cmCall: Observable<MessageResponse> =
+                        cmService.sendMessage(SendingMessage(currentUser.displayName!!, serializedData.uid))
+                                .observeOn(AndroidSchedulers.mainThread())
+                                .subscribeOn(Schedulers.io())
+                                .subscribe({ result ->
+                                    Log.d("RxLog", result.toString())
+                                }, { error ->
+                                    error.printStackTrace()
+                                })
                     }
 
                     override fun onCancelled(p0: DatabaseError?) {

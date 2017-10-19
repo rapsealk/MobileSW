@@ -1,6 +1,7 @@
 package com.rapsealk.mobilesw
 
 import android.Manifest
+import android.app.ProgressDialog
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.support.v7.app.AppCompatActivity
@@ -9,7 +10,9 @@ import android.support.v4.app.ActivityCompat
 import android.support.v4.content.ContextCompat
 import android.util.Log
 import android.view.View
+import com.google.android.gms.tasks.Task
 import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.auth.UserProfileChangeRequest
 import com.rapsealk.mobilesw.util.SharedPreferenceManager
 import com.rapsealk.mobilesw.service.CameraObservingService
 import com.rapsealk.mobilesw.service.RecallService
@@ -28,6 +31,7 @@ class SettingsActivity : AppCompatActivity() {
         setContentView(R.layout.activity_settings)
 
         mFirebaseAuth = FirebaseAuth.getInstance()
+        var user = mFirebaseAuth?.currentUser
 
         btnBack.setOnClickListener { v: View? -> finish() }
 
@@ -43,6 +47,27 @@ class SettingsActivity : AppCompatActivity() {
                 toast("GPS 정보를 이용하기 위해서는 권한이 필요합니다.")
             }
             ActivityCompat.requestPermissions(this, Array<String>(1) { Manifest.permission.ACCESS_FINE_LOCATION }, FINE_LOCATION_CODE)
+        }
+
+        etDisplayName.setText(user?.displayName)
+        btnDisplayName.setOnClickListener { v: View? ->
+            var progressDialog = ProgressDialog(this)
+            progressDialog.isIndeterminate = true
+            progressDialog.setProgressStyle(ProgressDialog.STYLE_SPINNER)
+            progressDialog.setMessage("사용자 이름을 변경하는 중")
+            progressDialog.show()
+            var newDisplayName = etDisplayName.text.toString()
+            var profileUpdate = UserProfileChangeRequest.Builder()
+                    .setDisplayName(newDisplayName)
+                    .build()
+            user?.updateProfile(profileUpdate)
+                    ?.addOnCompleteListener { task: Task<Void> ->
+                        progressDialog.dismiss()
+                        toast("변경된 이름을 적용하기 위하여 로그아웃합니다.")
+                        if (task.isSuccessful) {
+                            btnLogout.performClick()
+                        }
+                    }
         }
 
         mSharedPreference = SharedPreferenceManager.getInstance(this)

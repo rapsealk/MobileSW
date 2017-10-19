@@ -4,21 +4,23 @@ import android.app.Activity
 import android.content.Intent
 import android.support.v7.app.AppCompatActivity
 import android.os.Bundle
+import android.util.Log
 import android.view.View
 import android.widget.Toast
+import com.google.android.gms.tasks.Task
 import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.database.FirebaseDatabase
 import com.google.firebase.iid.FirebaseInstanceId
 import com.rapsealk.mobilesw.util.SharedPreferenceManager
 import com.rapsealk.mobilesw.service.CameraObservingService
 import com.rapsealk.mobilesw.service.FirebaseInstanceIDService
 import com.rapsealk.mobilesw.service.RecallService
 import kotlinx.android.synthetic.main.activity_main.*
+import java.lang.Exception
 
 class MainActivity : AppCompatActivity() {
 
-    companion object {
-        private var isFirstRun = true
-    }
+    private var isFirstRun = true
 
     private var mSharedPreference: SharedPreferenceManager? = null
 
@@ -27,17 +29,21 @@ class MainActivity : AppCompatActivity() {
         setContentView(R.layout.activity_main)
         setSupportActionBar(custom_toolbar)
 
-        var mFirebaseAuth: FirebaseAuth = FirebaseAuth.getInstance()
-        if (mFirebaseAuth.currentUser == null) {
-            startActivity(Intent(this, LoginActivity::class.java))
-            finish()
-        }
+        val mFirebaseAuth: FirebaseAuth = FirebaseAuth.getInstance()
+        val user = mFirebaseAuth.currentUser
 
         if (isFirstRun) {
             isFirstRun = false
             this.onPause()
             startActivity(Intent(this, SplashActivity::class.java))
         }
+
+        if (user == null) {
+            startActivity(Intent(this, LoginActivity::class.java))
+            return finish()
+        }
+
+        // startService(Intent(applicationContext, FirebaseInstanceIDService::class.java))
 
         mSharedPreference = SharedPreferenceManager.getInstance(this)
         if (mSharedPreference!!.getCameraObservingService(false)) {
@@ -47,14 +53,31 @@ class MainActivity : AppCompatActivity() {
             startService(Intent(applicationContext, RecallService::class.java))
         }
 
-        startService(Intent(applicationContext, FirebaseInstanceIDService::class.java))
         if (!mSharedPreference!!.isInstanceIdAlive()) {
-            var id: String = FirebaseInstanceId.getInstance().getToken()!!
+            val id = FirebaseInstanceId.getInstance().getToken()!!
+            Log.d("token:", id);
+            toast("if $id")
             mSharedPreference!!.updateInstanceId(id)
+        } else {
+            val instanceIdToken = mSharedPreference!!.retrieveInstanceId()!!
+            toast("else $instanceIdToken")
+            val uid = user.uid
+            Log.d("User", "uid: $uid")
+            FirebaseDatabase.getInstance().getReference("users").child(uid).child("instanceIdToken")
+                    .setValue(instanceIdToken)
+                    .addOnCompleteListener { task: Task<Void> ->
+                        if (task.isSuccessful) {
+                            Log.d("FirebaseInstanceId", "Update succeed to $instanceIdToken")
+                        }
+                    }
+                    .addOnFailureListener { exception: Exception ->
+                        Log.d("FirebaseInstanceId", "Error occured while updating instanceIdToken.")
+                        exception.printStackTrace()
+                    }
         }
 
         imageButtonWorldPhoto.setOnClickListener { view: View ->
-            var intent = Intent(this, WorldPhotoActivity::class.java)
+            val intent = Intent(this, WorldPhotoActivity::class.java)
             this.onPause()
             startActivity(intent)
         }
@@ -70,7 +93,7 @@ class MainActivity : AppCompatActivity() {
         }
 
         imageButtonInfo.setOnClickListener { view: View ->
-            var intent = Intent(this, InfoActivity::class.java)
+            val intent = Intent(this, InfoActivity::class.java)
             this.onPause()
             startActivity(intent)
         }

@@ -41,6 +41,10 @@ public class SharedPreferenceManager {
         mEdit?.putString(INSTANCE_ID, id)
     }
 
+    public fun retrieveInstanceId(): String? {
+        return mSharedPreference!!.getString(INSTANCE_ID, null)
+    }
+
     public fun isInstanceIdAlive(): Boolean {
         return mSharedPreference!!.getString(INSTANCE_ID, null) != null
     }

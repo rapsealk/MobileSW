@@ -1,6 +1,5 @@
 package com.rapsealk.mobilesw
 
-import android.os.AsyncTask
 import android.support.v7.app.AppCompatActivity
 import android.os.Bundle
 import android.os.Message
@@ -13,17 +12,12 @@ import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseError
 import com.google.firebase.database.FirebaseDatabase
 import com.google.firebase.database.ValueEventListener
-import com.google.firebase.messaging.FirebaseMessaging
-import com.google.firebase.messaging.RemoteMessage
 import com.rapsealk.mobilesw.adapter.CommentAdapter
 import com.rapsealk.mobilesw.retrofit.CloudMessageService
-import com.rapsealk.mobilesw.retrofit.MessageAsyncTask
-import com.rapsealk.mobilesw.retrofit.MessageResponse
 import com.rapsealk.mobilesw.retrofit.SendingMessage
 import com.rapsealk.mobilesw.schema.Comment
 import com.rapsealk.mobilesw.schema.Photo
 import com.squareup.picasso.Picasso
-import io.reactivex.Observable
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.schedulers.Schedulers
 import kotlinx.android.synthetic.main.activity_post.*
@@ -115,19 +109,8 @@ class PostActivity : AppCompatActivity() {
                         editTextComment.setText("")
                         updateCommentCount()
 
-                        /* FCM REQUEST
-                        val fm: FirebaseMessaging = FirebaseMessaging.getInstance()
-                        fm.send(RemoteMessage.Builder("$SENDER_ID@gcm.googleapis.com")
-                                .setMessageId(System.currentTimeMillis().toString())
-                                .addData("key", "value")
-                                .addData("", "")
-                                .build())
-                        */
+                        // FCM REQUEST
                         var cmService = CloudMessageService.create()
-                        // var cmCall: Observable<MessageResponse> =
-                        var cmCall = cmService.sendMessage(SendingMessage(currentUser.displayName!!, serializedData.uid))
-                        MessageAsyncTask<MessageResponse>(applicationContext).execute(cmCall)
-                        /*
                         cmService.sendMessage(SendingMessage(currentUser.displayName!!, serializedData.uid))
                                 .observeOn(AndroidSchedulers.mainThread())
                                 .subscribeOn(Schedulers.io())
@@ -136,7 +119,7 @@ class PostActivity : AppCompatActivity() {
                                 }, { error ->
                                     error.printStackTrace()
                                 })
-                        */
+
                     }
                     ?.addOnFailureListener { exception: Exception ->
                         toast("댓글 달기에 실패했습니다.")

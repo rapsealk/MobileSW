@@ -85,10 +85,11 @@ class MainActivity : AppCompatActivity() {
          */
         MobileAds.initialize(this, "ca-app-pub-3646601663753152~4242295983")
         val adRequest = AdRequest.Builder()
-                .addTestDevice("11FA7C8BEAD9541214256C4099D5D934")
+                .addTestDevice("485978C6538BE5B2BF5EE991E0F9DAD0")
+                // Luna S: 11FA7C8BEAD9541214256C4099D5D934
+                // Galaxy S6: 485978C6538BE5B2BF5EE991E0F9DAD0
                 .build()
         toast("Test Device: " + adRequest.isTestDevice(this).toString())
-        adView.loadAd(adRequest)
         adView.setAdListener(object : AdListener() {
             override fun onAdLoaded() {
                 super.onAdLoaded()

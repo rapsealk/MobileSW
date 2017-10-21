@@ -25,6 +25,6 @@ interface CloudMessageService {
     }
 
     @POST("fcm/send")
-    // fun sendMessage(@Body body: SendingMessage): Observable<MessageResponse>
-    fun sendMessage(@Body body: SendingMessage): Call<MessageResponse>
+    fun sendMessage(@Body body: SendingMessage): Observable<MessageResponse>
+    // fun sendMessage(@Body body: SendingMessage): Call<MessageResponse>
 }

@@ -13,7 +13,7 @@ android {
         versionName "1.0"
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
         vectorDrawables.useSupportLibrary = true
-        multiDexEnabled true    // FIXME: com.android.builder.dexing.DexArchiveMergerException
+        multiDexEnabled true    // FIXME: com.android.builder.dexing.DexArchiveMergerException + Kitkat
     }
     buildTypes {
         release {
@@ -39,6 +39,8 @@ dependencies {
     compile 'com.google.android.gms:play-services-location:10.2.6'
     compile 'com.google.android.gms:play-services-maps:10.2.6'
     testCompile 'junit:junit:4.12'
+
+    compile 'com.android.support:multidex:1.0.1'    // Kitkat Firebase
 
     compile 'com.google.firebase:firebase-core:10.2.6'
     compile 'com.google.firebase:firebase-auth:10.2.6'

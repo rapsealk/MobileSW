@@ -85,11 +85,13 @@ class MainActivity : AppCompatActivity() {
          */
         MobileAds.initialize(this, "ca-app-pub-3646601663753152~4242295983")
         val adRequest = AdRequest.Builder()
-                .addTestDevice("485978C6538BE5B2BF5EE991E0F9DAD0")
-                // Luna S: 11FA7C8BEAD9541214256C4099D5D934
-                // Galaxy S6: 485978C6538BE5B2BF5EE991E0F9DAD0
+                .addTestDevice("11FA7C8BEAD9541214256C4099D5D934")  // Luna S
+                .addTestDevice("485978C6538BE5B2BF5EE991E0F9DAD0")  // Galaxy S6
+                .addTestDevice("2CC79B5532C0B9EC2E03486315B181D0")  // Galaxy Note II
                 .build()
+        adView.loadAd(adRequest)
         toast("Test Device: " + adRequest.isTestDevice(this).toString())
+        /*
         adView.setAdListener(object : AdListener() {
             override fun onAdLoaded() {
                 super.onAdLoaded()
@@ -111,6 +113,7 @@ class MainActivity : AppCompatActivity() {
                 super.onAdClosed()
             }
         })
+        */
 
         imageButtonWorldPhoto.setOnClickListener { view: View ->
             val intent = Intent(this, WorldPhotoActivity::class.java)

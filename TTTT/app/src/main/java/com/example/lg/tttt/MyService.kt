@@ -12,6 +12,8 @@ import android.os.IBinder
 import android.util.Log
 import android.widget.Toast
 
+
+
 /**
  * Created by LG on 2017-09-10.
  */
@@ -53,6 +55,7 @@ class MyService : Service() {
         Log.d("test", "서비스의 onDestroy")
     }
 
+
     val isCameraUsebyApp: Boolean
         get() {
             var camera: Camera? = null
@@ -75,24 +78,29 @@ class MyService : Service() {
                     break
                 }
                 if (!isCameraUsebyApp && step == 0) {
-                    Log.d("test", "카메라 OFF1111111")
+                 //   Log.d("test", "카메라 OFF1111111")
                 } else if (isCameraUsebyApp && step == 0) {
-                    Log.d("test", "카메라 ON111111")
+                 //   Log.d("test", "카메라 ON111111")
                     step = 1
                 } else if (isCameraUsebyApp && step == 1) {
-                    Log.d("test", "카메라 ON222222")
+                  //  Log.d("test", "카메라 ON222222")
                 } else if (!isCameraUsebyApp && step == 1) {
-                    Log.d("test", "카메라 OFF2222222")
+                  //  Log.d("test", "카메라 OFF2222222")
                     step = 0
 
                     val nm = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
                     val push = Intent()
-                    val select = Intent(applicationContext,SelectActivity::class.java)
                     val fullScreenPendingIntent = PendingIntent.getActivity(applicationContext, 0, push, PendingIntent.FLAG_CANCEL_CURRENT)
-                    val selectPendingIntent = PendingIntent.getActivity(applicationContext, 0, select, PendingIntent.FLAG_CANCEL_CURRENT)
+
+                    val select = Intent(applicationContext,AlarmReceiver::class.java)
+                    select.setAction("YES_ACTION")
+                    val selectPendingIntent = PendingIntent.getBroadcast(applicationContext, 0, select, PendingIntent.FLAG_UPDATE_CURRENT)
+
+                    val cancel = Intent(applicationContext,AlarmReceiver::class.java)
+                    cancel.setAction("NO_ACTION")
+                    val cancelPendingIntent = PendingIntent.getBroadcast(applicationContext, 123456, cancel, PendingIntent.FLAG_UPDATE_CURRENT)
+
                     val builder = Notification.Builder(applicationContext)
-
-
                     builder.setFullScreenIntent(fullScreenPendingIntent, true)
                     builder.setSmallIcon(R.mipmap.ic_launcher)
                     builder.setTicker("Test1") //** 이 부분은 확인 필요
@@ -104,7 +112,8 @@ class MyService : Service() {
                     //** Intent와 PendingIntent를 추가해 주는 것으로 헤드업 알림이 가능
                     //** 없을 경우 이전 버전의 Notification과 동일
                     builder.addAction(android.R.drawable.star_on, "올리기", selectPendingIntent)
-                    builder.addAction(android.R.drawable.star_off, "닫기", fullScreenPendingIntent)
+                    builder.addAction(android.R.drawable.star_off, "닫기", cancelPendingIntent)
+
 
                     push.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
                     push.setClass(applicationContext, MainActivity::class.java)
@@ -120,5 +129,4 @@ class MyService : Service() {
             handler.post { Toast.makeText(applicationContext, "서비스 종료", Toast.LENGTH_SHORT).show() }
         }
     }
-
 }

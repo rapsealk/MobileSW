@@ -16,6 +16,7 @@ import com.google.firebase.database.ValueEventListener
 import com.rapsealk.mobilesw.adapter.CommentAdapter
 import com.rapsealk.mobilesw.retrofit.CloudMessageService
 import com.rapsealk.mobilesw.retrofit.SendingMessage
+import com.rapsealk.mobilesw.retrofit.UserService
 import com.rapsealk.mobilesw.schema.Comment
 import com.rapsealk.mobilesw.schema.Photo
 import com.squareup.picasso.Picasso
@@ -79,6 +80,17 @@ class PostActivity : AppCompatActivity() {
                 })
                 .into(profileImage)
 
+        val userService = UserService.create()
+        userService.getUser(serializedData.uid)
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribeOn(Schedulers.io())
+                .subscribe({ result ->
+                    Log.d("RxLog", result.toString())
+                    writerId.text = result.data.displayName
+                }, { error ->
+                    error.printStackTrace()
+                })
+
         Picasso.with(this)
                 .load(serializedData.url)
                 .into(imageViewPost as ImageView)
@@ -92,11 +104,22 @@ class PostActivity : AppCompatActivity() {
                         val comments: ArrayList<Comment> = arrayListOf()
 
                         for (value in snapshot.children) {
-                            comments.add(value.getValue<Comment>(Comment::class.java))
+                            val comment = value.getValue<Comment>(Comment::class.java)
+                            comments.add(comment)
+
+                            userService.getUser(comment.uid)
+                                    .observeOn(AndroidSchedulers.mainThread())
+                                    .subscribeOn(Schedulers.io())
+                                    .subscribe({ result ->
+                                        Log.d("RxLog", result.toString())
+                                        comment.uid = result.data.displayName
+                                        commentAdapter?.notifyDataSetChanged()
+                                    }, { error ->
+                                        error.printStackTrace()
+                                    })
                         }
 
                         commentAdapter = CommentAdapter(this@PostActivity, comments)
-
                         commentListView.adapter = commentAdapter
 
                         updateCommentCount()

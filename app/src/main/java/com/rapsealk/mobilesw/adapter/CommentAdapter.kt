@@ -32,5 +32,4 @@ class CommentAdapter(context: Context, val comments: ArrayList<Comment>) : BaseA
         rowView.commentTimestamp.text = SimpleDateFormat("yyyy-MM-dd HH:mm:ss:SSS").format(Timestamp(comment.timestamp))
         return rowView
     }
-
 }

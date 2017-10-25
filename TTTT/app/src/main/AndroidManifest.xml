@@ -28,7 +28,20 @@
         <service android:name=".MyService" />
 
         <activity android:name=".SelectActivity" />
-        <activity android:name=".Main2Activity"></activity>
+        <activity android:name=".Main2Activity" />
+        <activity android:name=".Main3Activity" />
+        <activity android:name=".Main4Activity"></activity>
+
+        <receiver android:name=".AlarmReceiver"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="YES_ACTION"/>
+                <action android:name="STOP_ACTION"/>
+
+            </intent-filter>
+        </receiver>
+
+
     </application>
 
 </manifest>

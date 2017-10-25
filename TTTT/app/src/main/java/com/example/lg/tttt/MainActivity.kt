@@ -31,6 +31,7 @@ class MainActivity : AppCompatActivity() {
 
 
 
+
         if (APIVersion >= android.os.Build.VERSION_CODES.M) {
             if (checkCAMERAPermission()) {  //이미 권한이 허가되어 있는지 확인한다. (표.1 로 구현)
                 //mCamera = Camera.open(Camera.CameraInfo.CAMERA_FACING_BACK);  //카메라를 open() 할 수 있다.
@@ -39,10 +40,11 @@ class MainActivity : AppCompatActivity() {
             }
         }
 
+
         b.setOnClickListener {
             // 서비스 시작하기
             val intent = Intent(applicationContext, //현재제어권자
-                    Main2Activity::class.java) // 이동할 컴포넌트
+                    Main3Activity::class.java) // 이동할 컴포넌트
             startActivity(intent) // 서비스 시작
         }
 

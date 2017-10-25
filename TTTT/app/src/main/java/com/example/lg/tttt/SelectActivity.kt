@@ -1,6 +1,5 @@
 package com.example.lg.tttt
 
-import android.app.NotificationManager
 import android.os.Bundle
 import android.support.v7.app.AppCompatActivity
 
@@ -30,8 +29,6 @@ class SelectActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_select)
 
-        val notificationManager = getSystemService(NOTIFICATION_SERVICE) as NotificationManager
-        notificationManager.cancel(123456);
 
         /*
         // App.을 실행하자 마자 지정한 경로의 생성 및 접근에 용이하도록 아래와 같이 생성

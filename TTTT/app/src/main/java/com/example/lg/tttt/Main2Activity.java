@@ -1,15 +1,10 @@
 package com.example.lg.tttt;
 
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
-import android.media.ThumbnailUtils;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
-import android.view.View;
-import android.widget.AdapterView;
 import android.widget.Button;
 import android.widget.Gallery;
 import android.widget.ImageView;
@@ -38,6 +33,7 @@ public class Main2Activity extends AppCompatActivity {
     private CustomGalleryAdapter customGalAdapter;
 
     private String[] imgs;
+    private File[] imgsf;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -45,7 +41,7 @@ public class Main2Activity extends AppCompatActivity {
         setContentView(R.layout.activity_main2);
 
         // App.을 실행하자 마자 지정한 경로의 생성 및 접근에 용이하도록 아래와 같이 생성
-        File mediaStorageDir = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DCIM), "Camera");
+        File mediaStorageDir = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DCIM), "Pictail");
 
         //File mediaStorageDir = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DCIM);
 
@@ -61,6 +57,8 @@ public class Main2Activity extends AppCompatActivity {
             }
         }
         */
+
+
         basePath = mediaStorageDir.getPath();
 
 
@@ -69,12 +67,28 @@ public class Main2Activity extends AppCompatActivity {
         takePicBtn = (Button)findViewById(R.id.takepicbtn);
 
 
+        /*
         File file = new File(basePath);
         imgs = file.list();
+        imgsf=file.listFiles();
+        */
 
+        /*
+        for(int i=0; i<imgs.length; i++){
+            Date day = new Date(imgsf[i].lastModified());
+            //imgsf[i].lastModified();
+            if(day.getYear()==2017) {
+              //  imgPath.setText(imgsf[i].toString());
+            }
+        }
+        */
+
+        File file = new File(basePath);
+        imgs = file.list();
         for(int i=0; i<imgs.length; i++){
             imgPath.setText(imgs[i]);
         }
+
 
         customGallery = (Gallery)findViewById(R.id.customgallery); // activity_main.xml에서 선언한 Gallery를 연결
         customGalAdapter = new CustomGalleryAdapter(getApplicationContext(), basePath); // 위 Gallery에 대한 Adapter를 선언
@@ -83,6 +97,7 @@ public class Main2Activity extends AppCompatActivity {
 
 
         // Gallery의 Item을 Click할 경우 ImageView에 보여주도록 함
+        /*
         customGallery.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
@@ -102,6 +117,7 @@ public class Main2Activity extends AppCompatActivity {
                 return false;
             }
         });
+        */
     }
     private static File getOutputMediaFile(int type){
         // To be safe, you should check that the SDCard is mounted

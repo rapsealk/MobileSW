@@ -240,12 +240,13 @@ class WorldPhotoActivity : FragmentActivity(), OnMapReadyCallback {
                                 var url = data.url
                                 if (url == null) url = "https://firebasestorage.googleapis.com/v0/b/mobilesw-178816.appspot.com/o/ReactiveX.jpg?alt=media&token=510350fe-ac5b-4f01-9d9a-2fecf8428940"
                                 var imageView = ImageView(this@WorldPhotoActivity)
+                                /*
                                 Glide.with(this@WorldPhotoActivity)
                                         .load(url)
                                         //.fitCenter()
                                         .override(480, 640)
                                         .into(imageView)
-                                /*
+                                */
                                 Picasso.with(this@WorldPhotoActivity)
                                         .load(url)
                                         .transform(object : Transformation {
@@ -262,7 +263,6 @@ class WorldPhotoActivity : FragmentActivity(), OnMapReadyCallback {
                                             }
                                         })
                                         .into(imageView)
-                                */
                                 linearLayout?.addView(imageView)
 
                                 imageView.setOnClickListener { view ->

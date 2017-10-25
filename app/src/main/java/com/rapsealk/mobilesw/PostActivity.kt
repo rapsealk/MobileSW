@@ -1,5 +1,6 @@
 package com.rapsealk.mobilesw
 
+import android.graphics.*
 import android.support.v7.app.AppCompatActivity
 import android.os.Bundle
 import android.os.Message
@@ -18,10 +19,13 @@ import com.rapsealk.mobilesw.retrofit.SendingMessage
 import com.rapsealk.mobilesw.schema.Comment
 import com.rapsealk.mobilesw.schema.Photo
 import com.squareup.picasso.Picasso
+import com.squareup.picasso.Transformation
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.schedulers.Schedulers
 import kotlinx.android.synthetic.main.activity_post.*
 import java.lang.Exception
+import java.sql.Timestamp
+import java.text.SimpleDateFormat
 
 class PostActivity : AppCompatActivity() {
 
@@ -42,14 +46,41 @@ class PostActivity : AppCompatActivity() {
         mFirebaseAuth = FirebaseAuth.getInstance()
         mFirebaseDatabase = FirebaseDatabase.getInstance()
 
-        var currentUser = mFirebaseAuth?.currentUser
-        var uid = currentUser!!.uid
+        val currentUser = mFirebaseAuth?.currentUser
+        val uid = currentUser!!.uid
 
-        var serializedData = intent.getSerializableExtra("SerializedData") as Photo
-        var postTimestamp = serializedData.timestamp
+        val serializedData = intent.getSerializableExtra("SerializedData") as Photo
+        val postTimestamp = serializedData.timestamp
+
+        writerId.text = serializedData.uid
+        writtenTime.text = SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(Timestamp(serializedData.timestamp))
 
         Picasso.with(this)
-                .load(serializedData?.url)
+                .load("http://52.78.4.96:3003/images/"+serializedData.uid)
+                .transform(object : Transformation {
+                    override fun key(): String = ""
+                    override fun transform(source: Bitmap?): Bitmap {
+                        val size = Math.min(source!!.height, source.width)
+                        val x = (source.width - size) / 2
+                        val y = (source.height - size) / 2
+                        val square = Bitmap.createBitmap(source, x, y, size, size)
+                        if (square != source) source.recycle()
+                        val bitmap = Bitmap.createBitmap(size, size, source.config)
+                        val canvas = Canvas(bitmap)
+                        val paint = Paint()
+                        val shader = BitmapShader(square, Shader.TileMode.CLAMP, Shader.TileMode.CLAMP)
+                        paint.shader = shader
+                        paint.isAntiAlias = true
+                        val round = size / 2f
+                        canvas.drawCircle(round, round, round, paint)
+                        square.recycle()
+                        return bitmap
+                    }
+                })
+                .into(profileImage)
+
+        Picasso.with(this)
+                .load(serializedData.url)
                 .into(imageViewPost as ImageView)
 
         mFirebaseDatabase?.getReference("photos/$postTimestamp/comments")
@@ -57,11 +88,10 @@ class PostActivity : AppCompatActivity() {
                     override fun onDataChange(snapshot: DataSnapshot?) {
 
                         commentCount = snapshot!!.childrenCount
-                        // updateCommentCount(commentCount)
 
-                        var comments: ArrayList<Comment> = arrayListOf()
+                        val comments: ArrayList<Comment> = arrayListOf()
 
-                        for (value in snapshot!!.children) {
+                        for (value in snapshot.children) {
                             comments.add(value.getValue<Comment>(Comment::class.java))
                         }
 
@@ -84,7 +114,7 @@ class PostActivity : AppCompatActivity() {
                         phoplCount = snapshot!!.childrenCount
                         updatePhoplCount(phoplCount)
 
-                        for (phopl in snapshot!!.children) {
+                        for (phopl in snapshot.children) {
                             if (phopl.key == uid) {
                                 isPhoPled = true
                                 btnPhoPl.setImageResource(R.drawable.star_yellow)
@@ -98,10 +128,10 @@ class PostActivity : AppCompatActivity() {
                 })
 
         btnPostComment.setOnClickListener { v: View ->
-            var comment = editTextComment.text.toString()
-            var commentTimestamp = System.currentTimeMillis()
-            var Comment = Comment(comment, commentTimestamp, uid)
-            var ref = mFirebaseDatabase?.reference
+            val comment = editTextComment.text.toString()
+            val commentTimestamp = System.currentTimeMillis()
+            val Comment = Comment(comment, commentTimestamp, uid)
+            val ref = mFirebaseDatabase?.reference
             ref?.child("photos/$postTimestamp/comments/$commentTimestamp")?.setValue(Comment)
                     ?.addOnCompleteListener { task: Task<Void> ->
                         commentAdapter?.comments?.add(Comment)
@@ -110,7 +140,7 @@ class PostActivity : AppCompatActivity() {
                         updateCommentCount()
 
                         // FCM REQUEST
-                        var cmService = CloudMessageService.create()
+                        val cmService = CloudMessageService.create()
                         cmService.sendMessage(SendingMessage(currentUser.displayName!!, serializedData.uid))
                                 .observeOn(AndroidSchedulers.mainThread())
                                 .subscribeOn(Schedulers.io())
@@ -127,8 +157,8 @@ class PostActivity : AppCompatActivity() {
         }
 
         btnPhoPl.setOnClickListener { v: View ->
-            var ref = mFirebaseDatabase?.getReference("photos/$postTimestamp/phopls/$uid")
-            var phoplTask = if (isPhoPled) ref?.removeValue() else ref?.setValue(System.currentTimeMillis())
+            val ref = mFirebaseDatabase?.getReference("photos/$postTimestamp/phopls/$uid")
+            val phoplTask = if (isPhoPled) ref?.removeValue() else ref?.setValue(System.currentTimeMillis())
             phoplTask
                     ?.addOnCompleteListener { task: Task<Void> ->
                         isPhoPled = !isPhoPled
@@ -151,7 +181,7 @@ class PostActivity : AppCompatActivity() {
     }
 
     fun updateCommentCount() {
-        var count = commentAdapter?.count
+        val count = commentAdapter?.count
         commentInfo.text ="댓글 ($count)"
     }
 }

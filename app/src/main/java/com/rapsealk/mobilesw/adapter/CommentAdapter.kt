@@ -27,7 +27,7 @@ class CommentAdapter(context: Context, val comments: ArrayList<Comment>) : BaseA
     override fun getView(position: Int, convertView: View?, parent: ViewGroup?): View {
         val comment = getItem(position)
         val rowView = mInflater.inflate(R.layout.list_item_comment, parent, false)
-        rowView.commentWriter.text = comment.uid
+        rowView.commentWriter.text = comment.displayName ?: comment.uid
         rowView.commentContent.text = comment.comment
         rowView.commentTimestamp.text = SimpleDateFormat("yyyy-MM-dd HH:mm:ss:SSS").format(Timestamp(comment.timestamp))
         return rowView

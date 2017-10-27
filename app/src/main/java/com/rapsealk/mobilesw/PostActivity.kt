@@ -1,9 +1,11 @@
 package com.rapsealk.mobilesw
 
+import android.content.DialogInterface
 import android.graphics.*
 import android.support.v7.app.AppCompatActivity
 import android.os.Bundle
 import android.os.Message
+import android.support.v7.app.AlertDialog
 import android.util.Log
 import android.view.View
 import android.widget.ImageView
@@ -112,7 +114,7 @@ class PostActivity : AppCompatActivity() {
                                     .subscribeOn(Schedulers.io())
                                     .subscribe({ result ->
                                         Log.d("RxLog", result.toString())
-                                        comment.uid = result.data.displayName
+                                        comment.displayName = result.data.displayName
                                         commentAdapter?.notifyDataSetChanged()
                                     }, { error ->
                                         error.printStackTrace()
@@ -121,6 +123,26 @@ class PostActivity : AppCompatActivity() {
 
                         commentAdapter = CommentAdapter(this@PostActivity, comments)
                         commentListView.adapter = commentAdapter
+
+                        commentListView.setOnItemClickListener { parent, view, position, id ->
+                            val comment = comments[position]
+                            if (comment.uid == uid) {
+                                val commentTimestamp = comment.timestamp
+                                val dialogBuilder = AlertDialog.Builder(this@PostActivity)
+                                        .setTitle("댓글을 삭제하시겠습니까?")
+                                        .setMessage("삭제된 댓글은 복구되지 않습니다.")
+                                        .setPositiveButton("삭제", DialogInterface.OnClickListener { dialog: DialogInterface, which: Int ->
+                                            mFirebaseDatabase?.getReference("photos/$postTimestamp/comments/$commentTimestamp")
+                                                    ?.removeValue()
+                                            comments.removeAt(position)
+                                            commentAdapter?.notifyDataSetChanged()
+                                        })
+                                        .setNegativeButton("취소", DialogInterface.OnClickListener { dialog, which ->
+                                            // TODO("Not required")
+                                        }).create()
+                                dialogBuilder.show()
+                            }
+                        }
 
                         updateCommentCount()
                     }
@@ -157,21 +179,24 @@ class PostActivity : AppCompatActivity() {
             val ref = mFirebaseDatabase?.reference
             ref?.child("photos/$postTimestamp/comments/$commentTimestamp")?.setValue(Comment)
                     ?.addOnCompleteListener { task: Task<Void> ->
+                        Comment.displayName = currentUser.displayName
                         commentAdapter?.comments?.add(Comment)
                         commentAdapter?.notifyDataSetChanged()
                         editTextComment.setText("")
                         updateCommentCount()
 
                         // FCM REQUEST
-                        val cmService = CloudMessageService.create()
-                        cmService.sendMessage(SendingMessage(currentUser.displayName!!, serializedData.uid))
-                                .observeOn(AndroidSchedulers.mainThread())
-                                .subscribeOn(Schedulers.io())
-                                .subscribe({ result ->
-                                    Log.d("RxLog", result.toString())
-                                }, { error ->
-                                    error.printStackTrace()
-                                })
+                        if (serializedData.uid != uid) {
+                            val cmService = CloudMessageService.create()
+                            cmService.sendMessage(SendingMessage(currentUser.displayName!!, serializedData.uid))
+                                    .observeOn(AndroidSchedulers.mainThread())
+                                    .subscribeOn(Schedulers.io())
+                                    .subscribe({ result ->
+                                        Log.d("RxLog", result.toString())
+                                    }, { error ->
+                                        error.printStackTrace()
+                                    })
+                        }
 
                     }
                     ?.addOnFailureListener { exception: Exception ->

@@ -8,5 +8,6 @@ import java.io.Serializable
 data class Comment(
         val comment: String = "",
         val timestamp: Long = 0,
-        var uid: String = ""
+        val uid: String = "",
+        var displayName: String? = null
 ) : Serializable

@@ -30,18 +30,18 @@
         <activity android:name=".SelectActivity" />
         <activity android:name=".Main2Activity" />
         <activity android:name=".Main3Activity" />
-        <activity android:name=".Main4Activity"></activity>
+        <activity android:name=".Main4Activity" />
 
-        <receiver android:name=".AlarmReceiver"
+        <receiver
+            android:name=".AlarmReceiver"
             android:exported="true">
             <intent-filter>
-                <action android:name="YES_ACTION"/>
-                <action android:name="STOP_ACTION"/>
-
+                <action android:name="YES_ACTION" />
+                <action android:name="STOP_ACTION" />
             </intent-filter>
         </receiver>
 
-
+        <activity android:name=".SelectPicture"></activity>
     </application>
 
 </manifest>

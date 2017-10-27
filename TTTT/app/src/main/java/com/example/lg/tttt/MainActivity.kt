@@ -44,7 +44,7 @@ class MainActivity : AppCompatActivity() {
         b.setOnClickListener {
             // 서비스 시작하기
             val intent = Intent(applicationContext, //현재제어권자
-                    Main3Activity::class.java) // 이동할 컴포넌트
+                    SelectPicture::class.java) // 이동할 컴포넌트
             startActivity(intent) // 서비스 시작
         }
 

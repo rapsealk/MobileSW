@@ -13,7 +13,8 @@ android {
         versionName "1.0"
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
         vectorDrawables.useSupportLibrary = true
-        multiDexEnabled true    // FIXME: com.android.builder.dexing.DexArchiveMergerException + Kitkat
+        multiDexEnabled true
+        // FIXME: com.android.builder.dexing.DexArchiveMergerException + Kitkat
     }
     buildTypes {
         release {

@@ -30,7 +30,7 @@
 
             </android.support.v7.widget.Toolbar>
 
-            <ImageButton
+            <!--ImageButton
                 android:id="@+id/btnMenu"
                 android:layout_width="50dp"
                 android:layout_height="100dp"
@@ -39,7 +39,7 @@
                 android:elevation="4dp"
                 android:scaleX="0.5"
                 android:scaleY="0.5"
-                app:srcCompat="@drawable/if_menu_hamburger" />
+                app:srcCompat="@drawable/if_menu_hamburger" /-->
 
         </RelativeLayout>
 

@@ -4,8 +4,8 @@ import android.content.DialogInterface
 import android.graphics.*
 import android.support.v7.app.AppCompatActivity
 import android.os.Bundle
-import android.os.Message
 import android.support.v7.app.AlertDialog
+import android.util.DisplayMetrics
 import android.util.Log
 import android.view.View
 import android.widget.ImageView
@@ -55,8 +55,18 @@ class PostActivity : AppCompatActivity() {
         val serializedData = intent.getSerializableExtra("SerializedData") as Photo
         val postTimestamp = serializedData.timestamp
 
+        val metrics = DisplayMetrics()
+        windowManager.defaultDisplay.getMetrics(metrics)
+        commentListView.layoutParams.height = metrics.heightPixels - (cardView.height + linearLayout.height)
+
         writerId.text = serializedData.uid
         writtenTime.text = SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(Timestamp(serializedData.timestamp))
+        content.text = serializedData.content
+
+        optionalButton.setOnClickListener { v: View? ->
+            toast("optionalButton")
+            // TODO("Dialog")
+        }
 
         Picasso.with(this)
                 .load("http://52.78.4.96:3003/images/"+serializedData.uid)
@@ -95,6 +105,18 @@ class PostActivity : AppCompatActivity() {
 
         Picasso.with(this)
                 .load(serializedData.url)
+                .transform(object : Transformation {
+                    override fun key(): String = ""
+                    override fun transform(source: Bitmap?): Bitmap {
+                        val maxHeight = 960
+                        val isSuperBig = source!!.height > maxHeight
+                        val x = source.width // if (isSuperBig) (source.width / source.height).toInt() * 480 else source.width
+                        val y = if (isSuperBig) maxHeight else source.height
+                        val image = Bitmap.createScaledBitmap(source, x, y, false)
+                        if (image != source) source.recycle()
+                        return image
+                    }
+                })
                 .into(imageViewPost as ImageView)
 
         mFirebaseDatabase?.getReference("photos/$postTimestamp/comments")
@@ -162,7 +184,7 @@ class PostActivity : AppCompatActivity() {
                         for (phopl in snapshot.children) {
                             if (phopl.key == uid) {
                                 isPhoPled = true
-                                btnPhoPl.setImageResource(R.drawable.star_yellow)
+                                btnPhopl.setImageResource(R.drawable.star_yellow)
                             }
                         }
                     }
@@ -204,13 +226,13 @@ class PostActivity : AppCompatActivity() {
                     }
         }
 
-        btnPhoPl.setOnClickListener { v: View ->
+        btnPhopl.setOnClickListener { v: View ->
             val ref = mFirebaseDatabase?.getReference("photos/$postTimestamp/phopls/$uid")
             val phoplTask = if (isPhoPled) ref?.removeValue() else ref?.setValue(System.currentTimeMillis())
             phoplTask
                     ?.addOnCompleteListener { task: Task<Void> ->
                         isPhoPled = !isPhoPled
-                        btnPhoPl.setImageResource( if (isPhoPled) R.drawable.star_yellow else R.drawable.star_gray )
+                        btnPhopl.setImageResource( if (isPhoPled) R.drawable.star_yellow else R.drawable.star_gray )
                         updatePhoplCount( if (isPhoPled) ++phoplCount else --phoplCount )
                     }
                     ?.addOnFailureListener { exception: Exception ->
@@ -225,7 +247,7 @@ class PostActivity : AppCompatActivity() {
     }
 
     fun updatePhoplCount(count: Long) {
-        commentPhoPl.text = "포플 ($count)"
+        commentPhopl.text = "포플 ($count)"
     }
 
     fun updateCommentCount() {

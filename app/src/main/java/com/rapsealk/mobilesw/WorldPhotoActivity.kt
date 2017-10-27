@@ -80,10 +80,10 @@ class WorldPhotoActivity : FragmentActivity(), OnMapReadyCallback {
                 .transform(object : Transformation {
                     override fun key() : String = ""
                     override fun transform(source: Bitmap): Bitmap {
-                        var ratio: Double = source.height.toDouble() / source.width.toDouble()
-                        var targetHeight: Int = rootLinearLayout.height - 1000
-                        var targetWidth: Int = (targetHeight * ratio).toInt()
-                        var result: Bitmap = Bitmap.createScaledBitmap(source, targetWidth, targetHeight, false)
+                        val ratio: Double = source.height.toDouble() / source.width.toDouble()
+                        val targetHeight: Int = rootLinearLayout.height - 1000
+                        val targetWidth: Int = (targetHeight * ratio).toInt()
+                        val result: Bitmap = Bitmap.createScaledBitmap(source, targetWidth, targetHeight, false)
                         if (result != source) source.recycle()
                         return result
                     }
@@ -100,7 +100,7 @@ class WorldPhotoActivity : FragmentActivity(), OnMapReadyCallback {
         // Firebase Auth
         mFirebaseAuth = FirebaseAuth.getInstance()
         mFirebaseAuthListener = FirebaseAuth.AuthStateListener() { auth: FirebaseAuth ->
-            var user: FirebaseUser? = auth.currentUser
+            val user: FirebaseUser? = auth.currentUser
             if (user != null) {
                 // var intent = Intent(this, MainActivity::class.java)
                 // startActivity(intent)
@@ -140,10 +140,9 @@ class WorldPhotoActivity : FragmentActivity(), OnMapReadyCallback {
                 db.getReference("photos").addListenerForSingleValueEvent(object : ValueEventListener {
                     override fun onDataChange(snapshot: DataSnapshot?) {
                         for (value in snapshot!!.children) {
-                            var photo = value.getValue<Photo>(Photo::class.java)
+                            val photo = value.getValue<Photo>(Photo::class.java)
                             GroundOverlayGenerator(this@WorldPhotoActivity, LatLng(photo.latitude, photo.longitude)).execute(photo.url)
                         }
-                        // GroundOverlayGenerator().execute(snapshot!!.children)
                     }
 
                     override fun onCancelled(p0: DatabaseError?) { }
@@ -191,7 +190,7 @@ class WorldPhotoActivity : FragmentActivity(), OnMapReadyCallback {
         mMap!!.setOnPolygonClickListener { polygon: Polygon ->
             VIEW_PHOTOS_STATE = !VIEW_PHOTOS_STATE
 
-            var params: ViewGroup.LayoutParams = mapFragment?.view!!.layoutParams
+            val params: ViewGroup.LayoutParams = mapFragment?.view!!.layoutParams
             if (!VIEW_PHOTOS_STATE) {
                 params.height += 400
                 linearLayout?.removeAllViewsInLayout()
@@ -213,22 +212,22 @@ class WorldPhotoActivity : FragmentActivity(), OnMapReadyCallback {
             }
             mapFragment?.view!!.layoutParams = params
 
-            var points: List<LatLng> = polygon.points
+            val points: List<LatLng> = polygon.points
             // safety block
-            var startPoint: LatLng = points.get(0)
-            var endPoint: LatLng = points.get(2)
+            val startPoint: LatLng = points.get(0)
+            val endPoint: LatLng = points.get(2)
 
             // Check Photos : Query https://firebase.google.com/docs/database/android/lists-of-data?hl=ko
             ref = db.getReference("photos")
 
-            var query: Query? = ref?.orderByChild("latitude")
+            val query: Query? = ref?.orderByChild("latitude")
                     ?.startAt(min(startPoint.latitude, endPoint.latitude))
                     ?.endAt(max(startPoint.latitude, endPoint.latitude))
 
             query?.addListenerForSingleValueEvent(object : ValueEventListener {
                 override fun onDataChange(snapshot: DataSnapshot?) {
 
-                    var ref2 = snapshot?.ref?.orderByChild("longitude")
+                    val ref2 = snapshot?.ref?.orderByChild("longitude")
                             ?.startAt(min(startPoint.longitude, endPoint.longitude))
                             ?.endAt(max(startPoint.longitude, endPoint.longitude))
 
@@ -281,14 +280,15 @@ class WorldPhotoActivity : FragmentActivity(), OnMapReadyCallback {
             })
         }
 
-        var lastKnownLocation = mSharedPreference?.getLastKnownLocation()
+        val lastKnownLocation = mSharedPreference?.getLastKnownLocation()
         if (lastKnownLocation != null) {
+            // INITIAL_GPS_SET = false
             mMap!!.animateCamera(CameraUpdateFactory.zoomTo(100f))
             mMap!!.moveCamera(CameraUpdateFactory.newLatLng(lastKnownLocation))
         }
     }
 
-    /* FIXME : OnCameraIdleListener
+    /* TODO : OnCameraIdleListener
     override fun onCameraIdle() {
         var zoomLevel = mMap?.cameraPosition?.zoom
         var imageSize = zoomLevel!! * 0.16f
@@ -336,7 +336,7 @@ class WorldPhotoActivity : FragmentActivity(), OnMapReadyCallback {
         override fun onStatusChanged(provider: String?, status: Int, extras: Bundle?) {}
 
         override fun onLocationChanged(location: Location) {
-            var currentLatLng = LatLng(location.latitude, location.longitude)
+            val currentLatLng = LatLng(location.latitude, location.longitude)
             mSharedPreference?.setLastKnownLocation(currentLatLng)
             currentLocation?.latitude = location.latitude
             currentLocation?.longitude = location.longitude
@@ -347,7 +347,7 @@ class WorldPhotoActivity : FragmentActivity(), OnMapReadyCallback {
             tvLongitude.setText(location.longitude.toString())
             tvAccuracy.setText(location.accuracy.toString())
             if (INITIAL_GPS_SET) {
-                mMap?.animateCamera(CameraUpdateFactory.zoomBy(100f))
+                mMap?.animateCamera(CameraUpdateFactory.zoomBy(25f))
                 INITIAL_GPS_SET = false
             }
         }
@@ -371,13 +371,13 @@ class WorldPhotoActivity : FragmentActivity(), OnMapReadyCallback {
 
         override fun onMarkerDrag(marker: Marker?) {
             exPolygon?.remove()
-            var pointTopLeft = polygonStartPoint
-            var pointBottomRight = marker!!.position
-            var rectangle = PolygonOptions().add(
-                    LatLng(pointTopLeft!!.latitude, pointTopLeft!!.longitude),
-                    LatLng(pointTopLeft!!.latitude, pointBottomRight.longitude),
+            val pointTopLeft = polygonStartPoint
+            val pointBottomRight = marker!!.position
+            val rectangle = PolygonOptions().add(
+                    LatLng(pointTopLeft!!.latitude, pointTopLeft.longitude),
+                    LatLng(pointTopLeft.latitude, pointBottomRight.longitude),
                     LatLng(pointBottomRight.latitude, pointBottomRight.longitude),
-                    LatLng(pointBottomRight.latitude, pointTopLeft!!.longitude)
+                    LatLng(pointBottomRight.latitude, pointTopLeft.longitude)
             ).strokeColor(Color.RED).fillColor(Color.YELLOW)
             exPolygon = mMap!!.addPolygon(rectangle)
             exPolygon!!.isClickable = true
@@ -403,7 +403,7 @@ class WorldPhotoActivity : FragmentActivity(), OnMapReadyCallback {
         }
 
         override fun doInBackground(vararg params: String?): BitmapDescriptor {
-            var url = params.get(0)
+            val url = params.get(0)
             bitmapDescriptor = BitmapDescriptorFactory.fromBitmap(Picasso.with(context).load(url).resize(160, 160).get())
             return bitmapDescriptor!!
         }
@@ -416,30 +416,4 @@ class WorldPhotoActivity : FragmentActivity(), OnMapReadyCallback {
             )
         }
     }
-
-    /*
-    inner class GroundOverlayGenerator : AsyncTask<Iterable<DataSnapshot>, Int, Unit> {
-
-        constructor() {
-            Log.d("GroundOverlay", "GroundOverlayGenerator::CONSTRUCTED")
-        }
-
-        override fun doInBackground(vararg params: Iterable<DataSnapshot>) {
-            var children = params.get(0)
-            for (value in children) {
-                var photo = value.getValue<Photo>(Photo::class.java)
-                var url = photo.url
-                Log.d("GroundOverlay", "url: $url")
-                var latlng = LatLng(photo.latitude, photo.longitude)
-                var bitmapDescriptor = BitmapDescriptorFactory.fromBitmap(Picasso.with(this@WorldPhotoActivity).load(url).get())
-                overlays?.add(
-                        mMap?.addGroundOverlay(GroundOverlayOptions()
-                        .image(bitmapDescriptor)
-                        .position(latlng, 16f, 16f))!!
-                )
-            }
-        }
-
-    }
-    */
 }

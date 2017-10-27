@@ -105,7 +105,7 @@ public class Main3Activity extends AppCompatActivity {
                     MediaStore.Images.Media.SIZE};
 
             Cursor imageCursor = managedQuery(MediaStore.Images.Media.EXTERNAL_CONTENT_URI,
-                    proj, null, null, null);
+                    proj, null, null,null);
 
             if (imageCursor != null && imageCursor.moveToFirst()){
                 String title;
@@ -120,6 +120,7 @@ public class Main3Activity extends AppCompatActivity {
                 int thumbsImageIDCol = imageCursor.getColumnIndex(MediaStore.Images.Media.DISPLAY_NAME);
                 int thumbsSizeCol = imageCursor.getColumnIndex(MediaStore.Images.Media.SIZE);
                 int num = 0;
+
                 do {
                     thumbsID = imageCursor.getString(thumbsIDCol);
                     thumbsData = imageCursor.getString(thumbsDataCol);

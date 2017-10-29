@@ -28,9 +28,6 @@
         <service android:name=".MyService" />
 
         <activity android:name=".SelectActivity" />
-        <activity android:name=".Main2Activity" />
-        <activity android:name=".Main3Activity" />
-        <activity android:name=".Main4Activity" />
 
         <receiver
             android:name=".AlarmReceiver"

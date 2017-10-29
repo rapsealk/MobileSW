@@ -6,9 +6,11 @@ import android.app.PendingIntent
 import android.app.Service
 import android.content.Context
 import android.content.Intent
+import android.database.Cursor
 import android.hardware.Camera
 import android.os.Handler
 import android.os.IBinder
+import android.provider.MediaStore
 import android.util.Log
 import android.widget.Toast
 
@@ -25,6 +27,7 @@ class MyService : Service() {
     internal var builder: Notification.Builder? = null
     internal var push: Intent? = null
     internal var fullScreenPendingIntent: PendingIntent? = null
+    var t : Long=0
 
     override fun onBind(intent: Intent): IBinder? {
         // Service 객체와 (화면단 Activity 사이에서)
@@ -81,6 +84,8 @@ class MyService : Service() {
                  //   Log.d("test", "카메라 OFF1111111")
                 } else if (isCameraUsebyApp && step == 0) {
                  //   Log.d("test", "카메라 ON111111")
+                    t = System.currentTimeMillis()
+
                     step = 1
                 } else if (isCameraUsebyApp && step == 1) {
                   //  Log.d("test", "카메라 ON222222")
@@ -88,12 +93,29 @@ class MyService : Service() {
                   //  Log.d("test", "카메라 OFF2222222")
                     step = 0
 
+                    val projection = arrayOf(MediaStore.Images.Media._ID, MediaStore.Images.Media.DATA)
+
+                    // 쿼리 수행
+                    val imageCursor : Cursor? = contentResolver.query(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, projection,
+                            MediaStore.Images.Media.DATE_TAKEN + " >=" + t, null, MediaStore.Images.Media.DATE_ADDED + " desc ")
+                    /*
+        Cursor imageCursor = managedQuery(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, projection,
+                MediaStore.Images.Media.DATE_TAKEN +" >= ? and"
+                        + MediaStore.Images.Media.DATE_TAKEN + "<=?",
+                new String[] {start + "", end+ ""}, MediaStore.Images.Media.DATE_ADDED + " desc ");
+        */
+
+                    if (imageCursor == null){
+                        continue
+                    }
+
                     val nm = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
                     val push = Intent()
                     val fullScreenPendingIntent = PendingIntent.getActivity(applicationContext, 0, push, PendingIntent.FLAG_CANCEL_CURRENT)
 
                     val select = Intent(applicationContext,AlarmReceiver::class.java)
                     select.setAction("YES_ACTION")
+                    select.putExtra("time",t)
                     val selectPendingIntent = PendingIntent.getBroadcast(applicationContext, 0, select, PendingIntent.FLAG_UPDATE_CURRENT)
 
                     val cancel = Intent(applicationContext,AlarmReceiver::class.java)
@@ -123,7 +145,7 @@ class MyService : Service() {
 
                     nm.notify(123456, builder.build())
 
-                    break
+                 //   break
                 }
             }
             handler.post { Toast.makeText(applicationContext, "서비스 종료", Toast.LENGTH_SHORT).show() }

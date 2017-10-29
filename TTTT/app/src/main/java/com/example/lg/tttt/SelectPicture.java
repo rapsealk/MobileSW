@@ -1,31 +1,8 @@
 package com.example.lg.tttt;
 
-import java.io.File;
-import java.util.ArrayList;
-
-import android.app.Activity;
 import android.app.ProgressDialog;
 import android.content.Context;
-import android.database.Cursor;
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
-import android.os.AsyncTask;
-import android.os.Bundle;
-import android.provider.MediaStore;
-import android.view.LayoutInflater;
-import android.view.View;
-import android.view.ViewGroup;
-import android.widget.AbsListView;
-import android.widget.AdapterView;
-import android.widget.BaseAdapter;
-import android.widget.CheckBox;
-import android.widget.GridView;
-import android.widget.ImageView;
-import android.widget.ListView;
-import android.widget.AbsListView.OnScrollListener;
-
-import android.app.ProgressDialog;
-import android.content.Context;
+import android.content.Intent;
 import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -33,10 +10,12 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 import android.provider.MediaStore;
 import android.support.v7.app.AppCompatActivity;
+import android.text.format.Time;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AbsListView;
+import android.widget.AbsListView.OnScrollListener;
 import android.widget.AdapterView;
 import android.widget.BaseAdapter;
 import android.widget.CheckBox;
@@ -54,6 +33,7 @@ public class SelectPicture extends AppCompatActivity implements ListView.OnScrol
     GridView mGvImageList;
     ImageAdapter mListAdapter;
     ArrayList<ThumbImageInfo> mThumbImageInfoList;
+    long time=0;
 
     @Override
     public void onCreate(Bundle savedInstanceState)
@@ -61,6 +41,8 @@ public class SelectPicture extends AppCompatActivity implements ListView.OnScrol
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_select_picture);
 
+        Intent intent = getIntent();
+        time= intent.getLongExtra("time",0);
         mThumbImageInfoList = new ArrayList<ThumbImageInfo>();
         mGvImageList = (GridView) findViewById(R.id.gvImageList);
         mGvImageList.setOnScrollListener(this);
@@ -72,12 +54,38 @@ public class SelectPicture extends AppCompatActivity implements ListView.OnScrol
     private long findThumbList()
     {
         long returnValue = 0;
+        Time t = new Time();
+        t.set(0, 0, 0, 28, 9, 2017);    //초, 분, 시간, 일, 월(0~11), 년도, 2013년 12월 1일로 셋팅
+
+        long start = t.toMillis(true);
+
+        Time e = new Time();
+        e.set(0, 0, 0, 12, 7, 2017);    //초, 분, 시간, 일, 월(0~11), 년도, 2013년 12월 1일로 셋팅
+
+        long end = t.toMillis(true);
+
+        String where = MediaStore.Images.Media.DATE_TAKEN +" >= " + start+"and"
+                + MediaStore.Images.Media.DATE_TAKEN + "<="+end;
+
+
+        String selection = MediaStore.Images.Media.DATE_TAKEN + " >="
+                + start + " AND "
+                + MediaStore.Images.Media.DATE_TAKEN + " <= "
+                + end;
 
         // Select 하고자 하는 컬럼
         String[] projection = { MediaStore.Images.Media._ID, MediaStore.Images.Media.DATA };
 
         // 쿼리 수행
-        Cursor imageCursor = managedQuery(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, projection, null, null, MediaStore.Images.Media.DATE_ADDED + " desc ");
+        Cursor imageCursor = managedQuery(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, projection,
+                MediaStore.Images.Media.DATE_TAKEN + " >=" + time,
+                null, MediaStore.Images.Media.DATE_ADDED + " desc ");
+        /*
+        Cursor imageCursor = managedQuery(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, projection,
+                MediaStore.Images.Media.DATE_TAKEN +" >= ? and"
+                        + MediaStore.Images.Media.DATE_TAKEN + "<=?",
+                new String[] {start + "", end+ ""}, MediaStore.Images.Media.DATE_ADDED + " desc ");
+        */
 
         if (imageCursor != null && imageCursor.getCount() > 0)
         {

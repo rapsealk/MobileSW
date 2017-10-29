@@ -16,12 +16,16 @@ class AlarmReceiver : BroadcastReceiver() {
 
         val notificationManager = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
         notificationManager.cancel(123456)
+
+        var time= intent.getLongExtra("time",0)
+
         //Log.d("shuffTest", "????????????????????????????????")
 
         val action = intent.action
         if (YES_ACTION == action) {
             Log.d("shuffTest", "Pressed YES")
-            val go = Intent(context, SelectActivity::class.java)
+            val go = Intent(context, SelectPicture::class.java)
+            go.putExtra("time",time)
             context.startActivity(go)
 
         } else if (NO_ACTION == action) {

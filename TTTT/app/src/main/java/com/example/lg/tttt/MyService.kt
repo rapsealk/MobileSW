@@ -105,9 +105,12 @@ class MyService : Service() {
                 new String[] {start + "", end+ ""}, MediaStore.Images.Media.DATE_ADDED + " desc ");
         */
 
-                    if (imageCursor == null){
+                    if (imageCursor == null || imageCursor.count==0){
+                   //     handler.post { Toast.makeText(applicationContext, "NONONONO", Toast.LENGTH_SHORT).show() }
                         continue
                     }
+
+                 //   handler.post { Toast.makeText(applicationContext, ""+imageCursor.count, Toast.LENGTH_SHORT).show() }
 
                     val nm = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
                     val push = Intent()

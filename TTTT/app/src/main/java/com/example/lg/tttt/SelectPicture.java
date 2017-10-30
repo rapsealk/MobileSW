@@ -18,6 +18,7 @@ import android.widget.AbsListView;
 import android.widget.AbsListView.OnScrollListener;
 import android.widget.AdapterView;
 import android.widget.BaseAdapter;
+import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.GridView;
 import android.widget.ImageView;
@@ -34,6 +35,8 @@ public class SelectPicture extends AppCompatActivity implements ListView.OnScrol
     ImageAdapter mListAdapter;
     ArrayList<ThumbImageInfo> mThumbImageInfoList;
     long time=0;
+    Button btnOK;
+    Button btnCancel;
 
     @Override
     public void onCreate(Bundle savedInstanceState)
@@ -47,8 +50,32 @@ public class SelectPicture extends AppCompatActivity implements ListView.OnScrol
         mGvImageList = (GridView) findViewById(R.id.gvImageList);
         mGvImageList.setOnScrollListener(this);
         mGvImageList.setOnItemClickListener(this);
+        btnOK=(Button)findViewById(R.id.btnSelectOk);
+        btnCancel=(Button)findViewById(R.id.btnSelectCancel);
 
         new DoFindImageList().execute();
+
+        btnOK.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                ArrayList<ThumbImageInfo> temp=new ArrayList<ThumbImageInfo>();
+                for(int i=0; i<mThumbImageInfoList.size(); i++){
+                    if(mThumbImageInfoList.get(i).getCheckedState()){
+                        temp.add(mThumbImageInfoList.get(i));
+                    }
+                }
+                mListAdapter = new ImageAdapter (getApplicationContext(), R.layout.image_cell, temp);
+                mGvImageList.setAdapter(mListAdapter);
+                Intent intent = new Intent(getApplicationContext(),MainActivity.class);
+                intent.putExtra("selected",temp);
+            }
+        });
+        btnCancel.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                finish();
+            }
+        });
     }
 
     private long findThumbList()

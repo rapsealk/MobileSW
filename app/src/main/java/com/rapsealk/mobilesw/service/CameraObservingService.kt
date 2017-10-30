@@ -1,13 +1,13 @@
 package com.rapsealk.mobilesw.service
 
 import android.Manifest
-import android.app.Notification
 import android.app.NotificationManager
 import android.app.PendingIntent
 import android.app.Service
 import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
+import android.database.Cursor
 import android.hardware.Camera
 import android.location.Location
 import android.location.LocationListener
@@ -15,6 +15,7 @@ import android.location.LocationManager
 import android.os.Bundle
 import android.os.Handler
 import android.os.IBinder
+import android.provider.MediaStore
 import android.support.v4.app.NotificationCompat
 import android.support.v4.content.ContextCompat
 import android.widget.Toast
@@ -33,6 +34,8 @@ class CameraObservingService : Service, LocationListener {
 
     private var mLocationManager: LocationManager? = null
     private var mSharedPreference: SharedPreferenceManager? = null
+
+    var t : Long=0
 
     constructor() : super() {}
 
@@ -88,11 +91,21 @@ class CameraObservingService : Service, LocationListener {
         override fun run() {
             while (!isStop) {
                 if (!onCameraUse() && !cameraOnUse) { }
-                else if (onCameraUse() && !cameraOnUse) { cameraOnUse = true }
+                else if (onCameraUse() && !cameraOnUse) {
+                    cameraOnUse = true
+                    t = System.currentTimeMillis()
+                }
                 else if (onCameraUse() && cameraOnUse) { }
                 else if (!onCameraUse() && cameraOnUse) {
 
                     cameraOnUse = false
+
+                    val projection = arrayOf(MediaStore.Images.Media._ID, MediaStore.Images.Media.DATA)
+                    val imageCursor : Cursor? = contentResolver.query(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, projection,
+                            MediaStore.Images.Media.DATE_TAKEN + " >=" + t, null, MediaStore.Images.Media.DATE_ADDED + " desc ")
+                    if (imageCursor == null || imageCursor.count==0){
+                        continue
+                    }
 
                     var notificationManager = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
                     var uploadImageIntent = Intent(this@CameraObservingService, UploadPhotoActivity::class.java)
@@ -101,6 +114,16 @@ class CameraObservingService : Service, LocationListener {
                             .setFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP)
 
                     var uploadImagePendingIntent = PendingIntent.getActivity(this@CameraObservingService, 1, uploadImageIntent, PendingIntent.FLAG_UPDATE_CURRENT)
+
+                    val select = Intent(applicationContext,AlarmReceiver::class.java)
+                    select.setAction("YES_ACTION")
+                    select.putExtra("time",t)
+                    val selectPendingIntent = PendingIntent.getBroadcast(applicationContext, 0, select, PendingIntent.FLAG_UPDATE_CURRENT)
+
+                    val cancel = Intent(applicationContext,AlarmReceiver::class.java)
+                    cancel.setAction("NO_ACTION")
+                    val cancelPendingIntent = PendingIntent.getBroadcast(applicationContext, 123456, cancel, PendingIntent.FLAG_UPDATE_CURRENT)
+
 
                     var contentTitleList: Array<String> = arrayOf(
                             "이곳에서 찍은 사진이 마음에 드시나요?",
@@ -118,10 +141,12 @@ class CameraObservingService : Service, LocationListener {
                             .setContentText("지금 포플에 업로드하세요!")
                             .setPriority(NotificationCompat.PRIORITY_MAX)
                             .setAutoCancel(true)
+                            .addAction(android.R.drawable.star_on, "올리기", selectPendingIntent)
+                            .addAction(android.R.drawable.star_off, "닫기", cancelPendingIntent)
+
 
                     notificationManager.notify(9999, ncbuilder.build())
-
-                    break
+                   // break
                 }
             }
             handler.post(Runnable {

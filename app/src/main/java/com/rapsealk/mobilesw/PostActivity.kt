@@ -60,7 +60,7 @@ class PostActivity : AppCompatActivity() {
         commentListView.layoutParams.height = metrics.heightPixels - (cardView.height + linearLayout.height)
 
         writerId.text = serializedData.uid
-        writtenTime.text = SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(Timestamp(serializedData.timestamp))
+        writtenTime.text = SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(Timestamp(postTimestamp))
         content.text = serializedData.content
 
         optionalButton.setOnClickListener { v: View? ->
@@ -158,6 +158,7 @@ class PostActivity : AppCompatActivity() {
                                                     ?.removeValue()
                                             comments.removeAt(position)
                                             commentAdapter?.notifyDataSetChanged()
+                                            updateCommentCount()
                                         })
                                         .setNegativeButton("취소", DialogInterface.OnClickListener { dialog, which ->
                                             // TODO("Not required")
@@ -211,7 +212,7 @@ class PostActivity : AppCompatActivity() {
                         // FCM REQUEST
                         if (serializedData.uid != uid) {
                             val cmService = CloudMessageService.create()
-                            cmService.sendMessage(SendingMessage(currentUser.displayName!!, serializedData.uid, comment))
+                            cmService.sendMessage(SendingMessage(currentUser.displayName!!, serializedData.uid, postTimestamp, comment))
                                     .observeOn(AndroidSchedulers.mainThread())
                                     .subscribeOn(Schedulers.io())
                                     .subscribe({ result ->

@@ -6,5 +6,6 @@ package com.rapsealk.mobilesw.retrofit
 data class SendingMessage(
         val sender: String,
         val instanceIdToken: String,
+        val postId: Long,
         val comment: String
 )

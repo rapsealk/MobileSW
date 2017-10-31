@@ -148,7 +148,7 @@ class PostActivity : AppCompatActivity() {
 
                         commentListView.setOnItemClickListener { parent, view, position, id ->
                             val comment = comments[position]
-                            if (comment.uid == uid) {
+                            if (serializedData.uid == uid || comment.uid == uid) {
                                 val commentTimestamp = comment.timestamp
                                 val dialogBuilder = AlertDialog.Builder(this@PostActivity)
                                         .setTitle("댓글을 삭제하시겠습니까?")
@@ -196,6 +196,7 @@ class PostActivity : AppCompatActivity() {
 
         btnPostComment.setOnClickListener { v: View ->
             val comment = editTextComment.text.toString()
+            if (comment == "") return@setOnClickListener
             val commentTimestamp = System.currentTimeMillis()
             val Comment = Comment(comment, commentTimestamp, uid)
             val ref = mFirebaseDatabase?.reference
@@ -210,7 +211,7 @@ class PostActivity : AppCompatActivity() {
                         // FCM REQUEST
                         if (serializedData.uid != uid) {
                             val cmService = CloudMessageService.create()
-                            cmService.sendMessage(SendingMessage(currentUser.displayName!!, serializedData.uid))
+                            cmService.sendMessage(SendingMessage(currentUser.displayName!!, serializedData.uid, comment))
                                     .observeOn(AndroidSchedulers.mainThread())
                                     .subscribeOn(Schedulers.io())
                                     .subscribe({ result ->

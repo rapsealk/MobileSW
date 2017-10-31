@@ -25,6 +25,7 @@ class AlarmReceiver : BroadcastReceiver() {
         if (YES_ACTION == action) {
             Log.d("shuffTest", "Pressed YES")
             val go = Intent(context, SelectPicture::class.java)
+                    .setFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
             go.putExtra("time",time)
             context.startActivity(go)
 

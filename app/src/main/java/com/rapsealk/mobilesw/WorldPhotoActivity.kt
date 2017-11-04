@@ -16,6 +16,7 @@ import android.support.v4.app.ActivityCompat
 import android.content.Intent
 import android.os.AsyncTask
 import android.support.v4.content.ContextCompat
+import android.util.Log
 import android.view.ViewGroup
 import android.widget.*
 import com.bumptech.glide.Glide
@@ -29,7 +30,7 @@ import com.rapsealk.mobilesw.schema.Photo
 import com.squareup.picasso.Picasso
 import com.squareup.picasso.Transformation
 
-class WorldPhotoActivity : FragmentActivity(), OnMapReadyCallback {
+class WorldPhotoActivity : FragmentActivity(), OnMapReadyCallback, GoogleMap.OnCameraIdleListener {
 
     private val FINE_LOCATION_CODE: Int = 1
 
@@ -45,6 +46,7 @@ class WorldPhotoActivity : FragmentActivity(), OnMapReadyCallback {
     private var overlayState: Boolean = false
 
     private var overlays: ArrayList<GroundOverlay>? = null
+    private var markers: ArrayList<Marker> = ArrayList<Marker>()
 
     private var mapFragment: SupportMapFragment? = null
 
@@ -186,6 +188,7 @@ class WorldPhotoActivity : FragmentActivity(), OnMapReadyCallback {
         }
 
         mMap!!.setOnMarkerDragListener(CustomDragMarkerListener())
+        mMap!!.setOnCameraIdleListener(this)
 
         mMap!!.setOnPolygonClickListener { polygon: Polygon ->
             VIEW_PHOTOS_STATE = !VIEW_PHOTOS_STATE
@@ -235,10 +238,10 @@ class WorldPhotoActivity : FragmentActivity(), OnMapReadyCallback {
                         override fun onDataChange(snapshot: DataSnapshot?) {
 
                             for (value in snapshot!!.children) {
-                                var data = value.getValue<Photo>(Photo::class.java)
+                                val data = value.getValue<Photo>(Photo::class.java)
                                 var url = data.url
-                                if (url == null) url = "https://firebasestorage.googleapis.com/v0/b/mobilesw-178816.appspot.com/o/ReactiveX.jpg?alt=media&token=510350fe-ac5b-4f01-9d9a-2fecf8428940"
-                                var imageView = ImageView(this@WorldPhotoActivity)
+                                if (url.equals("")) url = "https://firebasestorage.googleapis.com/v0/b/mobilesw-178816.appspot.com/o/ReactiveX.jpg?alt=media&token=510350fe-ac5b-4f01-9d9a-2fecf8428940"
+                                val imageView = ImageView(this@WorldPhotoActivity)
                                 /*
                                 Glide.with(this@WorldPhotoActivity)
                                         .load(url)
@@ -266,7 +269,7 @@ class WorldPhotoActivity : FragmentActivity(), OnMapReadyCallback {
 
                                 imageView.setOnClickListener { view ->
 
-                                    var intent = Intent(applicationContext, PostActivity::class.java)
+                                    val intent = Intent(applicationContext, PostActivity::class.java)
                                             .putExtra("SerializedData", data)
                                     startActivity(intent)
                                     this@WorldPhotoActivity.onPause()
@@ -288,13 +291,80 @@ class WorldPhotoActivity : FragmentActivity(), OnMapReadyCallback {
         }
     }
 
-    /* TODO : OnCameraIdleListener
+    // TODO : OnCameraIdleListener
     override fun onCameraIdle() {
-        var zoomLevel = mMap?.cameraPosition?.zoom
-        var imageSize = zoomLevel!! * 0.16f
-        if (overlayState) overlays?.forEach { overlay ->  }
+        // var zoomLevel = mMap?.cameraPosition?.zoom
+        // var imageSize = zoomLevel!! * 0.16f
+
+        // if (overlayState) overlays?.forEach { overlay ->  }
+
+        val bound = mMap!!.projection.visibleRegion.latLngBounds
+        val _northeast = bound.northeast
+        val _southwest = bound.southwest
+
+        // Firebase Query
+        ref = db.getReference("photos")
+
+        val query: Query? = ref?.orderByChild("latitude")
+                ?.startAt(min(_northeast.latitude, _southwest.latitude))
+                ?.endAt(max(_northeast.latitude, _southwest.latitude))
+
+        query?.addListenerForSingleValueEvent(object : ValueEventListener {
+            override fun onDataChange(snapshot: DataSnapshot?) {
+
+                val ref2 = snapshot?.ref?.orderByChild("longitude")
+                        ?.startAt(min(_northeast.longitude, _southwest.longitude))
+                        ?.endAt(max(_northeast.longitude, _southwest.longitude))
+
+                ref2?.addListenerForSingleValueEvent(object : ValueEventListener {
+                    override fun onDataChange(snapshot: DataSnapshot?) {
+
+                        for (value in snapshot!!.children) {
+                            val data = value.getValue<Photo>(Photo::class.java)
+
+                            val position = LatLng(data.latitude, data.longitude)
+                            val marker = mMap?.addMarker(MarkerOptions().position(position).title(data.content))
+                            markers.add(marker!!)
+                            /*
+                            var url = data.url
+                            if (url.equals("")) url = "https://firebasestorage.googleapis.com/v0/b/mobilesw-178816.appspot.com/o/ReactiveX.jpg?alt=media&token=510350fe-ac5b-4f01-9d9a-2fecf8428940"
+                            val imageView = ImageView(this@WorldPhotoActivity)
+                            Picasso.with(this@WorldPhotoActivity)
+                                    .load(url)
+                                    .transform(object : Transformation {
+
+                                        override fun key(): String = "resizeTransformation#" + System.currentTimeMillis()
+
+                                        override fun transform(source: Bitmap): Bitmap {
+                                            val ratio: Double = source.height.toDouble() / source.width.toDouble()
+                                            val targetHeight: Int = 400
+                                            val targetWidth: Int = (targetHeight * ratio).toInt()
+                                            val result: Bitmap = Bitmap.createScaledBitmap(source, targetWidth, targetHeight, false)
+                                            if (result != source) source.recycle()
+                                            return result
+                                        }
+                                    })
+                                    .into(imageView)
+                            linearLayout?.addView(imageView)
+
+                            imageView.setOnClickListener { view ->
+
+                                val intent = Intent(applicationContext, PostActivity::class.java)
+                                        .putExtra("SerializedData", data)
+                                startActivity(intent)
+                                this@WorldPhotoActivity.onPause()
+                            }
+                            */
+                        }
+                    }
+                    override fun onCancelled(p0: DatabaseError?) { }
+                })
+            }
+            override fun onCancelled(p0: DatabaseError?) { }
+        })
+
+        Log.d("IDLE", "NORTHEAST: $_northeast, SOUTHWEST: $_southwest");
     }
-    */
 
     override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<out String>, grantResults: IntArray) {
         when (requestCode) {
@@ -342,7 +412,7 @@ class WorldPhotoActivity : FragmentActivity(), OnMapReadyCallback {
             currentLocation?.longitude = location.longitude
             exMarker?.remove()
             exMarker = mMap?.addMarker(MarkerOptions().position(currentLatLng).title("#"+(++counter)))
-            mMap?.moveCamera(CameraUpdateFactory.newLatLng(currentLatLng))
+            // mMap?.moveCamera(CameraUpdateFactory.newLatLng(currentLatLng))
             tvLatitude.setText(location.latitude.toString())
             tvLongitude.setText(location.longitude.toString())
             tvAccuracy.setText(location.accuracy.toString())
@@ -391,16 +461,18 @@ class WorldPhotoActivity : FragmentActivity(), OnMapReadyCallback {
     fun max(a: Double, b: Double): Double = if (a > b) a else b
     fun min(a: Double, b: Double): Double = if (a < b) a else b
 
-    inner class GroundOverlayGenerator : AsyncTask<String, Int, BitmapDescriptor> {
+    inner class GroundOverlayGenerator(val context: Context, val latlng: LatLng) : AsyncTask<String, Int, BitmapDescriptor>() {
 
-        private val context: Context
-        private val latlng: LatLng
+        // private val context: Context
+        // private val latlng: LatLng
         private var bitmapDescriptor: BitmapDescriptor? = null
 
+        /*
         constructor(context: Context, latlng: LatLng) : super() {
             this.context = context
             this.latlng = latlng
         }
+        */
 
         override fun doInBackground(vararg params: String?): BitmapDescriptor {
             val url = params.get(0)

@@ -88,6 +88,7 @@ class MainActivity : AppCompatActivity() {
                 .addTestDevice("11FA7C8BEAD9541214256C4099D5D934")  // Luna S
                 .addTestDevice("485978C6538BE5B2BF5EE991E0F9DAD0")  // Galaxy S6
                 .addTestDevice("2CC79B5532C0B9EC2E03486315B181D0")  // Galaxy Note II
+                .addTestDevice("8BFC47801A471FF1C6D2DE3682F933F3")  // Galaxy S6 Edge
                 .build()
         adView.loadAd(adRequest)
         toast("Test Device: " + adRequest.isTestDevice(this).toString())

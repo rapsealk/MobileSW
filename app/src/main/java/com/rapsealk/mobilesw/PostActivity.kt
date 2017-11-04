@@ -5,6 +5,8 @@ import android.graphics.*
 import android.support.v7.app.AppCompatActivity
 import android.os.Bundle
 import android.support.v7.app.AlertDialog
+import android.text.Editable
+import android.text.TextWatcher
 import android.util.DisplayMetrics
 import android.util.Log
 import android.view.View
@@ -195,9 +197,19 @@ class PostActivity : AppCompatActivity() {
                     }
                 })
 
+        editTextComment.addTextChangedListener(object : TextWatcher {
+            override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
+            override fun onTextChanged(s: CharSequence, start: Int, before: Int, count: Int) {
+                btnPostComment.isEnabled = if (s.toString().trim().length > 0) true else false
+            }
+            override fun afterTextChanged(s: Editable?) { }
+        })
+
+        btnPostComment.isEnabled = false
+
         btnPostComment.setOnClickListener { v: View ->
             val comment = editTextComment.text.toString()
-            if (comment == "") return@setOnClickListener
+            // if (comment == "") return@setOnClickListener
             val commentTimestamp = System.currentTimeMillis()
             val Comment = Comment(comment, commentTimestamp, uid)
             val ref = mFirebaseDatabase?.reference

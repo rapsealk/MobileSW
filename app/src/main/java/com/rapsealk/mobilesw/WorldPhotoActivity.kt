@@ -17,6 +17,7 @@ import android.content.Intent
 import android.os.AsyncTask
 import android.support.v4.content.ContextCompat
 import android.util.Log
+import android.view.View
 import android.view.ViewGroup
 import android.widget.*
 import com.bumptech.glide.Glide
@@ -46,7 +47,8 @@ class WorldPhotoActivity : FragmentActivity(), OnMapReadyCallback, GoogleMap.OnC
     private var overlayState: Boolean = false
 
     private var overlays: ArrayList<GroundOverlay>? = null
-    private var markers: ArrayList<Marker> = ArrayList<Marker>()
+    // private var markers: ArrayList<Marker> = ArrayList<Marker>()
+    private var markers: HashMap<String, Marker> = HashMap<String, Marker>()
 
     private var mapFragment: SupportMapFragment? = null
 
@@ -61,7 +63,7 @@ class WorldPhotoActivity : FragmentActivity(), OnMapReadyCallback, GoogleMap.OnC
     private var horizontalScrollView: HorizontalScrollView? = null
     private var linearLayout: LinearLayout? = null
 
-    private var defaultPostImageLoadingView: ImageView? = null
+    // private var defaultPostImageLoadingView: ImageView? = null
 
     // Firebase Database
     private val db: FirebaseDatabase = FirebaseDatabase.getInstance()
@@ -76,6 +78,7 @@ class WorldPhotoActivity : FragmentActivity(), OnMapReadyCallback, GoogleMap.OnC
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_world_photo)
 
+        /*
         defaultPostImageLoadingView = ImageView(this)
         Picasso.with(this@WorldPhotoActivity)
                 .load(R.drawable.default_image)
@@ -90,6 +93,7 @@ class WorldPhotoActivity : FragmentActivity(), OnMapReadyCallback, GoogleMap.OnC
                         return result
                     }
                 }).into(defaultPostImageLoadingView)
+        */
 
         // Permission Check
         if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
@@ -170,6 +174,40 @@ class WorldPhotoActivity : FragmentActivity(), OnMapReadyCallback, GoogleMap.OnC
     override fun onMapReady(googleMap: GoogleMap) {
         mMap = googleMap
 
+        mMap!!.setInfoWindowAdapter(object : GoogleMap.InfoWindowAdapter {
+            override fun getInfoWindow(marker: Marker): View? = null
+
+            override fun getInfoContents(marker: Marker): View {
+                val view: View = layoutInflater.inflate(R.layout.snippet_layout, null)
+                val snippets = marker.snippet.split("\n")
+                val url = snippets.get(1)
+                val imageView = view.findViewById(R.id.imageView) as ImageView
+                Picasso.with(this@WorldPhotoActivity)
+                        .load(url)
+                        .into(imageView)
+                val textView = view.findViewById(R.id.textView) as TextView
+                textView.text = marker.title
+                return view
+            }
+        })
+
+        mMap!!.setOnInfoWindowClickListener { marker: Marker ->
+            val snippets = marker.snippet.split("\n")
+            val timestamp = snippets.get(0)
+            db.getReference("photos/$timestamp").addListenerForSingleValueEvent(object : ValueEventListener {
+                override fun onDataChange(snapshot: DataSnapshot) {
+                    val data = snapshot.getValue<Photo>(Photo::class.java)
+                    val intent = Intent(applicationContext, PostActivity::class.java)
+                            .putExtra("SerializedData", data)
+                    startActivity(intent)
+                    this@WorldPhotoActivity.onPause()
+                }
+                override fun onCancelled(error: DatabaseError) {
+                    Log.d("Error", error.details)
+                }
+            })
+        }
+
         mMap!!.uiSettings.isMapToolbarEnabled = false
         // mMap!!.uiSettings.isZoomControlsEnabled = true
         // mMap!!.uiSettings.isCompassEnabled = true
@@ -179,7 +217,7 @@ class WorldPhotoActivity : FragmentActivity(), OnMapReadyCallback, GoogleMap.OnC
             if (DRAG_STATE) {
                 draggableMarker = mMap!!.addMarker(MarkerOptions()
                         .position(point)
-                        .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_ORANGE))
+                        .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_YELLOW))
                         .visible(true)
                         .draggable(true)
                         .apply { CustomDragMarkerListener().onMarkerDragStart(draggableMarker) })
@@ -322,9 +360,13 @@ class WorldPhotoActivity : FragmentActivity(), OnMapReadyCallback, GoogleMap.OnC
                         for (value in snapshot!!.children) {
                             val data = value.getValue<Photo>(Photo::class.java)
 
+                            val timestamp = data.timestamp.toString()
+                            if (markers.get(timestamp) != null) continue
+
                             val position = LatLng(data.latitude, data.longitude)
-                            val marker = mMap?.addMarker(MarkerOptions().position(position).title(data.content))
-                            markers.add(marker!!)
+                            val marker = mMap?.addMarker(MarkerOptions().position(position).title(data.content).snippet(timestamp+"\n"+data.url).icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_ORANGE)))
+                            // markers.add(marker!!)
+                            markers.put(timestamp, marker!!)
                             /*
                             var url = data.url
                             if (url.equals("")) url = "https://firebasestorage.googleapis.com/v0/b/mobilesw-178816.appspot.com/o/ReactiveX.jpg?alt=media&token=510350fe-ac5b-4f01-9d9a-2fecf8428940"

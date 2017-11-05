@@ -90,7 +90,7 @@ class MainActivity : AppCompatActivity() {
                 .addTestDevice("2CC79B5532C0B9EC2E03486315B181D0")  // Galaxy Note II
                 .build()
         adView.loadAd(adRequest)
-        toast("Test Device: " + adRequest.isTestDevice(this).toString())
+       // toast("Test Device: " + adRequest.isTestDevice(this).toString())
         /*
         adView.setAdListener(object : AdListener() {
             override fun onAdLoaded() {

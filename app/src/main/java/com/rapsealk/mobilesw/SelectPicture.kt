@@ -219,17 +219,12 @@ class SelectPicture : AppCompatActivity() {
 
                 val bmp = BitmapFactory.decodeFile(path, option)
                 holder.ivImage!!.setImageBitmap(bmp)
+
             } catch (e: Exception) {
                 e.printStackTrace()
             }
 
             return convertView
         }
-/*
-        companion object {
-            internal val VISIBLE = 0x00000000
-            internal val INVISIBLE = 0x00000004
-        }
-        */
     }
 }

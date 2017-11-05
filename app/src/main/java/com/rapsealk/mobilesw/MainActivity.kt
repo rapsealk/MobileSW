@@ -91,7 +91,7 @@ class MainActivity : AppCompatActivity() {
                 .addTestDevice("8BFC47801A471FF1C6D2DE3682F933F3")  // Galaxy S6 Edge
                 .build()
         adView.loadAd(adRequest)
-        toast("Test Device: " + adRequest.isTestDevice(this).toString())
+       // toast("Test Device: " + adRequest.isTestDevice(this).toString())
         /*
         adView.setAdListener(object : AdListener() {
             override fun onAdLoaded() {

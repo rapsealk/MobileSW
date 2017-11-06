@@ -17,6 +17,7 @@ import android.provider.MediaStore
 import android.support.v4.app.ActivityCompat
 import android.support.v4.content.ContextCompat
 import android.view.View
+import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.tasks.Task
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseUser
@@ -80,32 +81,32 @@ class UploadPhotoActivity : AppCompatActivity() {
 
         btnCommit.setOnClickListener { v: View? ->
 
-            var progressDialog = ProgressDialog(this)
+            val progressDialog = ProgressDialog(this)
             progressDialog.isIndeterminate = true
             progressDialog.setProgressStyle(ProgressDialog.STYLE_SPINNER)
             progressDialog.setMessage("이미지 업로드 중...")
             progressDialog.show()
 
-            var storageRef: StorageReference = mFirebaseStorage.getReference()
+            val storageRef: StorageReference = mFirebaseStorage.getReference()
 
-            var uid = mFirebaseUser!!.uid
-            var content = editTextContent.text.toString()
+            val uid = mFirebaseUser!!.uid
+            val content = editTextContent.text.toString()
 
-            var location = mSharedPreference!!.getLastKnownLocation()
-            var latitude = location.latitude
-            var longitude = location.longitude
+            val location = mSharedPreference!!.getLastKnownLocation() ?: LatLng(127.0, 37.0)
+            val latitude = location.latitude
+            val longitude = location.longitude
 
-            var file = Uri.fromFile(File(photoPath))
-            var timestamp = System.currentTimeMillis()
-            var imageFileName = file.lastPathSegment
-            var uploadTask = storageRef.child("$uid/$imageFileName").putFile(file)
+            val file = Uri.fromFile(File(photoPath))
+            val timestamp = System.currentTimeMillis()
+            val imageFileName = file.lastPathSegment
+            val uploadTask = storageRef.child("$uid/$imageFileName").putFile(file)
 
             uploadTask
                     .addOnFailureListener { exception: Exception -> toast(exception.toString()) }
                     .addOnCompleteListener { task: Task<UploadTask.TaskSnapshot> ->
-                        var url = task.result.downloadUrl.toString()
-                        var ref = mFirebaseDatabase.getReference()
-                        var photoData = Photo(HashMap<String, Comment>(), content, latitude, longitude, HashMap<String, Long>(), timestamp, uid, url)
+                        val url = task.result.downloadUrl.toString()
+                        val ref = mFirebaseDatabase.getReference()
+                        val photoData = Photo(HashMap<String, Comment>(), content, latitude, longitude, HashMap<String, Long>(), timestamp, uid, url)
                         ref.child("users/$uid/photos/$timestamp").setValue(photoData)
                         ref.child("photos/$timestamp").setValue(photoData)
                         progressDialog.dismiss()

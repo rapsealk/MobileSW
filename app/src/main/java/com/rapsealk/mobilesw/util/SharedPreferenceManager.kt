@@ -50,18 +50,18 @@ public class SharedPreferenceManager {
     }
 
     public fun setLastKnownLocation(latLng: LatLng): SharedPreferenceManager {
-        var latitude = latLng.latitude
-        var longitude = latLng.longitude
+        val latitude = latLng.latitude
+        val longitude = latLng.longitude
         mEdit?.putString(LAST_KNOWN_LOCATION, "$latitude/$longitude")
         mEdit?.commit()
         return mInstance!!
     }
 
-    public fun getLastKnownLocation(): LatLng {
-        var lastKnown = mSharedPreference!!.getString(LAST_KNOWN_LOCATION, null)
-        if (lastKnown == null) return LatLng(127.0, 37.0)
-        var lastKnowns = lastKnown.split("/")
-        var location = LatLng(lastKnowns.get(0).toDouble(), lastKnowns.get(1).toDouble())
+    public fun getLastKnownLocation(): LatLng? {
+        val lastKnown = mSharedPreference!!.getString(LAST_KNOWN_LOCATION, null)
+        if (lastKnown == null) return null // LatLng(127.0, 37.0)
+        val lastKnowns = lastKnown.split("/")
+        val location = LatLng(lastKnowns.get(0).toDouble(), lastKnowns.get(1).toDouble())
         return location
     }
 

@@ -14,6 +14,7 @@ import android.location.LocationManager
 import android.location.LocationListener
 import android.support.v4.app.ActivityCompat
 import android.content.Intent
+import android.location.Geocoder
 import android.os.AsyncTask
 import android.support.v4.content.ContextCompat
 import android.util.Log
@@ -42,28 +43,27 @@ class WorldPhotoActivity : FragmentActivity(), OnMapReadyCallback, GoogleMap.OnC
 
     // STATE FLAGS
     private var INITIAL_GPS_SET: Boolean = true
-    private var DRAG_STATE: Boolean = false
-    private var VIEW_PHOTOS_STATE: Boolean = false
-    private var overlayState: Boolean = false
+    // private var DRAG_STATE: Boolean = false
+    // private var VIEW_PHOTOS_STATE: Boolean = false
+    private var OVERLAY_STATE: Boolean = false
 
     private var overlays: ArrayList<GroundOverlay>? = null
-    // private var markers: ArrayList<Marker> = ArrayList<Marker>()
     private var markers: HashMap<String, Marker> = HashMap<String, Marker>()
+
+    private var mGeocoder: Geocoder? = null
 
     private var mapFragment: SupportMapFragment? = null
 
-    private var mMap: GoogleMap? = null
+    private var mGoogleMap: GoogleMap? = null
     private var mLocationManager: LocationManager? = null
     private var mLocationListener: LocationListener? = null
-    private var draggableMarker: Marker? = null
-    private var polygonStartPoint: LatLng? = null
-    private var exPolygon: Polygon? = null
+    // private var draggableMarker: Marker? = null
+    // private var polygonStartPoint: LatLng? = null
+    // private var exPolygon: Polygon? = null
 
     // Runtime UI Component
-    private var horizontalScrollView: HorizontalScrollView? = null
-    private var linearLayout: LinearLayout? = null
-
-    // private var defaultPostImageLoadingView: ImageView? = null
+    // private var horizontalScrollView: HorizontalScrollView? = null
+    // private var linearLayout: LinearLayout? = null
 
     // Firebase Database
     private val db: FirebaseDatabase = FirebaseDatabase.getInstance()
@@ -77,23 +77,6 @@ class WorldPhotoActivity : FragmentActivity(), OnMapReadyCallback, GoogleMap.OnC
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_world_photo)
-
-        /*
-        defaultPostImageLoadingView = ImageView(this)
-        Picasso.with(this@WorldPhotoActivity)
-                .load(R.drawable.default_image)
-                .transform(object : Transformation {
-                    override fun key() : String = ""
-                    override fun transform(source: Bitmap): Bitmap {
-                        val ratio: Double = source.height.toDouble() / source.width.toDouble()
-                        val targetHeight: Int = rootLinearLayout.height - 1000
-                        val targetWidth: Int = (targetHeight * ratio).toInt()
-                        val result: Bitmap = Bitmap.createScaledBitmap(source, targetWidth, targetHeight, false)
-                        if (result != source) source.recycle()
-                        return result
-                    }
-                }).into(defaultPostImageLoadingView)
-        */
 
         // Permission Check
         if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
@@ -122,26 +105,25 @@ class WorldPhotoActivity : FragmentActivity(), OnMapReadyCallback, GoogleMap.OnC
         mapFragment = supportFragmentManager.findFragmentById(R.id.map) as SupportMapFragment
         mapFragment!!.getMapAsync(this)
 
-        btnMagnify.setOnClickListener { view ->
-            mMap!!.animateCamera(CameraUpdateFactory.zoomIn())
-        }
+        mGeocoder = Geocoder(this)
 
-        btnReduce.setOnClickListener { view ->
-            mMap!!.animateCamera(CameraUpdateFactory.zoomOut())
-        }
+        // btnMagnify.setOnClickListener { view -> mGoogleMap!!.animateCamera(CameraUpdateFactory.zoomIn()) }
+        // btnReduce.setOnClickListener { view -> mGoogleMap!!.animateCamera(CameraUpdateFactory.zoomOut()) }
 
+        /*
         btnState.setOnClickListener { view ->
             DRAG_STATE = !DRAG_STATE
             if (DRAG_STATE) btnState.text = "드래그!"
             else btnState.text = "영역 선택"
-            mMap?.uiSettings!!.isScrollGesturesEnabled = !DRAG_STATE
+            mGoogleMap?.uiSettings!!.isScrollGesturesEnabled = !DRAG_STATE
             clearScreen()
         }
+        */
 
         btnOverlay.setOnClickListener { view ->
             toast("TODO : OutOfMemoryError")
-            overlayState = overlayState.not()
-            if (overlayState) {
+            OVERLAY_STATE = OVERLAY_STATE.not()
+            if (OVERLAY_STATE) {
                 overlays = arrayListOf()
                 db.getReference("photos").addListenerForSingleValueEvent(object : ValueEventListener {
                     override fun onDataChange(snapshot: DataSnapshot?) {
@@ -172,26 +154,28 @@ class WorldPhotoActivity : FragmentActivity(), OnMapReadyCallback, GoogleMap.OnC
     }
 
     override fun onMapReady(googleMap: GoogleMap) {
-        mMap = googleMap
+        mGoogleMap = googleMap
 
-        mMap!!.setInfoWindowAdapter(object : GoogleMap.InfoWindowAdapter {
+        mGoogleMap!!.setInfoWindowAdapter(object : GoogleMap.InfoWindowAdapter {
             override fun getInfoWindow(marker: Marker): View? = null
 
             override fun getInfoContents(marker: Marker): View {
                 val view: View = layoutInflater.inflate(R.layout.snippet_layout, null)
-                val snippets = marker.snippet.split("\n")
-                val url = snippets.get(1)
-                val imageView = view.findViewById(R.id.imageView) as ImageView
-                Picasso.with(this@WorldPhotoActivity)
-                        .load(url)
-                        .into(imageView)
+                // val snippets = marker.snippet.split("\n")
+                if (marker.snippet != null) {
+                    val url = marker.snippet.split("\n").get(1)
+                    val imageView = view.findViewById(R.id.imageView) as ImageView
+                    Picasso.with(this@WorldPhotoActivity)
+                            .load(url)
+                            .into(imageView)
+                }
                 val textView = view.findViewById(R.id.textView) as TextView
                 textView.text = marker.title
                 return view
             }
         })
 
-        mMap!!.setOnInfoWindowClickListener { marker: Marker ->
+        mGoogleMap!!.setOnInfoWindowClickListener { marker: Marker ->
             val snippets = marker.snippet.split("\n")
             val timestamp = snippets.get(0)
             db.getReference("photos/$timestamp").addListenerForSingleValueEvent(object : ValueEventListener {
@@ -208,14 +192,15 @@ class WorldPhotoActivity : FragmentActivity(), OnMapReadyCallback, GoogleMap.OnC
             })
         }
 
-        mMap!!.uiSettings.isMapToolbarEnabled = false
-        // mMap!!.uiSettings.isZoomControlsEnabled = true
-        // mMap!!.uiSettings.isCompassEnabled = true
+        mGoogleMap!!.uiSettings.isMapToolbarEnabled = false
+        mGoogleMap!!.uiSettings.isZoomControlsEnabled = true
+        mGoogleMap!!.uiSettings.isCompassEnabled = true
 
-        mMap!!.setOnMapClickListener { point: LatLng ->
+        /*
+        mGoogleMap!!.setOnMapClickListener { point: LatLng ->
             draggableMarker?.remove()
             if (DRAG_STATE) {
-                draggableMarker = mMap!!.addMarker(MarkerOptions()
+                draggableMarker = mGoogleMap!!.addMarker(MarkerOptions()
                         .position(point)
                         .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_YELLOW))
                         .visible(true)
@@ -224,12 +209,14 @@ class WorldPhotoActivity : FragmentActivity(), OnMapReadyCallback, GoogleMap.OnC
                 polygonStartPoint = point
             }
         }
+        */
 
-        mMap!!.setOnMarkerDragListener(CustomDragMarkerListener())
-        mMap!!.setOnCameraIdleListener(this)
+        // mGoogleMap!!.setOnMarkerDragListener(CustomDragMarkerListener())
+        mGoogleMap!!.setOnCameraIdleListener(this)
 
-        mMap!!.setOnPolygonClickListener { polygon: Polygon ->
-            VIEW_PHOTOS_STATE = !VIEW_PHOTOS_STATE
+        /*
+        mGoogleMap!!.setOnPolygonClickListener { polygon: Polygon ->
+            VIEW_PHOTOS_STATE = VIEW_PHOTOS_STATE.not()
 
             val params: ViewGroup.LayoutParams = mapFragment?.view!!.layoutParams
             if (!VIEW_PHOTOS_STATE) {
@@ -280,13 +267,13 @@ class WorldPhotoActivity : FragmentActivity(), OnMapReadyCallback, GoogleMap.OnC
                                 var url = data.url
                                 if (url.equals("")) url = "https://firebasestorage.googleapis.com/v0/b/mobilesw-178816.appspot.com/o/ReactiveX.jpg?alt=media&token=510350fe-ac5b-4f01-9d9a-2fecf8428940"
                                 val imageView = ImageView(this@WorldPhotoActivity)
-                                /*
-                                Glide.with(this@WorldPhotoActivity)
-                                        .load(url)
-                                        //.fitCenter()
-                                        .override(480, 640)
-                                        .into(imageView)
-                                */
+                                //
+                                //Glide.with(this@WorldPhotoActivity)
+                                //        .load(url)
+                                //        //.fitCenter()
+                                //        .override(480, 640)
+                                //        .into(imageView)
+                                //
                                 Picasso.with(this@WorldPhotoActivity)
                                         .load(url)
                                         .transform(object : Transformation {
@@ -320,23 +307,23 @@ class WorldPhotoActivity : FragmentActivity(), OnMapReadyCallback, GoogleMap.OnC
                 override fun onCancelled(p0: DatabaseError?) { }
             })
         }
+        */
 
         val lastKnownLocation = mSharedPreference?.getLastKnownLocation()
         if (lastKnownLocation != null) {
             // INITIAL_GPS_SET = false
-            mMap!!.animateCamera(CameraUpdateFactory.zoomTo(100f))
-            mMap!!.moveCamera(CameraUpdateFactory.newLatLng(lastKnownLocation))
+            mGoogleMap!!.animateCamera(CameraUpdateFactory.zoomTo(25f))
+            mGoogleMap!!.moveCamera(CameraUpdateFactory.newLatLng(lastKnownLocation))
         }
     }
 
-    // TODO : OnCameraIdleListener
     override fun onCameraIdle() {
-        // var zoomLevel = mMap?.cameraPosition?.zoom
+        // var zoomLevel = mGoogleMap?.cameraPosition?.zoom
         // var imageSize = zoomLevel!! * 0.16f
 
-        // if (overlayState) overlays?.forEach { overlay ->  }
+        // if (OVERLAY_STATE) overlays?.forEach { overlay ->  }
 
-        val bound = mMap!!.projection.visibleRegion.latLngBounds
+        val bound = mGoogleMap!!.projection.visibleRegion.latLngBounds
         val _northeast = bound.northeast
         val _southwest = bound.southwest
 
@@ -364,7 +351,7 @@ class WorldPhotoActivity : FragmentActivity(), OnMapReadyCallback, GoogleMap.OnC
                             if (markers.get(timestamp) != null) continue
 
                             val position = LatLng(data.latitude, data.longitude)
-                            val marker = mMap?.addMarker(MarkerOptions().position(position).title(data.content).snippet(timestamp+"\n"+data.url).icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_ORANGE)))
+                            val marker = mGoogleMap?.addMarker(MarkerOptions().position(position).title(data.content).snippet("$timestamp\n"+data.url).icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_ORANGE)))
                             // markers.add(marker!!)
                             markers.put(timestamp, marker!!)
                             /*
@@ -406,6 +393,8 @@ class WorldPhotoActivity : FragmentActivity(), OnMapReadyCallback, GoogleMap.OnC
         })
 
         Log.d("IDLE", "NORTHEAST: $_northeast, SOUTHWEST: $_southwest");
+        val address = mGeocoder?.getFromLocation((_northeast.latitude+_southwest.latitude) / 2f, (_northeast.longitude+_southwest.longitude) / 2f, 1)
+        if (address!!.size > 0) tvAddress.text = address.get(0)?.getAddressLine(0) ?: address.get(0)?.adminArea
     }
 
     override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<out String>, grantResults: IntArray) {
@@ -422,6 +411,7 @@ class WorldPhotoActivity : FragmentActivity(), OnMapReadyCallback, GoogleMap.OnC
         }
     }
 
+    /*
     private fun clearScreen(): Unit {
         draggableMarker?.remove()
         exPolygon?.remove()
@@ -433,6 +423,7 @@ class WorldPhotoActivity : FragmentActivity(), OnMapReadyCallback, GoogleMap.OnC
             rootLinearLayout.removeView(horizontalScrollView)
         }
     }
+    */
 
     // CUSTOM INNER_CLASS IMPLEMENTS INTERFACE:LocationListener
     inner class CustomLocationListener : LocationListener {
@@ -453,13 +444,15 @@ class WorldPhotoActivity : FragmentActivity(), OnMapReadyCallback, GoogleMap.OnC
             currentLocation?.latitude = location.latitude
             currentLocation?.longitude = location.longitude
             exMarker?.remove()
-            exMarker = mMap?.addMarker(MarkerOptions().position(currentLatLng).title("#"+(++counter)))
-            // mMap?.moveCamera(CameraUpdateFactory.newLatLng(currentLatLng))
-            tvLatitude.setText(location.latitude.toString())
-            tvLongitude.setText(location.longitude.toString())
-            tvAccuracy.setText(location.accuracy.toString())
+            exMarker = mGoogleMap?.addMarker(MarkerOptions().position(currentLatLng).title("#"+(++counter)))
+            // mGoogleMap?.moveCamera(CameraUpdateFactory.newLatLng(currentLatLng))
+            // tvLatitude.text = location.latitude.toString()
+            // tvLongitude.text = location.longitude.toString()
+            // tvAccuracy.setText(location.accuracy.toString())
+            // val address = mGeocoder?.getFromLocation(location.latitude, location.longitude, 1)
+            // tvAddress.text = address?.get(0)?.adminArea
             if (INITIAL_GPS_SET) {
-                mMap?.animateCamera(CameraUpdateFactory.zoomBy(25f))
+                mGoogleMap?.animateCamera(CameraUpdateFactory.zoomBy(5f))
                 INITIAL_GPS_SET = false
             }
         }
@@ -473,9 +466,8 @@ class WorldPhotoActivity : FragmentActivity(), OnMapReadyCallback, GoogleMap.OnC
         }
     }
 
+    /*
     inner class CustomDragMarkerListener : GoogleMap.OnMarkerDragListener {
-
-        constructor() : super() {}
 
         override fun onMarkerDragStart(marker: Marker?) {
             toast("onMarkerDragStart")
@@ -491,7 +483,7 @@ class WorldPhotoActivity : FragmentActivity(), OnMapReadyCallback, GoogleMap.OnC
                     LatLng(pointBottomRight.latitude, pointBottomRight.longitude),
                     LatLng(pointBottomRight.latitude, pointTopLeft.longitude)
             ).strokeColor(Color.RED).fillColor(Color.YELLOW)
-            exPolygon = mMap!!.addPolygon(rectangle)
+            exPolygon = mGoogleMap!!.addPolygon(rectangle)
             exPolygon!!.isClickable = true
         }
 
@@ -499,22 +491,14 @@ class WorldPhotoActivity : FragmentActivity(), OnMapReadyCallback, GoogleMap.OnC
             toast("onMarkerDragEnd")
         }
     }
+    */
 
     fun max(a: Double, b: Double): Double = if (a > b) a else b
     fun min(a: Double, b: Double): Double = if (a < b) a else b
 
     inner class GroundOverlayGenerator(val context: Context, val latlng: LatLng) : AsyncTask<String, Int, BitmapDescriptor>() {
 
-        // private val context: Context
-        // private val latlng: LatLng
         private var bitmapDescriptor: BitmapDescriptor? = null
-
-        /*
-        constructor(context: Context, latlng: LatLng) : super() {
-            this.context = context
-            this.latlng = latlng
-        }
-        */
 
         override fun doInBackground(vararg params: String?): BitmapDescriptor {
             val url = params.get(0)
@@ -524,7 +508,7 @@ class WorldPhotoActivity : FragmentActivity(), OnMapReadyCallback, GoogleMap.OnC
 
         override fun onPostExecute(result: BitmapDescriptor?) {
             overlays?.add(
-                mMap?.addGroundOverlay(GroundOverlayOptions()
+                mGoogleMap?.addGroundOverlay(GroundOverlayOptions()
                         .image(bitmapDescriptor!!)
                         .position(latlng, 16f, 16f))!!
             )

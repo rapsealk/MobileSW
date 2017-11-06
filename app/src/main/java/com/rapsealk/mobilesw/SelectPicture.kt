@@ -12,6 +12,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.*
+import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.tasks.Task
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseUser
@@ -100,40 +101,39 @@ class SelectPicture : AppCompatActivity() {
             if(temp.size ==0){
                 toast("사진을 선택해주세요")
             }else {
-                var progressDialog = ProgressDialog(this)
+                val progressDialog = ProgressDialog(this)
                 progressDialog.isIndeterminate = true
                 progressDialog.setProgressStyle(ProgressDialog.STYLE_SPINNER)
                 progressDialog.setMessage("이미지 업로드 중...")
                 progressDialog.show()
 
 
-                var storageRef: StorageReference = mFirebaseStorage.getReference()
+                val storageRef: StorageReference = mFirebaseStorage.getReference()
 
-                var uid = mFirebaseUser!!.uid
-                var content = "//"
+                val uid = mFirebaseUser!!.uid
+                val content = System.currentTimeMillis().toString() // "//"
 
-                var location = mSharedPreference!!.getLastKnownLocation()
-                var latitude = location.latitude
-                var longitude = location.longitude
-
+                val location = mSharedPreference!!.getLastKnownLocation() ?: LatLng(127.0, 37.0)
+                val latitude = location.latitude
+                val longitude = location.longitude
 
 
                 for (i in temp.indices) {
                     // var file = Uri.fromFile(File(temp[i].data))
-                    var file = File(temp[i].data)
+                    val file = File(temp[i].data)
                     //var timestamp = System.currentTimeMillis()///////////////////////////////////이부분 고치기
-                    var timestamp = file.lastModified()
-                    var imageFileName = file.name
+                    val timestamp = file.lastModified()
+                    val imageFileName = file.name
 
-                    var uploadTask = storageRef.child("$uid/$imageFileName").putFile(Uri.fromFile(File(temp[i].data)))
+                    val uploadTask = storageRef.child("$uid/$imageFileName").putFile(Uri.fromFile(File(temp[i].data)))
 
 
                     uploadTask
                             .addOnFailureListener { exception: java.lang.Exception -> toast(exception.toString()) }
                             .addOnCompleteListener { task: Task<UploadTask.TaskSnapshot> ->
-                                var url = task.result.downloadUrl.toString()
-                                var ref = mFirebaseDatabase.getReference()
-                                var photoData = Photo(HashMap<String, Comment>(), content, latitude, longitude, HashMap<String, Long>(), timestamp, uid, url)
+                                val url = task.result.downloadUrl.toString()
+                                val ref = mFirebaseDatabase.getReference()
+                                val photoData = Photo(HashMap<String, Comment>(), content, latitude, longitude, HashMap<String, Long>(), timestamp, uid, url)
                                 ref.child("users/$uid/photos/$timestamp").setValue(photoData)
                                 ref.child("photos/$timestamp").setValue(photoData)
                                 //  btnRollback.performClick()

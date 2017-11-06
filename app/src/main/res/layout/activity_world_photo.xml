@@ -15,60 +15,66 @@
             android:id="@+id/map"
             android:name="com.google.android.gms.maps.SupportMapFragment"
             android:layout_width="match_parent"
-            android:layout_height="911dp"
+            android:layout_height="match_parent"
             android:layout_weight="1"
-            tools:context="com.rapsealk.mobilesw.WorldPhotoActivity"
-            tools:layout_editor_absoluteX="8dp"
-            tools:layout_editor_absoluteY="16dp" />
+            tools:context="com.rapsealk.mobilesw.WorldPhotoActivity" />
 
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:layout_weight="1"
+            android:layout_weight="7"
             android:orientation="vertical">
 
-            <LinearLayout
+            <Button
+                android:id="@+id/btnOverlay"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:text="오버레이" />
+
+            <TextView
+                android:id="@+id/tvAddress"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:text="Address"
+                android:textSize="18sp" />
+
+            <!--LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:orientation="horizontal">
+                android:orientation="horizontal"-->
 
-                <ImageButton
+            <!--ImageButton
                     android:id="@+id/btnMagnify"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
-                    android:src="@drawable/ic_add_circle_black_48dp" />
+                    android:src="@drawable/ic_add_circle_black_48dp" /-->
 
-                <Button
+            <!--Button
                     android:id="@+id/btnState"
                     android:layout_width="wrap_content"
                     android:layout_height="match_parent"
                     android:layout_weight="1"
-                    android:text="영역 선택" />
+                    android:text="영역 선택" /-->
 
-                <Button
-                    android:id="@+id/btnOverlay"
-                    android:layout_width="wrap_content"
-                    android:layout_height="match_parent"
-                    android:layout_weight="1"
-                    android:text="오버레이" />
-
-                <ImageButton
+            <!--ImageButton
                     android:id="@+id/btnReduce"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
-                    android:src="@drawable/ic_remove_circle_black_48dp" />
+                    android:src="@drawable/ic_remove_circle_black_48dp" /-->
 
-            </LinearLayout>
+            <!--/LinearLayout>
 
             <LinearLayout
                 android:id="@+id/LinearLayoutGPS"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:orientation="horizontal">
+                android:orientation="horizontal"-->
 
-                <TextView
+            <!--TextView
                     android:id="@+id/tvLatitude"
                     android:layout_width="wrap_content"
                     android:layout_height="match_parent"
@@ -82,17 +88,9 @@
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
                     android:text="Lon"
-                    android:textSize="18sp" />
+                    android:textSize="18sp" /-->
 
-                <TextView
-                    android:id="@+id/tvAccuracy"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:text="Acc"
-                    android:textSize="18sp" />
-
-            </LinearLayout>
+            <!--/LinearLayout-->
 
         </LinearLayout>
 

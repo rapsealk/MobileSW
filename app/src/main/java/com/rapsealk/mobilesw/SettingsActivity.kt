@@ -4,18 +4,18 @@ import android.Manifest
 import android.app.ProgressDialog
 import android.content.Intent
 import android.content.pm.PackageManager
-import android.support.v7.app.AppCompatActivity
 import android.os.Bundle
 import android.support.v4.app.ActivityCompat
 import android.support.v4.content.ContextCompat
+import android.support.v7.app.AppCompatActivity
 import android.util.Log
 import android.view.View
 import com.google.android.gms.tasks.Task
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.UserProfileChangeRequest
-import com.rapsealk.mobilesw.util.SharedPreferenceManager
 import com.rapsealk.mobilesw.service.CameraObservingService
 import com.rapsealk.mobilesw.service.RecallService
+import com.rapsealk.mobilesw.util.SharedPreferenceManager
 import kotlinx.android.synthetic.main.activity_settings.*
 
 class SettingsActivity : AppCompatActivity() {
@@ -35,12 +35,14 @@ class SettingsActivity : AppCompatActivity() {
 
         btnBack.setOnClickListener { v: View? -> finish() }
 
+
         if (ContextCompat.checkSelfPermission(this, Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED) {
             if (ActivityCompat.shouldShowRequestPermissionRationale(this, Manifest.permission.CAMERA)) {
                 toast("카메라 정보를 이용하기 위해서는 권한이 필요합니다.")
             }
             ActivityCompat.requestPermissions(this, Array<String>(1) { Manifest.permission.CAMERA }, CAMERA_REQUEST_CODE)
         }
+
 
         if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
             if (ActivityCompat.shouldShowRequestPermissionRationale(this, Manifest.permission.ACCESS_FINE_LOCATION)) {

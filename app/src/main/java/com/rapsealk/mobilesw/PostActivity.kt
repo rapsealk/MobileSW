@@ -1,6 +1,7 @@
 package com.rapsealk.mobilesw
 
 import android.content.DialogInterface
+import android.content.Intent
 import android.graphics.*
 import android.support.v7.app.AppCompatActivity
 import android.os.Bundle
@@ -17,6 +18,7 @@ import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseError
 import com.google.firebase.database.FirebaseDatabase
 import com.google.firebase.database.ValueEventListener
+import com.google.firebase.storage.FirebaseStorage
 import com.rapsealk.mobilesw.adapter.CommentAdapter
 import com.rapsealk.mobilesw.retrofit.CloudMessageService
 import com.rapsealk.mobilesw.retrofit.SendingMessage
@@ -34,15 +36,14 @@ import java.text.SimpleDateFormat
 
 class PostActivity : AppCompatActivity() {
 
-    val SENDER_ID = "519279191468"
-
     private var mFirebaseAuth: FirebaseAuth? = null
     private var mFirebaseDatabase: FirebaseDatabase? = null
+    private var mFirebaseStorage: FirebaseStorage? = null
 
-    private var commentAdapter: CommentAdapter? = null
-    private var commentCount: Long = 0
-    private var phoplCount: Long = 0
-    private var isPhoPled: Boolean = false
+    private var mCommentAdapter: CommentAdapter? = null
+    private var mCommentCount: Long = 0
+    private var mLikeCount: Long = 0
+    private var mIsLiked: Boolean = false
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -50,6 +51,7 @@ class PostActivity : AppCompatActivity() {
 
         mFirebaseAuth = FirebaseAuth.getInstance()
         mFirebaseDatabase = FirebaseDatabase.getInstance()
+        mFirebaseStorage = FirebaseStorage.getInstance()
 
         val currentUser = mFirebaseAuth?.currentUser
         val uid = currentUser!!.uid
@@ -66,8 +68,26 @@ class PostActivity : AppCompatActivity() {
         content.text = serializedData.content
 
         optionalButton.setOnClickListener { v: View? ->
-            toast("optionalButton")
-            // TODO("Dialog")
+            if (serializedData.uid != uid) return@setOnClickListener
+            val dialogBuilder = AlertDialog.Builder(this@PostActivity)
+                    .setTitle("사진을 삭제하시겠습니까?")
+                    .setMessage("삭제된 사진은 복구되지 않습니다.")
+                    .setPositiveButton("삭제", DialogInterface.OnClickListener { dialog: DialogInterface, which: Int ->
+                        val url = serializedData.url
+                        val imageName = url.split("?").get(0).split("/").last()
+                        toast("imageName: $imageName")
+                        mFirebaseStorage?.getReference("$uid/$imageName")?.delete()
+                        mFirebaseDatabase?.getReference("photos/$postTimestamp")?.removeValue()
+                        mFirebaseDatabase?.getReference("users/$uid/photos/$postTimestamp")?.removeValue()
+                        val intent = Intent()
+                        intent.putExtra("id", postTimestamp.toString())
+                        setResult(RESULT_OK, intent)
+                        finish()
+                    })
+                    .setNegativeButton("취소", DialogInterface.OnClickListener { dialog, which ->
+                        // TODO("Not required")
+                    }).create()
+            dialogBuilder.show()
         }
 
         Picasso.with(this)
@@ -125,7 +145,7 @@ class PostActivity : AppCompatActivity() {
                 ?.addListenerForSingleValueEvent(object : ValueEventListener {
                     override fun onDataChange(snapshot: DataSnapshot?) {
 
-                        commentCount = snapshot!!.childrenCount
+                        mCommentCount = snapshot!!.childrenCount
 
                         val comments: ArrayList<Comment> = arrayListOf()
 
@@ -139,14 +159,14 @@ class PostActivity : AppCompatActivity() {
                                     .subscribe({ result ->
                                         Log.d("RxLog", result.toString())
                                         comment.displayName = result.data.displayName
-                                        commentAdapter?.notifyDataSetChanged()
+                                        mCommentAdapter?.notifyDataSetChanged()
                                     }, { error ->
                                         error.printStackTrace()
                                     })
                         }
 
-                        commentAdapter = CommentAdapter(this@PostActivity, comments)
-                        commentListView.adapter = commentAdapter
+                        mCommentAdapter = CommentAdapter(this@PostActivity, comments)
+                        commentListView.adapter = mCommentAdapter
 
                         commentListView.setOnItemClickListener { parent, view, position, id ->
                             val comment = comments[position]
@@ -159,7 +179,7 @@ class PostActivity : AppCompatActivity() {
                                             mFirebaseDatabase?.getReference("photos/$postTimestamp/comments/$commentTimestamp")
                                                     ?.removeValue()
                                             comments.removeAt(position)
-                                            commentAdapter?.notifyDataSetChanged()
+                                            mCommentAdapter?.notifyDataSetChanged()
                                             updateCommentCount()
                                         })
                                         .setNegativeButton("취소", DialogInterface.OnClickListener { dialog, which ->
@@ -181,12 +201,12 @@ class PostActivity : AppCompatActivity() {
                 ?.addListenerForSingleValueEvent(object : ValueEventListener {
                     override fun onDataChange(snapshot: DataSnapshot?) {
 
-                        phoplCount = snapshot!!.childrenCount
-                        updatePhoplCount(phoplCount)
+                        mLikeCount = snapshot!!.childrenCount
+                        updateLikes(mLikeCount)
 
                         for (phopl in snapshot.children) {
                             if (phopl.key == uid) {
-                                isPhoPled = true
+                                mIsLiked = true
                                 btnPhopl.setImageResource(R.drawable.star_yellow)
                             }
                         }
@@ -216,8 +236,8 @@ class PostActivity : AppCompatActivity() {
             ref?.child("photos/$postTimestamp/comments/$commentTimestamp")?.setValue(Comment)
                     ?.addOnCompleteListener { task: Task<Void> ->
                         Comment.displayName = currentUser.displayName
-                        commentAdapter?.comments?.add(Comment)
-                        commentAdapter?.notifyDataSetChanged()
+                        mCommentAdapter?.comments?.add(Comment)
+                        mCommentAdapter?.notifyDataSetChanged()
                         editTextComment.setText("")
                         updateCommentCount()
 
@@ -242,12 +262,12 @@ class PostActivity : AppCompatActivity() {
 
         btnPhopl.setOnClickListener { v: View ->
             val ref = mFirebaseDatabase?.getReference("photos/$postTimestamp/phopls/$uid")
-            val phoplTask = if (isPhoPled) ref?.removeValue() else ref?.setValue(System.currentTimeMillis())
+            val phoplTask = if (mIsLiked) ref?.removeValue() else ref?.setValue(System.currentTimeMillis())
             phoplTask
                     ?.addOnCompleteListener { task: Task<Void> ->
-                        isPhoPled = !isPhoPled
-                        btnPhopl.setImageResource( if (isPhoPled) R.drawable.star_yellow else R.drawable.star_gray )
-                        updatePhoplCount( if (isPhoPled) ++phoplCount else --phoplCount )
+                        mIsLiked = !mIsLiked
+                        btnPhopl.setImageResource( if (mIsLiked) R.drawable.star_yellow else R.drawable.star_gray )
+                        updateLikes( if (mIsLiked) ++mLikeCount else --mLikeCount )
                     }
                     ?.addOnFailureListener { exception: Exception ->
                         toast("다시 시도해보세요.")
@@ -256,16 +276,23 @@ class PostActivity : AppCompatActivity() {
     }
 
     override fun onBackPressed() {
+        val intent = Intent()
+        intent.putExtra("id", "null")
+        setResult(RESULT_OK, intent)
         finish()
         super.onBackPressed()
     }
 
-    fun updatePhoplCount(count: Long) {
+    override fun onDestroy() {
+        super.onDestroy()
+    }
+
+    fun updateLikes(count: Long) {
         commentPhopl.text = "포플 ($count)"
     }
 
     fun updateCommentCount() {
-        val count = commentAdapter?.count
+        val count = mCommentAdapter?.count
         commentInfo.text ="댓글 ($count)"
     }
 }

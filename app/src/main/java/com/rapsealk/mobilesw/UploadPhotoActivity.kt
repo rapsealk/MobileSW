@@ -48,15 +48,15 @@ class UploadPhotoActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_upload_photo)
 
-        var mFirebaseAuth: FirebaseAuth = FirebaseAuth.getInstance()
-        var mFirebaseUser: FirebaseUser? = mFirebaseAuth.currentUser
+        val mFirebaseAuth: FirebaseAuth = FirebaseAuth.getInstance()
+        val mFirebaseUser: FirebaseUser? = mFirebaseAuth.currentUser
         if (mFirebaseUser == null) {
-            var intent = Intent(this, LoginActivity::class.java)
+            val intent = Intent(this, LoginActivity::class.java)
             startActivity(intent)
             finish()
         }
-        var mFirebaseDatabase: FirebaseDatabase = FirebaseDatabase.getInstance()
-        var mFirebaseStorage: FirebaseStorage = FirebaseStorage.getInstance()
+        val mFirebaseDatabase: FirebaseDatabase = FirebaseDatabase.getInstance()
+        val mFirebaseStorage: FirebaseStorage = FirebaseStorage.getInstance()
 
         mLocationManager = getSystemService(Context.LOCATION_SERVICE) as LocationManager
 
@@ -119,16 +119,16 @@ class UploadPhotoActivity : AppCompatActivity() {
     }
 
     fun acquirePhotosFromGallery() {
-        var intent = Intent(Intent.ACTION_PICK)
+        val intent = Intent(Intent.ACTION_PICK)
         intent.setData(android.provider.MediaStore.Images.Media.EXTERNAL_CONTENT_URI)
         intent.setType("image/*")
         startActivityForResult(Intent.createChooser(intent, "Select Photos"), ACQUIRE_FROM_GALLERY_CODE)
     }
 
     fun convertUriToPath(photoURI: Uri): String {
-        var project: Array<String> = arrayOf(MediaStore.Images.Media.DATA)
-        var cursor: Cursor = contentResolver.query(photoURI, project, null, null, null)
-        var column_index = cursor.getColumnIndexOrThrow(MediaStore.Images.Media.DATA)
+        val project: Array<String> = arrayOf(MediaStore.Images.Media.DATA)
+        val cursor: Cursor = contentResolver.query(photoURI, project, null, null, null)
+        val column_index = cursor.getColumnIndexOrThrow(MediaStore.Images.Media.DATA)
         cursor.moveToFirst()
         return cursor.getString(column_index)
     }
@@ -143,7 +143,7 @@ class UploadPhotoActivity : AppCompatActivity() {
     }
 
     fun loadPhotosFromURI(intent: Intent?) {
-        var photoURI = intent!!.data
+        val photoURI = intent!!.data
         photoPath = convertUriToPath(photoURI)
         var exif: ExifInterface? = null
         try {
@@ -152,10 +152,10 @@ class UploadPhotoActivity : AppCompatActivity() {
         catch (e: IOException) {
             toast(e.toString())
         }
-        var exifOrientation: Int? = exif?.getAttributeInt(ExifInterface.TAG_ORIENTATION, ExifInterface.ORIENTATION_NORMAL)
+        val exifOrientation: Int? = exif?.getAttributeInt(ExifInterface.TAG_ORIENTATION, ExifInterface.ORIENTATION_NORMAL)
         var exifDegree: Int = exifOrientationToDegrees(exifOrientation)
 
-        var bitmap: Bitmap = BitmapFactory.decodeFile(photoPath)
+        val bitmap: Bitmap = BitmapFactory.decodeFile(photoPath)
 
         imageViewUpload.setImageBitmap(bitmap)
     }

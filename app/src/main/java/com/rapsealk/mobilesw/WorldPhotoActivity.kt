@@ -35,6 +35,7 @@ import com.squareup.picasso.Transformation
 class WorldPhotoActivity : FragmentActivity(), OnMapReadyCallback, GoogleMap.OnCameraIdleListener {
 
     private val FINE_LOCATION_CODE: Int = 1
+    private val CHECK_POST_DELETED_CODE: Int = 11061
 
     private var mFirebaseAuth: FirebaseAuth? = null
     private var mFirebaseAuthListener: FirebaseAuth.AuthStateListener? = null
@@ -183,7 +184,7 @@ class WorldPhotoActivity : FragmentActivity(), OnMapReadyCallback, GoogleMap.OnC
                     val data = snapshot.getValue<Photo>(Photo::class.java)
                     val intent = Intent(applicationContext, PostActivity::class.java)
                             .putExtra("SerializedData", data)
-                    startActivity(intent)
+                    startActivityForResult(intent, CHECK_POST_DELETED_CODE)
                     this@WorldPhotoActivity.onPause()
                 }
                 override fun onCancelled(error: DatabaseError) {
@@ -393,8 +394,12 @@ class WorldPhotoActivity : FragmentActivity(), OnMapReadyCallback, GoogleMap.OnC
         })
 
         Log.d("IDLE", "NORTHEAST: $_northeast, SOUTHWEST: $_southwest");
-        val address = mGeocoder?.getFromLocation((_northeast.latitude+_southwest.latitude) / 2f, (_northeast.longitude+_southwest.longitude) / 2f, 1)
-        if (address!!.size > 0) tvAddress.text = address.get(0)?.getAddressLine(0) ?: address.get(0)?.adminArea
+        try {
+            val address = mGeocoder?.getFromLocation((_northeast.latitude + _southwest.latitude) / 2f, (_northeast.longitude + _southwest.longitude) / 2f, 1)
+            if (address!!.size > 0) tvAddress.text = address.get(0)?.getAddressLine(0) ?: address.get(0)?.adminArea
+        } catch (exception: Exception) {
+            exception.printStackTrace()
+        }
     }
 
     override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<out String>, grantResults: IntArray) {
@@ -407,6 +412,20 @@ class WorldPhotoActivity : FragmentActivity(), OnMapReadyCallback, GoogleMap.OnC
             }
             else -> {
                 finish()
+            }
+        }
+    }
+
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent) {
+        super.onActivityResult(requestCode, resultCode, data)
+
+        when (requestCode) {
+            CHECK_POST_DELETED_CODE -> {
+                if (resultCode == RESULT_OK) {
+                    val id = data.getStringExtra("id")
+                    val marker = markers.remove(id)
+                    if (marker != null) marker.remove()
+                }
             }
         }
     }

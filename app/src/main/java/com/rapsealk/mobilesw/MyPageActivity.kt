@@ -49,41 +49,41 @@ class MyPageActivity : AppCompatActivity() {
             ActivityCompat.requestPermissions(this, Array<String>(1) { Manifest.permission.WRITE_EXTERNAL_STORAGE }, WRITE_EXTERNAL_STORAGE_CODE)
         }
 
-        var progressDialog = ProgressDialog(this)
+        val progressDialog = ProgressDialog(this)
         progressDialog.isIndeterminate = true
         progressDialog.setProgressStyle(ProgressDialog.STYLE_SPINNER)
         progressDialog.setMessage("내 사진들 불러오는 중")
 
         mFirebaseAuth = FirebaseAuth.getInstance()
         mFirebaseDatabase = FirebaseDatabase.getInstance()
-        var user = mFirebaseAuth?.currentUser
-        var uid = user?.uid
+        val user = mFirebaseAuth?.currentUser
+        val uid = user?.uid
 
         btnBack.setOnClickListener { v: View? ->
             finish()
         }
 
         progressDialog.show()
-        var ref = mFirebaseDatabase?.getReference("users")
+        val ref = mFirebaseDatabase?.getReference("users")
         // TODO : add a descending element
         ref?.child("$uid/photos")?.orderByChild("timestamp")
                 ?.addListenerForSingleValueEvent(object : ValueEventListener {
                     override fun onDataChange(snapshot: DataSnapshot?) {
 
-                        var children = snapshot!!.children.reversed()
-                        var lastIndex = children.count() - 1
+                        val children = snapshot!!.children.reversed()
+                        val lastIndex = children.count() - 1
 
                         var horizontalLayout = LinearLayout(this@MyPageActivity)
                         horizontalLayout.layoutMode = LinearLayout.HORIZONTAL
 
                         children.forEachIndexed { index, child ->
-                            var photo = child.getValue<Photo>(Photo::class.java)
-                            var viewSwitcher = ViewSwitcher(this@MyPageActivity)
-                            var progressBar = ProgressBar(this@MyPageActivity)
+                            val photo = child.getValue<Photo>(Photo::class.java)
+                            val viewSwitcher = ViewSwitcher(this@MyPageActivity)
+                            val progressBar = ProgressBar(this@MyPageActivity)
                             progressBar.isIndeterminate = true
                             progressBar.visibility = ProgressBar.VISIBLE
                             viewSwitcher.addView(progressBar)
-                            var imageView = ImageView(this@MyPageActivity)
+                            val imageView = ImageView(this@MyPageActivity)
                             viewSwitcher.addView(imageView)
                             Picasso.with(this@MyPageActivity)
                                     .load(photo.url)
@@ -91,13 +91,13 @@ class MyPageActivity : AppCompatActivity() {
                                         override fun key(): String = ""
                                         override fun transform(source: Bitmap): Bitmap {
 
-                                            var result = Bitmap.createScaledBitmap(source, 480, 640, false)
+                                            val result = Bitmap.createScaledBitmap(source, 480, 640, false)
 
                                             // TODO : DOWNLOAD
                                             imageView.setOnClickListener { v: View? ->
-                                                var mime = photo.url.split(".").last().split("?").first()
-                                                var timestamp = System.currentTimeMillis()
-                                                var filename = "$timestamp.$mime"
+                                                val mime = photo.url.split(".").last().split("?").first()
+                                                val timestamp = System.currentTimeMillis()
+                                                val filename = "$timestamp.$mime"
                                                 OriginalImageRetreiver(filename).execute(photo.url)
                                             }
 

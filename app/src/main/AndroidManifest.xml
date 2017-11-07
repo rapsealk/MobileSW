@@ -36,12 +36,9 @@
         <activity
             android:name=".MainActivity"
             android:screenOrientation="portrait">
-            <intent-filter>
-                <action android:name="android.intent.action.MAIN" />
 
-                <category android:name="android.intent.category.LAUNCHER" />
-            </intent-filter>
         </activity>
+
         <activity
             android:name=".LoginActivity"
             android:screenOrientation="portrait" />
@@ -90,7 +87,12 @@
             android:windowSoftInputMode="adjustPan" />
         <activity
             android:name=".SplashActivity"
-            android:screenOrientation="portrait" />
+            android:screenOrientation="portrait">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
         <activity
             android:name=".PostActivity"
             android:screenOrientation="portrait"
@@ -111,7 +113,8 @@
             </intent-filter>
         </receiver>
 
-        <activity android:name=".SelectPicture"></activity>
+        <activity android:name=".SelectPicture" />
+        <activity android:name=".FragmentActivity"></activity>
     </application>
 
 </manifest>

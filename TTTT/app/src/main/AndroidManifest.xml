@@ -38,7 +38,8 @@
             </intent-filter>
         </receiver>
 
-        <activity android:name=".SelectPicture"></activity>
+        <activity android:name=".SelectPicture" />
+        <activity android:name=".TabActivity"></activity>
     </application>
 
 </manifest>

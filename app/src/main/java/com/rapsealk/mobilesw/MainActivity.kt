@@ -2,22 +2,21 @@ package com.rapsealk.mobilesw
 
 import android.app.Activity
 import android.content.Intent
-import android.support.v7.app.AppCompatActivity
 import android.os.Bundle
+import android.support.v7.app.AppCompatActivity
 import android.util.Log
 import android.view.View
 import android.widget.Toast
-import com.google.android.gms.ads.AdListener
 import com.google.android.gms.ads.AdRequest
 import com.google.android.gms.ads.MobileAds
 import com.google.android.gms.tasks.Task
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.database.FirebaseDatabase
 import com.google.firebase.iid.FirebaseInstanceId
-import com.rapsealk.mobilesw.util.SharedPreferenceManager
 import com.rapsealk.mobilesw.service.CameraObservingService
 import com.rapsealk.mobilesw.service.FirebaseInstanceIDService
 import com.rapsealk.mobilesw.service.RecallService
+import com.rapsealk.mobilesw.util.SharedPreferenceManager
 import kotlinx.android.synthetic.main.activity_main.*
 import java.lang.Exception
 
@@ -35,6 +34,7 @@ class MainActivity : AppCompatActivity() {
         val mFirebaseAuth: FirebaseAuth = FirebaseAuth.getInstance()
         val user = mFirebaseAuth.currentUser
 
+        /*
         if (isFirstRun) {
             isFirstRun = false
             this.onPause()
@@ -45,6 +45,7 @@ class MainActivity : AppCompatActivity() {
             startActivity(Intent(this, LoginActivity::class.java))
             return finish()
         }
+        */
 
         // startService(Intent(applicationContext, FirebaseInstanceIDService::class.java))
 
@@ -62,7 +63,7 @@ class MainActivity : AppCompatActivity() {
             mSharedPreference!!.updateInstanceId(id)
         } else {
             val instanceIdToken = mSharedPreference!!.retrieveInstanceId()!!
-            val uid = user.uid
+            val uid = user!!.uid
             Log.d("User", "uid: $uid")
             FirebaseDatabase.getInstance().getReference("users").child(uid).child("instanceIdToken")
                     .setValue(instanceIdToken)

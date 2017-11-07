@@ -59,11 +59,12 @@ class MainActivity : AppCompatActivity() {
 
         if (!mSharedPreference!!.isInstanceIdAlive()) {
             val id = FirebaseInstanceId.getInstance().getToken()!!
-            Log.d("token:", id);
+            Log.d("new token:", id);
             mSharedPreference!!.updateInstanceId(id)
         } else {
             val instanceIdToken = mSharedPreference!!.retrieveInstanceId()!!
             val uid = user!!.uid
+            Log.d("instanceIdToken", instanceIdToken)
             Log.d("User", "uid: $uid")
             FirebaseDatabase.getInstance().getReference("users").child(uid).child("instanceIdToken")
                     .setValue(instanceIdToken)

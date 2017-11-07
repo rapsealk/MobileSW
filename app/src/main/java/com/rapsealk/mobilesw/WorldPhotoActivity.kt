@@ -166,9 +166,7 @@ class WorldPhotoActivity : FragmentActivity(), OnMapReadyCallback, GoogleMap.OnC
                 if (marker.snippet != null) {
                     val url = marker.snippet.split("\n").get(1)
                     val imageView = view.findViewById(R.id.imageView) as ImageView
-                    Picasso.with(this@WorldPhotoActivity)
-                            .load(url)
-                            .into(imageView)
+                    Picasso.with(this@WorldPhotoActivity).load(url).resize(192, 108).into(imageView)
                 }
                 val textView = view.findViewById(R.id.textView) as TextView
                 textView.text = marker.title
@@ -471,7 +469,7 @@ class WorldPhotoActivity : FragmentActivity(), OnMapReadyCallback, GoogleMap.OnC
             // val address = mGeocoder?.getFromLocation(location.latitude, location.longitude, 1)
             // tvAddress.text = address?.get(0)?.adminArea
             if (INITIAL_GPS_SET) {
-                mGoogleMap?.animateCamera(CameraUpdateFactory.zoomBy(5f))
+                mGoogleMap?.animateCamera(CameraUpdateFactory.zoomBy(25f))
                 INITIAL_GPS_SET = false
             }
         }
@@ -519,13 +517,15 @@ class WorldPhotoActivity : FragmentActivity(), OnMapReadyCallback, GoogleMap.OnC
 
         private var bitmapDescriptor: BitmapDescriptor? = null
 
-        override fun doInBackground(vararg params: String?): BitmapDescriptor {
+        override fun doInBackground(vararg params: String?): BitmapDescriptor? {
             val url = params.get(0)
-            bitmapDescriptor = BitmapDescriptorFactory.fromBitmap(Picasso.with(context).load(url).resize(160, 160).get())
+            // bitmapDescriptor = BitmapDescriptorFactory.fromBitmap(Picasso.with(context).load(url).resize(160, 160).get())
+            bitmapDescriptor = BitmapDescriptorFactory.fromBitmap(Glide.with(context).load(url).asBitmap().thumbnail(0.3f).into(160, 160).get())
             return bitmapDescriptor!!
         }
 
         override fun onPostExecute(result: BitmapDescriptor?) {
+            if (result == null) return
             overlays?.add(
                 mGoogleMap?.addGroundOverlay(GroundOverlayOptions()
                         .image(bitmapDescriptor!!)

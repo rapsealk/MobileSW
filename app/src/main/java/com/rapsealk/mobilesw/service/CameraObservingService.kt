@@ -58,7 +58,7 @@ class CameraObservingService : Service, LocationListener {
     override fun onBind(intent: Intent?): IBinder? = null
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
-        var observer = Thread(CameraObserver())
+        val observer = Thread(CameraObserver())
         observer.start()
         return super.onStartCommand(intent, flags, startId)
     }

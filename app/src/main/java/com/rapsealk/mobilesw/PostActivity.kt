@@ -26,6 +26,7 @@ import com.rapsealk.mobilesw.retrofit.SendingMessage
 import com.rapsealk.mobilesw.retrofit.UserService
 import com.rapsealk.mobilesw.schema.Comment
 import com.rapsealk.mobilesw.schema.Photo
+import com.rapsealk.mobilesw.service.PostDeleteService
 import com.squareup.picasso.Picasso
 import com.squareup.picasso.Transformation
 import io.reactivex.android.schedulers.AndroidSchedulers
@@ -82,12 +83,15 @@ class PostActivity : AppCompatActivity() {
                         progressDialog.show()
                         */
                         val url = serializedData.url
-                        val imageName = url.split("?").get(0).split("/").last()
+                        val imageName = url.split("?").get(0).split("/").last().split("%2F").last()
                         Log.d("URL", url);
                         Log.d("ImageName", imageName)
                         // TODO
                         // toast("imageName: $imageName")
-                        mFirebaseStorage?.getReference("$uid/$imageName")?.delete()
+                        // mFirebaseStorage?.getReference("$uid/$imageName")?.delete()
+                        val serviceIntent = Intent(this, PostDeleteService::class.java)
+                        serviceIntent.putExtra("path", "$uid/$imageName")
+                        startService(serviceIntent)
                         mFirebaseDatabase?.getReference("photos/$postTimestamp")?.removeValue()
                         mFirebaseDatabase?.getReference("users/$uid/photos/$postTimestamp")?.removeValue()
                         val intent = Intent()

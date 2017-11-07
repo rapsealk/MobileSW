@@ -18,6 +18,7 @@ class SplashActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_splash)
 
+
         /*
         if (checkSTORAGEPermission()) {  //이미 권한이 허가되어 있는지 확인한다. (표.1 로 구현)
             //mCamera = Camera.open(Camera.CameraInfo.CAMERA_FACING_BACK);  //카메라를 open() 할 수 있다.
@@ -31,6 +32,7 @@ class SplashActivity : AppCompatActivity() {
             ActivityCompat.requestPermissions(this, arrayOf(Manifest.permission.CAMERA), CAMERA_REQUEST_CODE)
         }
         */
+
 
 
         val mFirebaseAuth: FirebaseAuth = FirebaseAuth.getInstance()
@@ -77,4 +79,5 @@ class SplashActivity : AppCompatActivity() {
             }
         }
     }
+
 }

@@ -1,0 +1,85 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context="com.rapsealk.mobilesw.InfoActivity"
+    tools:layout_editor_absoluteX="0dp"
+    tools:layout_editor_absoluteY="25dp">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical">
+
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="100dp"
+            android:layout_weight="1">
+
+            <android.support.v7.widget.Toolbar
+                android:id="@+id/custom_toolbar"
+                android:layout_width="match_parent"
+                android:layout_height="100dp"
+                android:layout_weight="1"
+                android:background="?android:attr/colorPressedHighlight"
+                android:elevation="4dp"
+                android:theme="@style/ThemeOverlay.AppCompat.ActionBar"
+                app:popupTheme="@style/ThemeOverlay.AppCompat.Light">
+
+            </android.support.v7.widget.Toolbar>
+
+            <ImageButton
+                android:id="@+id/buttonBackToMain"
+                android:layout_width="50dp"
+                android:layout_height="100dp"
+                android:background="@android:color/transparent"
+                android:elevation="4dp"
+                app:srcCompat="?android:attr/actionModeCloseDrawable" />
+
+        </RelativeLayout>
+
+        <TextView
+            android:id="@+id/textViewTitle"
+            android:layout_width="395dp"
+            android:layout_height="wrap_content"
+            android:layout_column="0"
+            android:layout_row="2"
+            android:layout_weight="1"
+            android:text="PhotoPlace"
+            android:textAlignment="center"
+            android:textSize="36sp" />
+
+        <TextView
+            android:id="@+id/textViewKAUSoftware"
+            android:layout_width="395dp"
+            android:layout_height="wrap_content"
+            android:layout_column="0"
+            android:layout_row="1"
+            android:layout_weight="1"
+            android:text="한국항공대학교 소프트웨어학과"
+            android:textAlignment="center"
+            android:textSize="24sp" />
+
+        <TextView
+            android:id="@+id/textViewStudent1"
+            android:layout_width="395dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="2015125005 강정석"
+            android:textAlignment="center"
+            android:textSize="24sp" />
+
+        <TextView
+            android:id="@+id/textViewStudent2"
+            android:layout_width="395dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:text="2015125068 임희제"
+            android:textAlignment="center"
+            android:textSize="24sp" />
+
+    </LinearLayout>
+
+</LinearLayout>

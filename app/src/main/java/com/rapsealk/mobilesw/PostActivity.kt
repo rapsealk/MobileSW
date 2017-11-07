@@ -1,5 +1,6 @@
 package com.rapsealk.mobilesw
 
+import android.app.ProgressDialog
 import android.content.DialogInterface
 import android.content.Intent
 import android.graphics.*
@@ -73,9 +74,19 @@ class PostActivity : AppCompatActivity() {
                     .setTitle("사진을 삭제하시겠습니까?")
                     .setMessage("삭제된 사진은 복구되지 않습니다.")
                     .setPositiveButton("삭제", DialogInterface.OnClickListener { dialog: DialogInterface, which: Int ->
+                        /*
+                        val progressDialog = ProgressDialog(this)
+                        progressDialog.isIndeterminate = true
+                        progressDialog.setProgressStyle(ProgressDialog.STYLE_SPINNER)
+                        progressDialog.setMessage("내 사진들 불러오는 중")
+                        progressDialog.show()
+                        */
                         val url = serializedData.url
                         val imageName = url.split("?").get(0).split("/").last()
-                        toast("imageName: $imageName")
+                        Log.d("URL", url);
+                        Log.d("ImageName", imageName)
+                        // TODO
+                        // toast("imageName: $imageName")
                         mFirebaseStorage?.getReference("$uid/$imageName")?.delete()
                         mFirebaseDatabase?.getReference("photos/$postTimestamp")?.removeValue()
                         mFirebaseDatabase?.getReference("users/$uid/photos/$postTimestamp")?.removeValue()

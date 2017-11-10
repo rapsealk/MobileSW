@@ -14,9 +14,9 @@ import com.google.android.gms.tasks.Task
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.UserProfileChangeRequest
 import com.rapsealk.mobilesw.service.CameraObservingService
-import com.rapsealk.mobilesw.service.RecallService
 import com.rapsealk.mobilesw.util.SharedPreferenceManager
 import kotlinx.android.synthetic.main.activity_settings.*
+import kotlinx.android.synthetic.main.fragment_setting.*
 
 class SettingsActivity : AppCompatActivity() {
 
@@ -33,7 +33,7 @@ class SettingsActivity : AppCompatActivity() {
         mFirebaseAuth = FirebaseAuth.getInstance()
         var user = mFirebaseAuth?.currentUser
 
-        btnBack.setOnClickListener { v: View? -> finish() }
+       // btnBack.setOnClickListener { v: View? -> finish() }
 
 
         if (ContextCompat.checkSelfPermission(this, Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED) {
@@ -51,14 +51,14 @@ class SettingsActivity : AppCompatActivity() {
             ActivityCompat.requestPermissions(this, Array<String>(1) { Manifest.permission.ACCESS_FINE_LOCATION }, FINE_LOCATION_CODE)
         }
 
-        etDisplayName.setText(user?.displayName)
-        btnDisplayName.setOnClickListener { v: View? ->
+        etUserName.setText(user?.displayName)
+        btnUserName.setOnClickListener { v: View? ->
             var progressDialog = ProgressDialog(this)
             progressDialog.isIndeterminate = true
             progressDialog.setProgressStyle(ProgressDialog.STYLE_SPINNER)
             progressDialog.setMessage("사용자 이름을 변경하는 중")
             progressDialog.show()
-            var newDisplayName = etDisplayName.text.toString()
+            var newDisplayName = etUserName.text.toString()
             var profileUpdate = UserProfileChangeRequest.Builder()
                     .setDisplayName(newDisplayName)
                     .build()

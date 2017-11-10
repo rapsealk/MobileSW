@@ -1,10 +1,12 @@
 package com.rapsealk.mobilesw
 
+import android.app.Activity
 import android.content.Intent
 import android.os.Bundle
 import android.support.v7.app.AppCompatActivity
 import android.util.Log
 import android.view.View
+import android.widget.Toast
 import com.google.android.gms.tasks.Task
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.database.FirebaseDatabase
@@ -91,6 +93,7 @@ class FragmentActivity : AppCompatActivity() {
         val fragmentTransaction = supportFragmentManager.beginTransaction()
         val fragment = Fragment_WorldPhoto()
         fragmentTransaction.replace(R.id.please, fragment)
+        fragmentTransaction.addToBackStack(null);
         fragmentTransaction.commit()
 
 
@@ -99,13 +102,16 @@ class FragmentActivity : AppCompatActivity() {
             val fragmentTransaction = supportFragmentManager.beginTransaction()
             val fragment = Fragment_WorldPhoto()
             fragmentTransaction.replace(R.id.please, fragment)
+            fragmentTransaction.addToBackStack(null);
             fragmentTransaction.commit()
+
         }
 
         ButtonSetting.setOnClickListener { view: View ->
             val fragmentTransaction = supportFragmentManager.beginTransaction()
             val fragment = Fragment_Setting()
             fragmentTransaction.replace(R.id.please, fragment)
+            fragmentTransaction.addToBackStack(null);
             fragmentTransaction.commit()
         }
 
@@ -115,6 +121,7 @@ class FragmentActivity : AppCompatActivity() {
             val fragmentTransaction = supportFragmentManager.beginTransaction()
             val fragment = Fragment_MyPage()
             fragmentTransaction.replace(R.id.please, fragment)
+            fragmentTransaction.addToBackStack(null);
             fragmentTransaction.commit()
            // startActivity(Intent(this, MyPageActivity::class.java))
         }
@@ -123,9 +130,13 @@ class FragmentActivity : AppCompatActivity() {
             val fragmentTransaction = supportFragmentManager.beginTransaction()
             val fragment = Fragment_Info()
             fragmentTransaction.replace(R.id.please, fragment)
+            fragmentTransaction.addToBackStack(null);
             fragmentTransaction.commit()
         }
 
+    }
+    fun Activity.toast(message: CharSequence, duration: Int = Toast.LENGTH_SHORT) {
+        Toast.makeText(this, message, duration).show()
     }
     /*
     private fun checkCAMERAPermission(): Boolean {

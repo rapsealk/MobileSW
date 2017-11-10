@@ -56,25 +56,29 @@
                     tools:layout_editor_absoluteY="0dp">
 
                     <EditText
-                        android:id="@+id/etDisplayName"
+                        android:id="@+id/etName"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:ems="10"
                         android:inputType="textPersonName"
                         android:text="Username"
-                        app:layout_constraintEnd_toStartOf="@+id/btnDisplayName"
+                        app:layout_constraintEnd_toStartOf="@+id/btnUserName"
                         app:layout_constraintHorizontal_bias="0.5"
-                        app:layout_constraintStart_toStartOf="parent" />
+                        app:layout_constraintStart_toStartOf="parent"
+                        tools:layout_editor_absoluteY="0dp"
+                        android:layout_marginStart="8dp" />
 
                     <Button
-                        android:id="@+id/btnDisplayName"
+                        android:id="@+id/btnName"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:layout_marginStart="32dp"
+                        android:layout_marginStart="8dp"
+                        android:layout_weight="1"
                         android:text="이름 변경"
-                        app:layout_constraintEnd_toStartOf="@+id/etDisplayName"
                         app:layout_constraintHorizontal_bias="0.5"
-                        app:layout_constraintStart_toEndOf="@+id/etDisplayName" />
+                        app:layout_constraintEnd_toEndOf="parent"
+                        tools:layout_editor_absoluteY="0dp"
+                        android:layout_marginEnd="8dp" />
 
                 </android.support.constraint.ConstraintLayout>
 
@@ -95,7 +99,7 @@
                         android:textStyle="bold" />
 
                     <Switch
-                        android:id="@+id/switchCameraService"
+                        android:id="@+id/CameraService"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_weight="1"
@@ -121,7 +125,7 @@
                         android:textStyle="bold" />
 
                     <Switch
-                        android:id="@+id/switchRecallService"
+                        android:id="@+id/RecallService"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_weight="1"
@@ -131,7 +135,7 @@
                 </LinearLayout>
 
                 <Button
-                    android:id="@+id/btnLogout"
+                    android:id="@+id/Logout"
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
                     android:layout_weight="1"

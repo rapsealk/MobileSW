@@ -137,10 +137,10 @@ class Fragment_MyPage : Fragment() {
                             //
 
                             if (index % 3 == 2 || index == lastIndex) {
-                                vLayout.addView(getView())
-                             //   vLayout.addView(horizontalLayout)
-                            //    horizontalLayout = LinearLayout(ct)
-                            //    horizontalLayout.layoutMode = LinearLayout.HORIZONTAL
+                             //   vLayout.addView(getView())
+                                vLayout.addView(horizontalLayout)
+                                horizontalLayout = LinearLayout(ct)
+                                horizontalLayout.layoutMode = LinearLayout.HORIZONTAL
                             }
                             //
                         }

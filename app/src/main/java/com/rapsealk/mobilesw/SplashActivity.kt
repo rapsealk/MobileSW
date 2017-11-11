@@ -44,7 +44,7 @@ class SplashActivity : AppCompatActivity() {
                 startActivity(Intent(this, LoginActivity::class.java))
                 finish()
             }else{
-                startActivity(Intent(this, MainActivity::class.java))
+                startActivity(Intent(this, FragmentActivity::class.java))
                 finish()
             }
         }, 2000)

@@ -19,6 +19,7 @@ import kotlinx.android.synthetic.main.activity_fragment.*
 class FragmentActivity : AppCompatActivity() {
 
     private var mSharedPreference: SharedPreferenceManager? = null
+    var frag:Int = 0
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -90,53 +91,82 @@ class FragmentActivity : AppCompatActivity() {
         adView.loadAd(adRequest)
         */
 
+        frag=1
         val fragmentTransaction = supportFragmentManager.beginTransaction()
         val fragment = Fragment_WorldPhoto()
         fragmentTransaction.replace(R.id.please, fragment)
-        fragmentTransaction.addToBackStack(null);
+      //  fragmentTransaction.addToBackStack(null);
         fragmentTransaction.commit()
 
 
 
         ButtonWorldPhoto.setOnClickListener { view: View ->
+            frag=1
             val fragmentTransaction = supportFragmentManager.beginTransaction()
             val fragment = Fragment_WorldPhoto()
             fragmentTransaction.replace(R.id.please, fragment)
-            fragmentTransaction.addToBackStack(null);
+          //  fragmentTransaction.addToBackStack(null);
             fragmentTransaction.commit()
 
         }
 
         ButtonSetting.setOnClickListener { view: View ->
+            frag=3
             val fragmentTransaction = supportFragmentManager.beginTransaction()
             val fragment = Fragment_Setting()
             fragmentTransaction.replace(R.id.please, fragment)
-            fragmentTransaction.addToBackStack(null);
+          //  fragmentTransaction.addToBackStack(null);
             fragmentTransaction.commit()
         }
 
         ButtonMyPage.setOnClickListener { view: View ->
           //  this.onPause()
            // val fm = supportFragmentManager
+            frag=2
             val fragmentTransaction = supportFragmentManager.beginTransaction()
             val fragment = Fragment_MyPage()
             fragmentTransaction.replace(R.id.please, fragment)
-            fragmentTransaction.addToBackStack(null);
+          //  fragmentTransaction.addToBackStack(null);
             fragmentTransaction.commit()
            // startActivity(Intent(this, MyPageActivity::class.java))
         }
 
         ButtonInfo.setOnClickListener { view: View ->
+            frag=4
             val fragmentTransaction = supportFragmentManager.beginTransaction()
             val fragment = Fragment_Info()
             fragmentTransaction.replace(R.id.please, fragment)
-            fragmentTransaction.addToBackStack(null);
+        //    fragmentTransaction.addToBackStack(null);
             fragmentTransaction.commit()
         }
 
     }
     fun Activity.toast(message: CharSequence, duration: Int = Toast.LENGTH_SHORT) {
         Toast.makeText(this, message, duration).show()
+    }
+
+    override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<String>, grantResults: IntArray) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
+        val fragments = supportFragmentManager.fragments
+        if (fragments != null) {
+            for (fragment in fragments) {
+                fragment.onRequestPermissionsResult(requestCode, permissions, grantResults)
+            }
+        }
+    }
+
+    override fun onBackPressed() {
+      //  super.onBackPressed()
+        if(frag!=1) {
+            frag=1
+            val fragmentTransaction = supportFragmentManager.beginTransaction()
+            val fragment = Fragment_WorldPhoto()
+            fragmentTransaction.replace(R.id.please, fragment)
+            fragmentTransaction.commit()
+        }else{
+            super.onBackPressed()
+        }
+
     }
     /*
     private fun checkCAMERAPermission(): Boolean {

@@ -3,14 +3,17 @@ package com.rapsealk.mobilesw
 import android.annotation.SuppressLint
 import android.content.Context
 import android.content.Intent
+import android.content.pm.PackageManager
 import android.location.Geocoder
 import android.location.Location
 import android.location.LocationListener
 import android.location.LocationManager
 import android.os.AsyncTask
 import android.os.Bundle
+import android.support.v4.app.ActivityCompat
 import android.support.v4.app.Fragment
 import android.support.v4.app.FragmentActivity
+import android.support.v4.content.ContextCompat
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
@@ -99,14 +102,14 @@ class Fragment_WorldPhoto : Fragment(), OnMapReadyCallback, GoogleMap.OnCameraId
     @SuppressLint("MissingPermission")
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         // Permission Check
-        /*
-        if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-            if (ActivityCompat.shouldShowRequestPermissionRationale(this, Manifest.permission.ACCESS_FINE_LOCATION)) {
-                toast("위치 정보를 이용하기 위해서는 권한이 필요합니다.")
+
+        if (ContextCompat.checkSelfPermission(ct!!, android.Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+            if (ActivityCompat.shouldShowRequestPermissionRationale(activity, android.Manifest.permission.ACCESS_FINE_LOCATION)) {
+               // toast("위치 정보를 이용하기 위해서는 권한이 필요합니다.")
             }
-            ActivityCompat.requestPermissions(this, Array<String>(1) { Manifest.permission.ACCESS_FINE_LOCATION }, FINE_LOCATION_CODE)
+            ActivityCompat.requestPermissions(activity, Array<String>(1) { android.Manifest.permission.ACCESS_FINE_LOCATION }, FINE_LOCATION_CODE)
         }
-        */
+
         // Firebase Auth
 
         mFirebaseAuth = FirebaseAuth.getInstance()

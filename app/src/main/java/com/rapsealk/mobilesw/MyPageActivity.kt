@@ -1,16 +1,15 @@
 package com.rapsealk.mobilesw
 
-import android.Manifest
 import android.app.ProgressDialog
 import android.content.pm.PackageManager
 import android.graphics.Bitmap
 import android.os.AsyncTask
-import android.support.v7.app.AppCompatActivity
 import android.os.Bundle
 import android.os.Environment
 import android.os.Handler
 import android.support.v4.app.ActivityCompat
 import android.support.v4.content.ContextCompat
+import android.support.v7.app.AppCompatActivity
 import android.view.View
 import android.widget.ImageView
 import android.widget.LinearLayout
@@ -21,8 +20,8 @@ import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseError
 import com.google.firebase.database.FirebaseDatabase
 import com.google.firebase.database.ValueEventListener
-import com.rapsealk.mobilesw.util.MediaScanner
 import com.rapsealk.mobilesw.schema.Photo
+import com.rapsealk.mobilesw.util.MediaScanner
 import com.squareup.picasso.Callback
 import com.squareup.picasso.Picasso
 import com.squareup.picasso.Transformation
@@ -42,11 +41,11 @@ class MyPageActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_my_page)
 
-        if (ContextCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
-            if (ActivityCompat.shouldShowRequestPermissionRationale(this, Manifest.permission.WRITE_EXTERNAL_STORAGE)) {
+        if (ContextCompat.checkSelfPermission(this, android.Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
+            if (ActivityCompat.shouldShowRequestPermissionRationale(this, android.Manifest.permission.WRITE_EXTERNAL_STORAGE)) {
                 toast("이미지를 저장하기 위해서는 권한이 필요합니다.")
             }
-            ActivityCompat.requestPermissions(this, Array<String>(1) { Manifest.permission.WRITE_EXTERNAL_STORAGE }, WRITE_EXTERNAL_STORAGE_CODE)
+            ActivityCompat.requestPermissions(this, Array<String>(1) { android.Manifest.permission.WRITE_EXTERNAL_STORAGE }, WRITE_EXTERNAL_STORAGE_CODE)
         }
 
         val progressDialog = ProgressDialog(this)

@@ -2,9 +2,13 @@ package com.rapsealk.mobilesw
 
 //import kotlinx.android.synthetic.*
 import android.app.ProgressDialog
+import android.content.Context
 import android.content.Intent
+import android.content.pm.PackageManager
 import android.os.Bundle
+import android.support.v4.app.ActivityCompat
 import android.support.v4.app.Fragment
+import android.support.v4.content.ContextCompat
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
@@ -24,15 +28,34 @@ class Fragment_Setting : Fragment() {
     private val CAMERA_REQUEST_CODE: Int = 10
     private val FINE_LOCATION_CODE: Int = 11
     private var mSharedPreference: SharedPreferenceManager? = null
+    var ct: Context? = null;
 
     override fun onCreateView(inflater: LayoutInflater?, container: ViewGroup?, savedInstanceState: Bundle?): View? {
-        return inflater!!.inflate(R.layout.fragment_setting, container, false)
+        var View =inflater!!.inflate(R.layout.fragment_setting, container, false)
+        ct= container!!.context
+        return View
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         mFirebaseAuth = FirebaseAuth.getInstance()
-
         var user = mFirebaseAuth?.currentUser
+
+
+        if (ContextCompat.checkSelfPermission(ct!!, android.Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED) {
+            if (ActivityCompat.shouldShowRequestPermissionRationale(activity, android.Manifest.permission.CAMERA)) {
+               // toast("카메라 정보를 이용하기 위해서는 권한이 필요합니다.")
+            }
+            ActivityCompat.requestPermissions(activity, Array<String>(1) { android.Manifest.permission.CAMERA }, CAMERA_REQUEST_CODE)
+        }
+
+
+        if (ContextCompat.checkSelfPermission(ct!!, android.Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+            if (ActivityCompat.shouldShowRequestPermissionRationale(activity, android.Manifest.permission.ACCESS_FINE_LOCATION)) {
+            //    toast("GPS 정보를 이용하기 위해서는 권한이 필요합니다.")
+            }
+            ActivityCompat.requestPermissions(activity, Array<String>(1) { android.Manifest.permission.ACCESS_FINE_LOCATION }, FINE_LOCATION_CODE)
+        }
+
         etName.setText(user?.displayName)
 
         btnName.setOnClickListener { v: View? ->

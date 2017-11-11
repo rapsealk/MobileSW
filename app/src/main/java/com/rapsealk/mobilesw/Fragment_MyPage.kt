@@ -2,12 +2,15 @@ package com.rapsealk.mobilesw
 
 import android.app.ProgressDialog
 import android.content.Context
+import android.content.pm.PackageManager
 import android.graphics.Bitmap
 import android.os.AsyncTask
 import android.os.Bundle
 import android.os.Environment
 import android.os.Handler
+import android.support.v4.app.ActivityCompat
 import android.support.v4.app.Fragment
+import android.support.v4.content.ContextCompat
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -52,14 +55,14 @@ class Fragment_MyPage : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         //super.onCreate(savedInstanceState)
        // setContentView(R.layout.activity_my_page)
-/*
-        if (ContextCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
-            if (ActivityCompat.shouldShowRequestPermissionRationale(this, Manifest.permission.WRITE_EXTERNAL_STORAGE)) {
-                toast("이미지를 저장하기 위해서는 권한이 필요합니다.")
+
+        if (ContextCompat.checkSelfPermission(ct!!, android.Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
+            if (ActivityCompat.shouldShowRequestPermissionRationale(activity, android.Manifest.permission.WRITE_EXTERNAL_STORAGE)) {
+                //toast("이미지를 저장하기 위해서는 권한이 필요합니다.")
             }
-            ActivityCompat.requestPermissions(this, Array<String>(1) { Manifest.permission.WRITE_EXTERNAL_STORAGE }, WRITE_EXTERNAL_STORAGE_CODE)
+            ActivityCompat.requestPermissions(activity, Array<String>(1) { android.Manifest.permission.WRITE_EXTERNAL_STORAGE }, WRITE_EXTERNAL_STORAGE_CODE)
         }
-*/
+
         val progressDialog = ProgressDialog(ct)
         progressDialog.isIndeterminate = true
         progressDialog.setProgressStyle(ProgressDialog.STYLE_SPINNER)
@@ -70,13 +73,7 @@ class Fragment_MyPage : Fragment() {
         val user = mFirebaseAuth?.currentUser
         val uid = user?.uid
 
-        /*
-        btnBack.setOnClickListener { v: View? ->
-            finish()
-        }
-        */
         progressDialog.show()
-
 
         val ref = mFirebaseDatabase?.getReference("users")
         // TODO : add a descending element
@@ -155,12 +152,13 @@ class Fragment_MyPage : Fragment() {
                 })
     }
 
+
 /*
     override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<out String>, grantResults: IntArray) {
         when (requestCode) {
             WRITE_EXTERNAL_STORAGE_CODE -> {
                 if (grantResults.size > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED)
-                    toast("ACCESS_WRITE_EXTERNAL_STORAGE PERMISSION GRANTED")
+               //     toast("ACCESS_WRITE_EXTERNAL_STORAGE PERMISSION GRANTED")
                 else finish()
                 return
             }
@@ -171,6 +169,8 @@ class Fragment_MyPage : Fragment() {
     }
 */
 
+
+
     inner class OriginalImageRetreiver: AsyncTask<String, Int, Bitmap> {
 
     private val progressDialog: ProgressDialog
@@ -179,7 +179,7 @@ class Fragment_MyPage : Fragment() {
 
         constructor(filename: String) : super() {
             this.filename = filename
-            progressDialog = ProgressDialog(getActivity().applicationContext)
+            progressDialog = ProgressDialog(getActivity())
             progressDialog.isIndeterminate = true
             progressDialog.setProgressStyle(ProgressDialog.STYLE_SPINNER)
             progressDialog.setMessage("사진 저장 중")
@@ -187,10 +187,13 @@ class Fragment_MyPage : Fragment() {
         }
 
         override fun doInBackground(vararg params: String?): Bitmap {
+
             handler.post(Runnable { progressDialog.show() })
             var url = params.get(0)
             return Picasso.with(getActivity().applicationContext).load(url).get()
+
         }
+
 
         override fun onPostExecute(result: Bitmap?) {
 
@@ -219,5 +222,6 @@ class Fragment_MyPage : Fragment() {
                // toast(exception.toString())
             }
         }
+
     }
 }

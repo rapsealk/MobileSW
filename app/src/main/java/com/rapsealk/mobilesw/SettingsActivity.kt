@@ -35,19 +35,21 @@ class SettingsActivity : AppCompatActivity() {
 
        // btnBack.setOnClickListener { v: View? -> finish() }
 
-
+        /*
         if (ContextCompat.checkSelfPermission(this, Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED) {
             if (ActivityCompat.shouldShowRequestPermissionRationale(this, Manifest.permission.CAMERA)) {
                 toast("카메라 정보를 이용하기 위해서는 권한이 필요합니다.")
             }
             ActivityCompat.requestPermissions(this, Array<String>(1) { Manifest.permission.CAMERA }, CAMERA_REQUEST_CODE)
         }
-
+*/
 
         if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+            /*
             if (ActivityCompat.shouldShowRequestPermissionRationale(this, Manifest.permission.ACCESS_FINE_LOCATION)) {
                 toast("GPS 정보를 이용하기 위해서는 권한이 필요합니다.")
             }
+            */
             ActivityCompat.requestPermissions(this, Array<String>(1) { Manifest.permission.ACCESS_FINE_LOCATION }, FINE_LOCATION_CODE)
         }
 

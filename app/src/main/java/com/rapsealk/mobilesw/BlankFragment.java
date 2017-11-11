@@ -34,5 +34,4 @@ public class BlankFragment extends Fragment {
         }
         return  view;
     }
-
 }

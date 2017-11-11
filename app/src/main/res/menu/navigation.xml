@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <item
+        android:id="@+id/navigation_worldphoto"
+        android:icon="@mipmap/worldphoto"
+        android:title="world photo"
+        app:showAsAction="always" />
+    <item
+        android:id="@+id/navigation_mypage"
+        android:icon="@mipmap/worldphoto"
+        android:title="mypage"
+        app:showAsAction="always"/>
+
+    <item
+        android:id="@+id/navigation_setting"
+        android:icon="@mipmap/worldphoto"
+        android:title="setting"
+        app:showAsAction="always" />
+
+    <item
+        android:id="@+id/navigation_info"
+        android:icon="@mipmap/worldphoto"
+        android:title="info"
+        app:showAsAction="always" />
+
+
+</menu>

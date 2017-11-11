@@ -3,9 +3,9 @@ package com.rapsealk.mobilesw
 import android.app.Activity
 import android.content.Intent
 import android.os.Bundle
+import android.support.design.widget.BottomNavigationView
 import android.support.v7.app.AppCompatActivity
 import android.util.Log
-import android.view.View
 import android.widget.Toast
 import com.google.android.gms.tasks.Task
 import com.google.firebase.auth.FirebaseAuth
@@ -14,7 +14,6 @@ import com.google.firebase.iid.FirebaseInstanceId
 import com.rapsealk.mobilesw.service.CameraObservingService
 import com.rapsealk.mobilesw.service.RecallService
 import com.rapsealk.mobilesw.util.SharedPreferenceManager
-import kotlinx.android.synthetic.main.activity_fragment.*
 
 class FragmentActivity : AppCompatActivity() {
 
@@ -25,6 +24,8 @@ class FragmentActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_fragment)
 
+        val navigation = findViewById(R.id.navigation) as BottomNavigationView
+        navigation.setOnNavigationItemSelectedListener(mOnNavigationItemSelectedListener)
         /*
         if (checkSTORAGEPermission()) {  //이미 권한이 허가되어 있는지 확인한다. (표.1 로 구현)
             //mCamera = Camera.open(Camera.CameraInfo.CAMERA_FACING_BACK);  //카메라를 open() 할 수 있다.
@@ -99,7 +100,7 @@ class FragmentActivity : AppCompatActivity() {
         fragmentTransaction.commit()
 
 
-
+/*
         ButtonWorldPhoto.setOnClickListener { view: View ->
             frag=1
             val fragmentTransaction = supportFragmentManager.beginTransaction()
@@ -139,10 +140,13 @@ class FragmentActivity : AppCompatActivity() {
         //    fragmentTransaction.addToBackStack(null);
             fragmentTransaction.commit()
         }
-
+*/
     }
     fun Activity.toast(message: CharSequence, duration: Int = Toast.LENGTH_SHORT) {
         Toast.makeText(this, message, duration).show()
+
+        val navigation = findViewById(R.id.navigation) as BottomNavigationView
+        navigation.setOnNavigationItemSelectedListener(mOnNavigationItemSelectedListener)
     }
 
     override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<String>, grantResults: IntArray) {
@@ -153,6 +157,47 @@ class FragmentActivity : AppCompatActivity() {
                 fragment.onRequestPermissionsResult(requestCode, permissions, grantResults)
             }
         }
+    }
+
+    private val mOnNavigationItemSelectedListener = BottomNavigationView.OnNavigationItemSelectedListener { item ->
+        when (item.itemId) {
+            R.id.navigation_worldphoto -> {
+                frag=1
+                val fragmentTransaction = supportFragmentManager.beginTransaction()
+                val fragment = Fragment_WorldPhoto()
+                fragmentTransaction.replace(R.id.please, fragment)
+                //  fragmentTransaction.addToBackStack(null);
+                fragmentTransaction.commit()
+                return@OnNavigationItemSelectedListener true
+            }
+            R.id.navigation_mypage -> {
+                frag=2
+                val fragmentTransaction = supportFragmentManager.beginTransaction()
+                val fragment = Fragment_MyPage()
+                fragmentTransaction.replace(R.id.please, fragment)
+                fragmentTransaction.commit()
+                return@OnNavigationItemSelectedListener true
+            }
+            R.id.navigation_setting -> {
+                frag=3
+                val fragmentTransaction = supportFragmentManager.beginTransaction()
+                val fragment = Fragment_Setting()
+                fragmentTransaction.replace(R.id.please, fragment)
+                //  fragmentTransaction.addToBackStack(null);
+                fragmentTransaction.commit()
+                return@OnNavigationItemSelectedListener true
+            }
+            R.id.navigation_info -> {
+                frag=4
+                val fragmentTransaction = supportFragmentManager.beginTransaction()
+                val fragment = Fragment_Info()
+                fragmentTransaction.replace(R.id.please, fragment)
+                //    fragmentTransaction.addToBackStack(null);
+                fragmentTransaction.commit()
+                return@OnNavigationItemSelectedListener true
+            }
+        }
+        false
     }
 
     override fun onBackPressed() {

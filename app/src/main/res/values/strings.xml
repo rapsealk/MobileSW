@@ -93,4 +93,11 @@
 
     <string name="pref_title_vibrate">Vibrate</string>
     <string name="title_activity_image_upload">ImageUploadActivity</string>
+    <string name="title_activity_example">ExampleActivity</string>
+    <string name="title_home">Home</string>
+    <string name="title_dashboard">Dashboard</string>
+    <string name="title_notifications">Notifications</string>
+    <string name="title_activity_test">TestActivity</string>
+    <string name="action_settings">Settings</string>
+    <string name="section_format">Hello World from section: %1$d</string>
 </resources>

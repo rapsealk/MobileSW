@@ -4,6 +4,8 @@ import android.annotation.SuppressLint
 import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
+import android.graphics.Bitmap
+import android.graphics.Color
 import android.location.Geocoder
 import android.location.Location
 import android.location.LocationListener
@@ -18,7 +20,9 @@ import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.HorizontalScrollView
 import android.widget.ImageView
+import android.widget.LinearLayout
 import android.widget.TextView
 import com.bumptech.glide.Glide
 import com.google.android.gms.maps.*
@@ -29,7 +33,8 @@ import com.google.firebase.database.*
 import com.rapsealk.mobilesw.schema.Photo
 import com.rapsealk.mobilesw.util.SharedPreferenceManager
 import com.squareup.picasso.Picasso
-import kotlinx.android.synthetic.main.activity_world_photo.*
+import com.squareup.picasso.Transformation
+// import kotlinx.android.synthetic.main.activity_world_photo.*
 import kotlinx.android.synthetic.main.fragment_world_photo.*
 
 class Fragment_WorldPhoto : Fragment(), OnMapReadyCallback, GoogleMap.OnCameraIdleListener {
@@ -44,8 +49,8 @@ class Fragment_WorldPhoto : Fragment(), OnMapReadyCallback, GoogleMap.OnCameraId
 
     // STATE FLAGS
     private var INITIAL_GPS_SET: Boolean = true
-    // private var DRAG_STATE: Boolean = false
-    // private var VIEW_PHOTOS_STATE: Boolean = false
+    private var DRAG_STATE: Boolean = false
+    private var VIEW_PHOTOS_STATE: Boolean = false
     private var OVERLAY_STATE: Boolean = false
 
     private var overlays: ArrayList<GroundOverlay>? = null
@@ -58,13 +63,13 @@ class Fragment_WorldPhoto : Fragment(), OnMapReadyCallback, GoogleMap.OnCameraId
     private var mGoogleMap: GoogleMap? = null
     private var mLocationManager: LocationManager? = null
     private var mLocationListener: LocationListener? = null
-    // private var draggableMarker: Marker? = null
-    // private var polygonStartPoint: LatLng? = null
-    // private var exPolygon: Polygon? = null
+    private var draggableMarker: Marker? = null
+    private var polygonStartPoint: LatLng? = null
+    private var exPolygon: Polygon? = null
 
     // Runtime UI Component
-    // private var horizontalScrollView: HorizontalScrollView? = null
-    // private var linearLayout: LinearLayout? = null
+    private var horizontalScrollView: HorizontalScrollView? = null
+    private var linearLayout: LinearLayout? = null
 
     // Firebase Database
     private val db: FirebaseDatabase = FirebaseDatabase.getInstance()
@@ -75,7 +80,7 @@ class Fragment_WorldPhoto : Fragment(), OnMapReadyCallback, GoogleMap.OnCameraId
 
     override fun onCreateView(inflater: LayoutInflater?, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         ct=container?.getContext()
-        var view = inflater!!.inflate(R.layout.fragment_world_photo, container, false)
+        val view = inflater!!.inflate(R.layout.fragment_world_photo, container, false)
 
         mapView = view.findViewById(R.id.worldmap) as MapView/////////////////////////////
 
@@ -91,9 +96,6 @@ class Fragment_WorldPhoto : Fragment(), OnMapReadyCallback, GoogleMap.OnCameraId
             e.printStackTrace();
         }
         //_map = mapView.getMapAsync()
-
-
-
 
         return view
     }
@@ -136,7 +138,6 @@ class Fragment_WorldPhoto : Fragment(), OnMapReadyCallback, GoogleMap.OnCameraId
          btnMagnify.setOnClickListener { view -> mGoogleMap!!.animateCamera(CameraUpdateFactory.zoomIn()) }
          btnReduce.setOnClickListener { view -> mGoogleMap!!.animateCamera(CameraUpdateFactory.zoomOut()) }
 
-        /*
         btnState.setOnClickListener { view ->
             DRAG_STATE = !DRAG_STATE
             if (DRAG_STATE) btnState.text = "드래그!"
@@ -144,7 +145,6 @@ class Fragment_WorldPhoto : Fragment(), OnMapReadyCallback, GoogleMap.OnCameraId
             mGoogleMap?.uiSettings!!.isScrollGesturesEnabled = !DRAG_STATE
             clearScreen()
         }
-        */
 
         btn_Overlay.setOnClickListener { view ->
          //   toast("TODO : OutOfMemoryError")
@@ -223,7 +223,6 @@ class Fragment_WorldPhoto : Fragment(), OnMapReadyCallback, GoogleMap.OnCameraId
         mGoogleMap!!.uiSettings.isZoomControlsEnabled = true
         mGoogleMap!!.uiSettings.isCompassEnabled = true
 
-        /*
         mGoogleMap!!.setOnMapClickListener { point: LatLng ->
             draggableMarker?.remove()
             if (DRAG_STATE) {
@@ -236,43 +235,40 @@ class Fragment_WorldPhoto : Fragment(), OnMapReadyCallback, GoogleMap.OnCameraId
                 polygonStartPoint = point
             }
         }
-        */
 
-        // mGoogleMap!!.setOnMarkerDragListener(CustomDragMarkerListener())
-        //mGoogleMap!!.setOnCameraIdleListener(ct)/////////////////////////////////////////////
+        mGoogleMap!!.setOnMarkerDragListener(CustomDragMarkerListener())
+        mGoogleMap!!.setOnCameraIdleListener(this)
 
-        /*
         mGoogleMap!!.setOnPolygonClickListener { polygon: Polygon ->
             VIEW_PHOTOS_STATE = VIEW_PHOTOS_STATE.not()
 
-            val params: ViewGroup.LayoutParams = mapFragment?.view!!.layoutParams
+            // val params: ViewGroup.LayoutParams = mapFragment?.view!!.layoutParams
             if (!VIEW_PHOTOS_STATE) {
-                params.height += 400
+                // params.height += 400
                 linearLayout?.removeAllViewsInLayout()
                 horizontalScrollView?.removeAllViews()
                 rootLinearLayout.removeView(horizontalScrollView)
             }
             else {
-                params.height -= 400
-                horizontalScrollView = HorizontalScrollView(this)
+                // params.height -= 400
+                horizontalScrollView = HorizontalScrollView(context)
                 horizontalScrollView?.x = LinearLayoutGPS.x
                 horizontalScrollView?.y = 0f
                 horizontalScrollView?.layoutParams?.width = LinearLayoutGPS.width
                 horizontalScrollView?.layoutParams?.height = 400
-                linearLayout = LinearLayout(this)
+                linearLayout = LinearLayout(context)
                 linearLayout?.layoutParams?.width = horizontalScrollView?.width
                 linearLayout?.layoutParams?.height = 400
                 horizontalScrollView?.addView(linearLayout)
                 rootLinearLayout.addView(horizontalScrollView)
             }
-            mapFragment?.view!!.layoutParams = params
+            // mapFragment?.view!!.layoutParams = params
 
             val points: List<LatLng> = polygon.points
             // safety block
             val startPoint: LatLng = points.get(0)
             val endPoint: LatLng = points.get(2)
 
-            // Check Photos : Query https://firebase.google.com/docs/database/android/lists-of-data?hl=ko
             ref = db.getReference("photos")
 
             val query: Query? = ref?.orderByChild("latitude")
@@ -293,15 +289,15 @@ class Fragment_WorldPhoto : Fragment(), OnMapReadyCallback, GoogleMap.OnCameraId
                                 val data = value.getValue<Photo>(Photo::class.java)
                                 var url = data.url
                                 if (url.equals("")) url = "https://firebasestorage.googleapis.com/v0/b/mobilesw-178816.appspot.com/o/ReactiveX.jpg?alt=media&token=510350fe-ac5b-4f01-9d9a-2fecf8428940"
-                                val imageView = ImageView(this@WorldPhotoActivity)
+                                val imageView = ImageView(this@Fragment_WorldPhoto.context)
                                 //
-                                //Glide.with(this@WorldPhotoActivity)
+                                //Glide.with(this@Fragment_WorldPhoto.context)
                                 //        .load(url)
                                 //        //.fitCenter()
                                 //        .override(480, 640)
                                 //        .into(imageView)
                                 //
-                                Picasso.with(this@WorldPhotoActivity)
+                                Picasso.with(this@Fragment_WorldPhoto.context)
                                         .load(url)
                                         .transform(object : Transformation {
 
@@ -321,10 +317,10 @@ class Fragment_WorldPhoto : Fragment(), OnMapReadyCallback, GoogleMap.OnCameraId
 
                                 imageView.setOnClickListener { view ->
 
-                                    val intent = Intent(applicationContext, PostActivity::class.java)
+                                    val intent = Intent(context, PostActivity::class.java)
                                             .putExtra("SerializedData", data)
                                     startActivity(intent)
-                                    this@WorldPhotoActivity.onPause()
+                                    // this@Fragment_WorldPhoto.context.onPause()
                                 }
                             }
                         }
@@ -334,7 +330,6 @@ class Fragment_WorldPhoto : Fragment(), OnMapReadyCallback, GoogleMap.OnCameraId
                 override fun onCancelled(p0: DatabaseError?) { }
             })
         }
-        */
 
         val lastKnownLocation = mSharedPreference?.getLastKnownLocation()
         if (lastKnownLocation != null) {
@@ -381,11 +376,11 @@ class Fragment_WorldPhoto : Fragment(), OnMapReadyCallback, GoogleMap.OnCameraId
                             val marker = mGoogleMap?.addMarker(MarkerOptions().position(position).title(data.content).snippet("$timestamp\n"+data.url).icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_ORANGE)))
                             // markers.add(marker!!)
                             markers.put(timestamp, marker!!)
-                            /*
+
                             var url = data.url
                             if (url.equals("")) url = "https://firebasestorage.googleapis.com/v0/b/mobilesw-178816.appspot.com/o/ReactiveX.jpg?alt=media&token=510350fe-ac5b-4f01-9d9a-2fecf8428940"
-                            val imageView = ImageView(this@WorldPhotoActivity)
-                            Picasso.with(this@WorldPhotoActivity)
+                            val imageView = ImageView(this@Fragment_WorldPhoto.context)
+                            Picasso.with(this@Fragment_WorldPhoto.context)
                                     .load(url)
                                     .transform(object : Transformation {
 
@@ -405,12 +400,11 @@ class Fragment_WorldPhoto : Fragment(), OnMapReadyCallback, GoogleMap.OnCameraId
 
                             imageView.setOnClickListener { view ->
 
-                                val intent = Intent(applicationContext, PostActivity::class.java)
+                                val intent = Intent(context, PostActivity::class.java)
                                         .putExtra("SerializedData", data)
                                 startActivity(intent)
-                                this@WorldPhotoActivity.onPause()
+                                // this@Fragment_WorldPhoto.context.onPause()
                             }
-                            */
                         }
                     }
                     override fun onCancelled(p0: DatabaseError?) { }
@@ -419,6 +413,7 @@ class Fragment_WorldPhoto : Fragment(), OnMapReadyCallback, GoogleMap.OnCameraId
             override fun onCancelled(p0: DatabaseError?) { }
         })
 
+        /*
         Log.d("IDLE", "NORTHEAST: $_northeast, SOUTHWEST: $_southwest");
         try {
             val address = mGeocoder?.getFromLocation((_northeast.latitude + _southwest.latitude) / 2f, (_northeast.longitude + _southwest.longitude) / 2f, 1)
@@ -426,22 +421,23 @@ class Fragment_WorldPhoto : Fragment(), OnMapReadyCallback, GoogleMap.OnCameraId
         } catch (exception: Exception) {
             exception.printStackTrace()
         }
+        */
     }
-/*
+
     override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<out String>, grantResults: IntArray) {
         when (requestCode) {
             FINE_LOCATION_CODE -> {
                 if (grantResults.size > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED)
-        //            toast("ACCESS_FINE_LOCATION PERMISSION GRANTED")
-        //        else finish()
+                    // toast("ACCESS_FINE_LOCATION PERMISSION GRANTED")
+                // else finish()
                 return
             }
             else -> {
-          //      finish()
+                // finish()
             }
         }
     }
-*/
+
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent) {
         super.onActivityResult(requestCode, resultCode, data)
 
@@ -456,7 +452,6 @@ class Fragment_WorldPhoto : Fragment(), OnMapReadyCallback, GoogleMap.OnCameraId
         }
     }
 
-    /*
     private fun clearScreen(): Unit {
         draggableMarker?.remove()
         exPolygon?.remove()
@@ -468,7 +463,6 @@ class Fragment_WorldPhoto : Fragment(), OnMapReadyCallback, GoogleMap.OnCameraId
             rootLinearLayout.removeView(horizontalScrollView)
         }
     }
-    */
 
     // CUSTOM INNER_CLASS IMPLEMENTS INTERFACE:LocationListener
     inner class CustomLocationListener : LocationListener {
@@ -502,21 +496,13 @@ class Fragment_WorldPhoto : Fragment(), OnMapReadyCallback, GoogleMap.OnCameraId
             }
         }
 
-        override fun onProviderEnabled(provider: String?) {
-     //       toast("ProviderEnabled: $provider")
-        }
-
-        override fun onProviderDisabled(provider: String?) {
-      //      toast("ProviderDisabled: $provider")
-        }
+        override fun onProviderEnabled(provider: String?) { }
+        override fun onProviderDisabled(provider: String?) { }
     }
 
-    /*
     inner class CustomDragMarkerListener : GoogleMap.OnMarkerDragListener {
 
-        override fun onMarkerDragStart(marker: Marker?) {
-            toast("onMarkerDragStart")
-        }
+        override fun onMarkerDragStart(marker: Marker?) { }
 
         override fun onMarkerDrag(marker: Marker?) {
             exPolygon?.remove()
@@ -532,11 +518,8 @@ class Fragment_WorldPhoto : Fragment(), OnMapReadyCallback, GoogleMap.OnCameraId
             exPolygon!!.isClickable = true
         }
 
-        override fun onMarkerDragEnd(marker: Marker?) {
-            toast("onMarkerDragEnd")
-        }
+        override fun onMarkerDragEnd(marker: Marker?) { }
     }
-    */
 
     fun max(a: Double, b: Double): Double = if (a > b) a else b
     fun min(a: Double, b: Double): Double = if (a < b) a else b

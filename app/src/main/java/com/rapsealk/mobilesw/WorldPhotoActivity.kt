@@ -445,7 +445,6 @@ class WorldPhotoActivity : FragmentActivity(), OnMapReadyCallback, GoogleMap.OnC
     // CUSTOM INNER_CLASS IMPLEMENTS INTERFACE:LocationListener
     inner class CustomLocationListener : LocationListener {
 
-        private var counter: Int = 0
         private var currentLocation: Location? = null
         private var exMarker: Marker? = null
 
@@ -461,7 +460,7 @@ class WorldPhotoActivity : FragmentActivity(), OnMapReadyCallback, GoogleMap.OnC
             currentLocation?.latitude = location.latitude
             currentLocation?.longitude = location.longitude
             exMarker?.remove()
-            exMarker = mGoogleMap?.addMarker(MarkerOptions().position(currentLatLng).title("#"+(++counter)))
+            exMarker = mGoogleMap?.addMarker(MarkerOptions().position(currentLatLng))
             // mGoogleMap?.moveCamera(CameraUpdateFactory.newLatLng(currentLatLng))
             // tvLatitude.text = location.latitude.toString()
             // tvLongitude.text = location.longitude.toString()

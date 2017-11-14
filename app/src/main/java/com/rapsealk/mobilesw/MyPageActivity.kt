@@ -21,6 +21,7 @@ import com.google.firebase.database.DatabaseError
 import com.google.firebase.database.FirebaseDatabase
 import com.google.firebase.database.ValueEventListener
 import com.rapsealk.mobilesw.schema.Photo
+import com.rapsealk.mobilesw.util.ImageDownloader
 import com.rapsealk.mobilesw.util.MediaScanner
 import com.squareup.picasso.Callback
 import com.squareup.picasso.Picasso
@@ -97,7 +98,8 @@ class MyPageActivity : AppCompatActivity() {
                                                 val mime = photo.url.split(".").last().split("?").first()
                                                 val timestamp = System.currentTimeMillis()
                                                 val filename = "$timestamp.$mime"
-                                                OriginalImageRetreiver(filename).execute(photo.url)
+                                                // OriginalImageRetreiver(filename).execute(photo.url)
+                                                ImageDownloader(applicationContext, filename).execute(photo.url)
                                             }
 
                                             if (result != source) source.recycle()
@@ -143,6 +145,7 @@ class MyPageActivity : AppCompatActivity() {
         }
     }
 
+    /*
     inner class OriginalImageRetreiver: AsyncTask<String, Int, Bitmap> {
 
         private val progressDialog: ProgressDialog
@@ -193,4 +196,5 @@ class MyPageActivity : AppCompatActivity() {
             }
         }
     }
+    */
 }

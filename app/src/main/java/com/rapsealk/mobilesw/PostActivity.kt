@@ -10,7 +10,6 @@ import android.support.v7.app.AlertDialog
 import android.text.Editable
 import android.text.TextWatcher
 import android.util.DisplayMetrics
-import android.util.Log
 import android.view.View
 import android.widget.ImageView
 import com.google.android.gms.tasks.Task
@@ -26,6 +25,7 @@ import com.rapsealk.mobilesw.retrofit.SendingMessage
 import com.rapsealk.mobilesw.retrofit.UserService
 import com.rapsealk.mobilesw.schema.Comment
 import com.rapsealk.mobilesw.schema.Photo
+import com.rapsealk.mobilesw.service.ImageDownloadService
 import com.rapsealk.mobilesw.service.PostDeleteService
 import com.squareup.picasso.Picasso
 import com.squareup.picasso.Transformation
@@ -61,6 +61,47 @@ class PostActivity : AppCompatActivity() {
         val serializedData = intent.getSerializableExtra("SerializedData") as Photo
         val postTimestamp = serializedData.timestamp
 
+        if (serializedData.uid.equals(uid)) {
+            optionalButton.setImageDrawable(resources.getDrawable(R.drawable.ic_trash))
+            optionalButton.setOnClickListener { v: View? ->
+                val dialogBuilder = AlertDialog.Builder(this)
+                        .setTitle("사진을 삭제하시겠습니까?")
+                        .setMessage("삭제된 사진은 복구되지 않습니다.")
+                        .setPositiveButton("삭제", DialogInterface.OnClickListener { dialog: DialogInterface, which: Int ->
+
+                            val progressDialog = ProgressDialog(this)
+                            progressDialog.isIndeterminate = true
+                            progressDialog.setProgressStyle(ProgressDialog.STYLE_SPINNER)
+                            progressDialog.setMessage("사진을 삭제하는 중..")
+                            progressDialog.show()
+
+                            val url = serializedData.url
+                            val imageName = url.split("?").get(0).split("/").last().split("%2F").last()
+                            val serviceIntent = Intent(this, PostDeleteService::class.java)
+                            serviceIntent.putExtra("path", "$uid/$imageName")
+                            startService(serviceIntent)
+                            mFirebaseDatabase?.getReference("photos/$postTimestamp")?.removeValue()
+                            mFirebaseDatabase?.getReference("users/$uid/photos/$postTimestamp")?.removeValue()
+                            val intent = Intent()
+                            intent.putExtra("id", postTimestamp.toString())
+                            setResult(RESULT_OK, intent)
+                            progressDialog.dismiss()
+                            finish()
+                        })
+                        .setNegativeButton("취소", DialogInterface.OnClickListener { dialog, which ->
+                            // TODO("Not required")
+                        }).create()
+                dialogBuilder.show()
+            }
+        } else {
+            optionalButton.setImageDrawable(resources.getDrawable(R.drawable.ic_save))
+            optionalButton.setOnClickListener { v: View? ->
+                val intent = Intent(applicationContext, ImageDownloadService::class.java)
+                intent.putExtra("url", serializedData.url)
+                startService(intent)
+            }
+        }
+
         val metrics = DisplayMetrics()
         windowManager.defaultDisplay.getMetrics(metrics)
         commentListView.layoutParams.height = metrics.heightPixels - (cardView.height + linearLayout.height)
@@ -68,42 +109,6 @@ class PostActivity : AppCompatActivity() {
         writerId.text = serializedData.uid
         writtenTime.text = SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(Timestamp(postTimestamp))
         content.text = serializedData.content
-
-        optionalButton.setOnClickListener { v: View? ->
-            if (serializedData.uid != uid) return@setOnClickListener
-            val dialogBuilder = AlertDialog.Builder(this@PostActivity)
-                    .setTitle("사진을 삭제하시겠습니까?")
-                    .setMessage("삭제된 사진은 복구되지 않습니다.")
-                    .setPositiveButton("삭제", DialogInterface.OnClickListener { dialog: DialogInterface, which: Int ->
-                        /*
-                        val progressDialog = ProgressDialog(this)
-                        progressDialog.isIndeterminate = true
-                        progressDialog.setProgressStyle(ProgressDialog.STYLE_SPINNER)
-                        progressDialog.setMessage("내 사진들 불러오는 중")
-                        progressDialog.show()
-                        */
-                        val url = serializedData.url
-                        val imageName = url.split("?").get(0).split("/").last().split("%2F").last()
-                        Log.d("URL", url);
-                        Log.d("ImageName", imageName)
-                        // TODO
-                        // toast("imageName: $imageName")
-                        // mFirebaseStorage?.getReference("$uid/$imageName")?.delete()
-                        val serviceIntent = Intent(this, PostDeleteService::class.java)
-                        serviceIntent.putExtra("path", "$uid/$imageName")
-                        startService(serviceIntent)
-                        mFirebaseDatabase?.getReference("photos/$postTimestamp")?.removeValue()
-                        mFirebaseDatabase?.getReference("users/$uid/photos/$postTimestamp")?.removeValue()
-                        val intent = Intent()
-                        intent.putExtra("id", postTimestamp.toString())
-                        setResult(RESULT_OK, intent)
-                        finish()
-                    })
-                    .setNegativeButton("취소", DialogInterface.OnClickListener { dialog, which ->
-                        // TODO("Not required")
-                    }).create()
-            dialogBuilder.show()
-        }
 
         Picasso.with(this)
                 .load("http://52.78.4.96:3003/images/"+serializedData.uid)
@@ -134,7 +139,6 @@ class PostActivity : AppCompatActivity() {
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribeOn(Schedulers.io())
                 .subscribe({ result ->
-                    Log.d("RxLog", result.toString())
                     writerId.text = result.data.displayName
                 }, { error ->
                     error.printStackTrace()
@@ -172,7 +176,6 @@ class PostActivity : AppCompatActivity() {
                                     .observeOn(AndroidSchedulers.mainThread())
                                     .subscribeOn(Schedulers.io())
                                     .subscribe({ result ->
-                                        Log.d("RxLog", result.toString())
                                         comment.displayName = result.data.displayName
                                         mCommentAdapter?.notifyDataSetChanged()
                                     }, { error ->
@@ -222,7 +225,7 @@ class PostActivity : AppCompatActivity() {
                         for (phopl in snapshot.children) {
                             if (phopl.key == uid) {
                                 mIsLiked = true
-                                btnPhopl.setImageResource(R.drawable.star_yellow)
+                                buttonLike.setImageResource(R.drawable.ic_heart_red)
                             }
                         }
                     }
@@ -263,7 +266,6 @@ class PostActivity : AppCompatActivity() {
                                     .observeOn(AndroidSchedulers.mainThread())
                                     .subscribeOn(Schedulers.io())
                                     .subscribe({ result ->
-                                        Log.d("RxLog", result.toString())
                                     }, { error ->
                                         error.printStackTrace()
                                     })
@@ -275,13 +277,13 @@ class PostActivity : AppCompatActivity() {
                     }
         }
 
-        btnPhopl.setOnClickListener { v: View ->
+        buttonLike.setOnClickListener { v: View ->
             val ref = mFirebaseDatabase?.getReference("photos/$postTimestamp/phopls/$uid")
             val phoplTask = if (mIsLiked) ref?.removeValue() else ref?.setValue(System.currentTimeMillis())
             phoplTask
                     ?.addOnCompleteListener { task: Task<Void> ->
                         mIsLiked = !mIsLiked
-                        btnPhopl.setImageResource( if (mIsLiked) R.drawable.star_yellow else R.drawable.star_gray )
+                        buttonLike.setImageResource( if (mIsLiked) R.drawable.ic_heart_red else R.drawable.ic_heart )
                         updateLikes( if (mIsLiked) ++mLikeCount else --mLikeCount )
                     }
                     ?.addOnFailureListener { exception: Exception ->
@@ -303,7 +305,7 @@ class PostActivity : AppCompatActivity() {
     }
 
     fun updateLikes(count: Long) {
-        commentPhopl.text = "포플 ($count)"
+        commentPhopl.text = "$count"
     }
 
     fun updateCommentCount() {

@@ -62,6 +62,7 @@
             android:name=".SettingsActivity"
             android:screenOrientation="portrait" />
 
+        <service android:name=".service.ImageDownloadService" />
         <service android:name=".service.PostDeleteService" />
         <service android:name=".service.CameraObservingService" />
         <service android:name=".service.RecallService" />

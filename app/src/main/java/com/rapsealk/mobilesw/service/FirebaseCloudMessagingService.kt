@@ -64,7 +64,7 @@ public class FirebaseCloudMessagingService : FirebaseMessagingService {
                         .putExtra("SerializedData", photo)
                 val pendingIntent = PendingIntent.getActivity(this@FirebaseCloudMessagingService, 125, intent, PendingIntent.FLAG_ONE_SHOT)
                 val nBuilder = NotificationCompat.Builder(this@FirebaseCloudMessagingService)
-                        .setSmallIcon(R.drawable.ic_send_black_48dp)
+                        .setSmallIcon(R.drawable.ic_instagram)
                         .setContentTitle("PhotoPlace")
                         .setContentText(message)
                         .setAutoCancel(true)

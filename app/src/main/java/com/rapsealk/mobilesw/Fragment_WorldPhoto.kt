@@ -48,10 +48,10 @@ class Fragment_WorldPhoto : Fragment(), OnMapReadyCallback, GoogleMap.OnCameraId
     private var mSharedPreference: SharedPreferenceManager? = null
 
     // STATE FLAGS
-    private var INITIAL_GPS_SET: Boolean = true
-    private var DRAG_STATE: Boolean = false
+    private var mIsInitialGps: Boolean = true
+    private var mIsDraggableState: Boolean = false
     private var VIEW_PHOTOS_STATE: Boolean = false
-    private var OVERLAY_STATE: Boolean = false
+    private var mIsOverlayState: Boolean = false
 
     private var overlays: ArrayList<GroundOverlay>? = null
     private var markers: HashMap<String, Marker> = HashMap<String, Marker>()
@@ -63,9 +63,9 @@ class Fragment_WorldPhoto : Fragment(), OnMapReadyCallback, GoogleMap.OnCameraId
     private var mGoogleMap: GoogleMap? = null
     private var mLocationManager: LocationManager? = null
     private var mLocationListener: LocationListener? = null
-    private var draggableMarker: Marker? = null
-    private var polygonStartPoint: LatLng? = null
-    private var exPolygon: Polygon? = null
+    private var mDraggableMarker: Marker? = null
+    private var mPolygonStartPoint: LatLng? = null
+    private var mLastPolygon: Polygon? = null
 
     // Runtime UI Component
     private var horizontalScrollView: HorizontalScrollView? = null
@@ -139,17 +139,17 @@ class Fragment_WorldPhoto : Fragment(), OnMapReadyCallback, GoogleMap.OnCameraId
          btnReduce.setOnClickListener { view -> mGoogleMap!!.animateCamera(CameraUpdateFactory.zoomOut()) }
 
         btnState.setOnClickListener { view ->
-            DRAG_STATE = !DRAG_STATE
-            if (DRAG_STATE) btnState.text = "드래그!"
+            mIsDraggableState = !mIsDraggableState
+            if (mIsDraggableState) btnState.text = "드래그!"
             else btnState.text = "영역 선택"
-            mGoogleMap?.uiSettings!!.isScrollGesturesEnabled = !DRAG_STATE
+            mGoogleMap?.uiSettings!!.isScrollGesturesEnabled = !mIsDraggableState
             clearScreen()
         }
 
         btn_Overlay.setOnClickListener { view ->
          //   toast("TODO : OutOfMemoryError")
-            OVERLAY_STATE = OVERLAY_STATE.not()
-            if (OVERLAY_STATE) {
+            mIsOverlayState = mIsOverlayState.not()
+            if (mIsOverlayState) {
                 overlays = arrayListOf()
                 db.getReference("photos").addListenerForSingleValueEvent(object : ValueEventListener {
                     override fun onDataChange(snapshot: DataSnapshot?) {
@@ -193,8 +193,10 @@ class Fragment_WorldPhoto : Fragment(), OnMapReadyCallback, GoogleMap.OnCameraId
                 // val snippets = marker.snippet.split("\n")
                 if (marker.snippet != null) {
                     val url = marker.snippet.split("\n").get(1)
-                    val imageView = view.findViewById(R.id.imageView) as ImageView
-                    Picasso.with(ct).load(url).resize(192, 108).into(imageView)
+                    if (!url.equals("")) {
+                        val imageView = view.findViewById(R.id.imageView) as ImageView
+                        Picasso.with(ct).load(url).resize(192, 108).into(imageView)
+                    }
                 }
                 val textView = view.findViewById(R.id.textView) as TextView
                 textView.text = marker.title
@@ -224,15 +226,15 @@ class Fragment_WorldPhoto : Fragment(), OnMapReadyCallback, GoogleMap.OnCameraId
         mGoogleMap!!.uiSettings.isCompassEnabled = true
 
         mGoogleMap!!.setOnMapClickListener { point: LatLng ->
-            draggableMarker?.remove()
-            if (DRAG_STATE) {
-                draggableMarker = mGoogleMap!!.addMarker(MarkerOptions()
+            mDraggableMarker?.remove()
+            if (mIsDraggableState) {
+                mDraggableMarker = mGoogleMap!!.addMarker(MarkerOptions()
                         .position(point)
                         .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_YELLOW))
                         .visible(true)
                         .draggable(true)
-                        .apply { CustomDragMarkerListener().onMarkerDragStart(draggableMarker) })
-                polygonStartPoint = point
+                        .apply { CustomDragMarkerListener().onMarkerDragStart(mDraggableMarker) })
+                mPolygonStartPoint = point
             }
         }
 
@@ -333,7 +335,7 @@ class Fragment_WorldPhoto : Fragment(), OnMapReadyCallback, GoogleMap.OnCameraId
 
         val lastKnownLocation = mSharedPreference?.getLastKnownLocation()
         if (lastKnownLocation != null) {
-            // INITIAL_GPS_SET = false
+            // mIsInitialGps = false
             mGoogleMap!!.animateCamera(CameraUpdateFactory.zoomTo(25f))
             mGoogleMap!!.moveCamera(CameraUpdateFactory.newLatLng(lastKnownLocation))
         }
@@ -343,7 +345,7 @@ class Fragment_WorldPhoto : Fragment(), OnMapReadyCallback, GoogleMap.OnCameraId
         // var zoomLevel = mGoogleMap?.cameraPosition?.zoom
         // var imageSize = zoomLevel!! * 0.16f
 
-        // if (OVERLAY_STATE) overlays?.forEach { overlay ->  }
+        // if (mIsOverlayState) overlays?.forEach { overlay ->  }
 
         val bound = mGoogleMap!!.projection.visibleRegion.latLngBounds
         val _northeast = bound.northeast
@@ -374,7 +376,6 @@ class Fragment_WorldPhoto : Fragment(), OnMapReadyCallback, GoogleMap.OnCameraId
 
                             val position = LatLng(data.latitude, data.longitude)
                             val marker = mGoogleMap?.addMarker(MarkerOptions().position(position).title(data.content).snippet("$timestamp\n"+data.url).icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_ORANGE)))
-                            // markers.add(marker!!)
                             markers.put(timestamp, marker!!)
 
                             var url = data.url
@@ -425,10 +426,11 @@ class Fragment_WorldPhoto : Fragment(), OnMapReadyCallback, GoogleMap.OnCameraId
     }
 
     override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<out String>, grantResults: IntArray) {
+        /*
         when (requestCode) {
             FINE_LOCATION_CODE -> {
                 if (grantResults.size > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED)
-                    // toast("ACCESS_FINE_LOCATION PERMISSION GRANTED")
+                    toast("ACCESS_FINE_LOCATION PERMISSION GRANTED")
                 // else finish()
                 return
             }
@@ -436,6 +438,7 @@ class Fragment_WorldPhoto : Fragment(), OnMapReadyCallback, GoogleMap.OnCameraId
                 // finish()
             }
         }
+        */
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent) {
@@ -453,8 +456,8 @@ class Fragment_WorldPhoto : Fragment(), OnMapReadyCallback, GoogleMap.OnCameraId
     }
 
     private fun clearScreen(): Unit {
-        draggableMarker?.remove()
-        exPolygon?.remove()
+        mDraggableMarker?.remove()
+        mLastPolygon?.remove()
         if (VIEW_PHOTOS_STATE) {
             VIEW_PHOTOS_STATE = !VIEW_PHOTOS_STATE
             mapFragment?.view!!.layoutParams.height += 400
@@ -464,10 +467,8 @@ class Fragment_WorldPhoto : Fragment(), OnMapReadyCallback, GoogleMap.OnCameraId
         }
     }
 
-    // CUSTOM INNER_CLASS IMPLEMENTS INTERFACE:LocationListener
     inner class CustomLocationListener : LocationListener {
 
-        private var counter: Int = 0
         private var currentLocation: Location? = null
         private var exMarker: Marker? = null
 
@@ -483,16 +484,17 @@ class Fragment_WorldPhoto : Fragment(), OnMapReadyCallback, GoogleMap.OnCameraId
             currentLocation?.latitude = location.latitude
             currentLocation?.longitude = location.longitude
             exMarker?.remove()
-            exMarker = mGoogleMap?.addMarker(MarkerOptions().position(currentLatLng).title("#"+(++counter)))
+            exMarker = mGoogleMap?.addMarker(MarkerOptions().position(currentLatLng))
+            exMarker?.hideInfoWindow()
             // mGoogleMap?.moveCamera(CameraUpdateFactory.newLatLng(currentLatLng))
             // tvLatitude.text = location.latitude.toString()
             // tvLongitude.text = location.longitude.toString()
             // tvAccuracy.setText(location.accuracy.toString())
             // val address = mGeocoder?.getFromLocation(location.latitude, location.longitude, 1)
             // tvAddress.text = address?.get(0)?.adminArea
-            if (INITIAL_GPS_SET) {
+            if (mIsInitialGps) {
                 mGoogleMap?.animateCamera(CameraUpdateFactory.zoomBy(25f))
-                INITIAL_GPS_SET = false
+                mIsInitialGps = false
             }
         }
 
@@ -505,8 +507,8 @@ class Fragment_WorldPhoto : Fragment(), OnMapReadyCallback, GoogleMap.OnCameraId
         override fun onMarkerDragStart(marker: Marker?) { }
 
         override fun onMarkerDrag(marker: Marker?) {
-            exPolygon?.remove()
-            val pointTopLeft = polygonStartPoint
+            mLastPolygon?.remove()
+            val pointTopLeft = mPolygonStartPoint
             val pointBottomRight = marker!!.position
             val rectangle = PolygonOptions().add(
                     LatLng(pointTopLeft!!.latitude, pointTopLeft.longitude),
@@ -514,8 +516,8 @@ class Fragment_WorldPhoto : Fragment(), OnMapReadyCallback, GoogleMap.OnCameraId
                     LatLng(pointBottomRight.latitude, pointBottomRight.longitude),
                     LatLng(pointBottomRight.latitude, pointTopLeft.longitude)
             ).strokeColor(Color.RED).fillColor(Color.YELLOW)
-            exPolygon = mGoogleMap!!.addPolygon(rectangle)
-            exPolygon!!.isClickable = true
+            mLastPolygon = mGoogleMap!!.addPolygon(rectangle)
+            mLastPolygon!!.isClickable = true
         }
 
         override fun onMarkerDragEnd(marker: Marker?) { }
@@ -530,7 +532,6 @@ class Fragment_WorldPhoto : Fragment(), OnMapReadyCallback, GoogleMap.OnCameraId
 
         override fun doInBackground(vararg params: String?): BitmapDescriptor? {
             val url = params.get(0)
-            // bitmapDescriptor = BitmapDescriptorFactory.fromBitmap(Picasso.with(context).load(url).resize(160, 160).get())
             bitmapDescriptor = BitmapDescriptorFactory.fromBitmap(Glide.with(context).load(url).asBitmap().thumbnail(0.3f).into(160, 160).get())
             return bitmapDescriptor!!
         }

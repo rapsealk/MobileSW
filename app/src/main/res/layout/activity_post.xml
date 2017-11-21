@@ -48,7 +48,7 @@
                         android:layout_centerVertical="true"
                         android:layout_marginLeft="10dp"
                         android:layout_marginRight="10dp"
-                        android:layout_toLeftOf="@+id/optionalButton"
+                        android:layout_toLeftOf="@+id/kakaoButton"
                         android:layout_toRightOf="@+id/profileImage"
                         android:orientation="vertical">
 
@@ -68,6 +68,15 @@
                             android:textAppearance="?android:attr/textAppearanceSmall"
                             android:textSize="13dp" />
                     </LinearLayout>
+
+                    <ImageView
+                        android:id="@+id/kakaoButton"
+                        android:layout_width="30dp"
+                        android:layout_height="30dp"
+                        android:layout_marginRight="10dp"
+                        android:layout_centerVertical="true"
+                        android:layout_toLeftOf="@id/optionalButton"
+                        app:srcCompat="@drawable/kakaolink_btn_small" />
 
                     <ImageView
                         android:id="@+id/optionalButton"

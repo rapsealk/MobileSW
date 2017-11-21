@@ -35,6 +35,14 @@ import kotlinx.android.synthetic.main.activity_post.*
 import java.lang.Exception
 import java.sql.Timestamp
 import java.text.SimpleDateFormat
+import com.kakao.kakaolink.v2.KakaoLinkResponse
+import com.kakao.kakaolink.v2.KakaoLinkService
+import com.kakao.message.template.ContentObject
+import com.kakao.message.template.FeedTemplate
+import com.kakao.message.template.LinkObject
+import com.kakao.message.template.SocialObject
+import com.kakao.network.ErrorResult
+import com.kakao.network.callback.ResponseCallback
 
 class PostActivity : AppCompatActivity() {
 
@@ -289,6 +297,24 @@ class PostActivity : AppCompatActivity() {
                     ?.addOnFailureListener { exception: Exception ->
                         toast("다시 시도해보세요.")
                     }
+        }
+
+        kakaoButton.setOnClickListener { v: View ->
+            val params: FeedTemplate = FeedTemplate
+                    .newBuilder(ContentObject.newBuilder(
+                            serializedData.content,
+                            serializedData.url,
+                            LinkObject.newBuilder().build()).setDescrption("by. ${currentUser.displayName} on PhotoPlace").build())
+                    .setSocial(SocialObject.newBuilder().setLikeCount(mLikeCount.toInt()).setCommentCount(mCommentCount.toInt()).build())
+                    .build()
+            KakaoLinkService.getInstance().sendDefault(this, params, object : ResponseCallback<KakaoLinkResponse>() {
+                override fun onSuccess(result: KakaoLinkResponse) {
+
+                }
+                override fun onFailure(errorResult: ErrorResult) {
+                    toast(errorResult.toString())
+                }
+            })
         }
     }
 

@@ -107,13 +107,13 @@ class CameraObservingService : Service, LocationListener {
                         continue
                     }
 
-                    var notificationManager = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
-                    var uploadImageIntent = Intent(this@CameraObservingService, UploadPhotoActivity::class.java)
+                    val notificationManager = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+                    val uploadImageIntent = Intent(this@CameraObservingService, UploadPhotoActivity::class.java)
                             .setFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
                             .setFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK)
                             .setFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP)
 
-                    var uploadImagePendingIntent = PendingIntent.getActivity(this@CameraObservingService, 1, uploadImageIntent, PendingIntent.FLAG_UPDATE_CURRENT)
+                    val uploadImagePendingIntent = PendingIntent.getActivity(this@CameraObservingService, 1, uploadImageIntent, PendingIntent.FLAG_UPDATE_CURRENT)
 
                     val select = Intent(applicationContext,AlarmReceiver::class.java)
                     select.setAction("YES_ACTION")
@@ -125,18 +125,18 @@ class CameraObservingService : Service, LocationListener {
                     val cancelPendingIntent = PendingIntent.getBroadcast(applicationContext, 123456, cancel, PendingIntent.FLAG_UPDATE_CURRENT)
 
 
-                    var contentTitleList: Array<String> = arrayOf(
+                    val contentTitleList: Array<String> = arrayOf(
                             "이곳에서 찍은 사진이 마음에 드시나요?",
                             "다른 사람들에게 소개하고 싶은 곳인가요?",
                             "추억을 공유하고 싶으신가요?"
                     )
 
-                    var titleIndex = ((System.currentTimeMillis().toInt() % contentTitleList.size.toInt()) + contentTitleList.size.toInt()) % contentTitleList.size.toInt()
+                    val titleIndex = ((System.currentTimeMillis().toInt() % contentTitleList.size.toInt()) + contentTitleList.size.toInt()) % contentTitleList.size.toInt()
 
-                    var ncbuilder: NotificationCompat.Builder = NotificationCompat.Builder(applicationContext)
+                    val ncbuilder: NotificationCompat.Builder = NotificationCompat.Builder(applicationContext)
                             .setFullScreenIntent(uploadImagePendingIntent, true)
                             .setContentIntent(uploadImagePendingIntent)
-                            .setSmallIcon(R.mipmap.ic_instagram)
+                            .setSmallIcon(R.drawable.ic_instagram)
                             .setContentTitle(contentTitleList.get(titleIndex))
                             .setContentText("지금 포플에 업로드하세요!")
                             .setPriority(NotificationCompat.PRIORITY_MAX)

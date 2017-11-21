@@ -58,7 +58,7 @@ class RecallService : Service, LocationListener {
     override fun onBind(intent: Intent?): IBinder? = null
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
-        var observer = Thread(LocationObserver())
+        val observer = Thread(LocationObserver())
         observer.start()
         return super.onStartCommand(intent, flags, startId)
     }
@@ -79,37 +79,37 @@ class RecallService : Service, LocationListener {
 
     override fun onLocationChanged(location: Location?) {
 
-        var latitude = location?.latitude
-        var longitude = location?.longitude
+        val latitude = location?.latitude!!
+        val longitude = location.longitude
 
-        if ((Math.abs(latitude!!.minus(lastLatitude)) < 0.0005).and(Math.abs(longitude!!.minus(lastLongitude)) < 0.0005)) return
+        if ((Math.abs(latitude.minus(lastLatitude)) < 0.0005).and(Math.abs(longitude.minus(lastLongitude)) < 0.0005)) return
 
         ref?.orderByChild("latitude")
-                ?.startAt(latitude!!.minus(0.0005))
+                ?.startAt(latitude.minus(0.0005))
                 ?.endAt(latitude.plus(0.0005))
                 ?.addListenerForSingleValueEvent(object : ValueEventListener {
 
             override fun onDataChange(snapshot: DataSnapshot?) {
 
                 snapshot?.ref?.orderByChild("longitude")
-                        ?.startAt(longitude!!.minus(0.0005))
+                        ?.startAt(longitude.minus(0.0005))
                         ?.endAt(longitude.plus(0.0005))
                         ?.addListenerForSingleValueEvent(object : ValueEventListener {
 
                             override fun onDataChange(snapshot: DataSnapshot?) {
 
-                                var count = snapshot!!.childrenCount
+                                val count = snapshot!!.childrenCount
 
                                 if (count > 0) {
                                     lastLatitude = latitude
                                     lastLongitude = longitude
-                                    var recallIntent = Intent(this@RecallService, MainActivity::class.java)
+                                    val recallIntent = Intent(this@RecallService, MainActivity::class.java)
                                             .setFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-                                    var recallPendingIntent = PendingIntent.getActivity(this@RecallService, 1, recallIntent, PendingIntent.FLAG_UPDATE_CURRENT)
-                                    var ncbuilder = NotificationCompat.Builder(applicationContext)
+                                    val recallPendingIntent = PendingIntent.getActivity(this@RecallService, 1, recallIntent, PendingIntent.FLAG_UPDATE_CURRENT)
+                                    val ncbuilder = NotificationCompat.Builder(applicationContext)
                                             .setFullScreenIntent(recallPendingIntent, true)
                                             .setContentIntent(recallPendingIntent)
-                                            .setSmallIcon(R.mipmap.ic_instagram)
+                                            .setSmallIcon(R.drawable.ic_instagram)
                                             .setContentTitle("이곳에서 $count 장의 기록이 있습니다.")
                                             .setContentText("지금 포플에서 확인해보세요! ($latitude, $longitude)")
                                             .setPriority(NotificationCompat.PRIORITY_HIGH)

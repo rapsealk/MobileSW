@@ -10,6 +10,7 @@ import android.support.v7.app.AlertDialog
 import android.text.Editable
 import android.text.TextWatcher
 import android.util.DisplayMetrics
+import android.util.Log
 import android.view.View
 import android.widget.ImageView
 import com.google.android.gms.tasks.Task
@@ -43,6 +44,8 @@ import com.kakao.message.template.LinkObject
 import com.kakao.message.template.SocialObject
 import com.kakao.network.ErrorResult
 import com.kakao.network.callback.ResponseCallback
+import java.net.URLDecoder
+import java.net.URLEncoder
 
 class PostActivity : AppCompatActivity() {
 
@@ -66,7 +69,23 @@ class PostActivity : AppCompatActivity() {
         val currentUser = mFirebaseAuth?.currentUser
         val uid = currentUser!!.uid
 
-        val serializedData = intent.getSerializableExtra("SerializedData") as Photo
+        val serializedData = (intent.getSerializableExtra("SerializedData") ?:
+                Photo(HashMap<String, Comment>(0),
+                        intent.data.getQueryParameter("content") as String,
+                        intent.data.getQueryParameter("latitude").toDouble(),
+                        intent.data.getQueryParameter("longitude").toDouble(),
+                        HashMap<String, Long>(0),
+                        intent.data.getQueryParameter("timestamp").toLong(),
+                        intent.data.getQueryParameter("uid"),
+                        URLDecoder.decode(intent.data.getQueryParameter("url"), "utf-8")
+                )) as Photo
+
+        if (serializedData.url.indexOf("%2F") == -1) {
+            val lastIndex = serializedData.url.lastIndexOf('/')
+            serializedData.url = serializedData.url.replaceRange(lastIndex, lastIndex+1, "%2F")
+        }
+        Log.d("URL", serializedData.url)
+
         val postTimestamp = serializedData.timestamp
 
         if (serializedData.uid.equals(uid)) {
@@ -300,11 +319,17 @@ class PostActivity : AppCompatActivity() {
         }
 
         kakaoButton.setOnClickListener { v: View ->
+            Log.d("bURL", serializedData.url)
+            val androidExecutionParams = "content=${serializedData.content}" +
+                    "&latitude=${serializedData.latitude}&longitude=${serializedData.longitude}" +
+                    "&timestamp=${serializedData.timestamp}" +
+                    "&uid=${serializedData.uid}" +
+                    "&url=${URLEncoder.encode(serializedData.url, "utf-8")}"
             val params: FeedTemplate = FeedTemplate
                     .newBuilder(ContentObject.newBuilder(
                             serializedData.content,
                             serializedData.url,
-                            LinkObject.newBuilder().build()).setDescrption("by. ${currentUser.displayName} on PhotoPlace").build())
+                            LinkObject.newBuilder().setAndroidExecutionParams(androidExecutionParams).build()).setDescrption("by. ${writerId.text.toString()} on PhotoPlace").build())
                     .setSocial(SocialObject.newBuilder().setLikeCount(mLikeCount.toInt()).setCommentCount(mCommentCount.toInt()).build())
                     .build()
             KakaoLinkService.getInstance().sendDefault(this, params, object : ResponseCallback<KakaoLinkResponse>() {

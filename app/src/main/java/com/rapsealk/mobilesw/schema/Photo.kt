@@ -15,5 +15,5 @@ data class Photo (
     val phopls: Map<String, Long> = HashMap<String, Long>(),
     val timestamp: Long = 0,
     val uid: String = "",
-    val url: String = ""
+    var url: String = ""
 ) : Serializable

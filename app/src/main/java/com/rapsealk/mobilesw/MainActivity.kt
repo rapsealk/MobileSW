@@ -47,7 +47,7 @@ class MainActivity : AppCompatActivity() {
         }
         */
 
-        // startService(Intent(applicationContext, FirebaseInstanceIDService::class.java))
+        startService(Intent(applicationContext, FirebaseInstanceIDService::class.java))
 
         mSharedPreference = SharedPreferenceManager.getInstance(this)
         if (mSharedPreference!!.getCameraObservingService(false)) {

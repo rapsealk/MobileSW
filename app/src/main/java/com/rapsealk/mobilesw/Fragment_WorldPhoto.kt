@@ -20,10 +20,7 @@ import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.HorizontalScrollView
-import android.widget.ImageView
-import android.widget.LinearLayout
-import android.widget.TextView
+import android.widget.*
 import com.bumptech.glide.Glide
 import com.google.android.gms.maps.*
 import com.google.android.gms.maps.model.*
@@ -107,7 +104,7 @@ class Fragment_WorldPhoto : Fragment(), OnMapReadyCallback, GoogleMap.OnCameraId
 
         if (ContextCompat.checkSelfPermission(ct!!, android.Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
             if (ActivityCompat.shouldShowRequestPermissionRationale(activity, android.Manifest.permission.ACCESS_FINE_LOCATION)) {
-               // toast("위치 정보를 이용하기 위해서는 권한이 필요합니다.")
+                Toast.makeText(ct, "위치 정보를 이용하기 위해서는 권한이 필요합니다.", Toast.LENGTH_SHORT).show()
             }
             ActivityCompat.requestPermissions(activity, Array<String>(1) { android.Manifest.permission.ACCESS_FINE_LOCATION }, FINE_LOCATION_CODE)
         }
@@ -131,7 +128,7 @@ class Fragment_WorldPhoto : Fragment(), OnMapReadyCallback, GoogleMap.OnCameraId
 
         // Obtain the SupportMapFragment and get notified when the map is ready to be used.
         //mapFragment = fragmentManager.findFragmentById(R.id.worldmap) as MapFragment
-        mapView!!.getMapAsync(this)
+        mapView.getMapAsync(this)
 
         mGeocoder = Geocoder(ct)
 
@@ -253,12 +250,12 @@ class Fragment_WorldPhoto : Fragment(), OnMapReadyCallback, GoogleMap.OnCameraId
             }
             else {
                 // params.height -= 400
-                horizontalScrollView = HorizontalScrollView(context)
+                horizontalScrollView = HorizontalScrollView(ct)
                 horizontalScrollView?.x = LinearLayoutGPS.x
                 horizontalScrollView?.y = 0f
                 horizontalScrollView?.layoutParams?.width = LinearLayoutGPS.width
                 horizontalScrollView?.layoutParams?.height = 400
-                linearLayout = LinearLayout(context)
+                linearLayout = LinearLayout(ct)
                 linearLayout?.layoutParams?.width = horizontalScrollView?.width
                 linearLayout?.layoutParams?.height = 400
                 horizontalScrollView?.addView(linearLayout)
@@ -291,7 +288,7 @@ class Fragment_WorldPhoto : Fragment(), OnMapReadyCallback, GoogleMap.OnCameraId
                                 val data = value.getValue<Photo>(Photo::class.java)
                                 var url = data.url
                                 if (url.equals("")) url = "https://firebasestorage.googleapis.com/v0/b/mobilesw-178816.appspot.com/o/ReactiveX.jpg?alt=media&token=510350fe-ac5b-4f01-9d9a-2fecf8428940"
-                                val imageView = ImageView(this@Fragment_WorldPhoto.context)
+                                val imageView = ImageView(ct) // ImageView(this@Fragment_WorldPhoto.context)
                                 //
                                 //Glide.with(this@Fragment_WorldPhoto.context)
                                 //        .load(url)
@@ -299,7 +296,8 @@ class Fragment_WorldPhoto : Fragment(), OnMapReadyCallback, GoogleMap.OnCameraId
                                 //        .override(480, 640)
                                 //        .into(imageView)
                                 //
-                                Picasso.with(this@Fragment_WorldPhoto.context)
+                                Picasso.with(ct)
+                                // Picasso.with(this@Fragment_WorldPhoto.context)
                                         .load(url)
                                         .transform(object : Transformation {
 
@@ -319,7 +317,7 @@ class Fragment_WorldPhoto : Fragment(), OnMapReadyCallback, GoogleMap.OnCameraId
 
                                 imageView.setOnClickListener { view ->
 
-                                    val intent = Intent(context, PostActivity::class.java)
+                                    val intent = Intent(ct, PostActivity::class.java)
                                             .putExtra("SerializedData", data)
                                     startActivity(intent)
                                     // this@Fragment_WorldPhoto.context.onPause()
@@ -380,8 +378,9 @@ class Fragment_WorldPhoto : Fragment(), OnMapReadyCallback, GoogleMap.OnCameraId
 
                             var url = data.url
                             if (url.equals("")) url = "https://firebasestorage.googleapis.com/v0/b/mobilesw-178816.appspot.com/o/ReactiveX.jpg?alt=media&token=510350fe-ac5b-4f01-9d9a-2fecf8428940"
-                            val imageView = ImageView(this@Fragment_WorldPhoto.context)
-                            Picasso.with(this@Fragment_WorldPhoto.context)
+                            val imageView = ImageView(ct) // ImageView(this@Fragment_WorldPhoto.context)
+                            Picasso.with(ct)
+                                    // Picasso.with(this@Fragment_WorldPhoto.context)
                                     .load(url)
                                     .transform(object : Transformation {
 
@@ -401,7 +400,7 @@ class Fragment_WorldPhoto : Fragment(), OnMapReadyCallback, GoogleMap.OnCameraId
 
                             imageView.setOnClickListener { view ->
 
-                                val intent = Intent(context, PostActivity::class.java)
+                                val intent = Intent(ct, PostActivity::class.java)
                                         .putExtra("SerializedData", data)
                                 startActivity(intent)
                                 // this@Fragment_WorldPhoto.context.onPause()
@@ -426,11 +425,10 @@ class Fragment_WorldPhoto : Fragment(), OnMapReadyCallback, GoogleMap.OnCameraId
     }
 
     override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<out String>, grantResults: IntArray) {
-        /*
         when (requestCode) {
             FINE_LOCATION_CODE -> {
                 if (grantResults.size > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED)
-                    toast("ACCESS_FINE_LOCATION PERMISSION GRANTED")
+                    Toast.makeText(ct, "ACCESS_FINE_LOCATION PERMISSION GRANTED", Toast.LENGTH_SHORT).show()
                 // else finish()
                 return
             }
@@ -438,7 +436,6 @@ class Fragment_WorldPhoto : Fragment(), OnMapReadyCallback, GoogleMap.OnCameraId
                 // finish()
             }
         }
-        */
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent) {

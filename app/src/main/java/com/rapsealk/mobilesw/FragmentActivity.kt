@@ -4,6 +4,7 @@ import android.app.Activity
 import android.content.Intent
 import android.os.Bundle
 import android.support.design.widget.BottomNavigationView
+import android.support.v4.app.Fragment
 import android.support.v7.app.AppCompatActivity
 import android.util.Log
 import android.widget.Toast
@@ -19,6 +20,7 @@ class FragmentActivity : AppCompatActivity() {
 
     private var mSharedPreference: SharedPreferenceManager? = null
     var frag:Int = 0
+    var mLastFragment: Fragment? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -92,7 +94,7 @@ class FragmentActivity : AppCompatActivity() {
         adView.loadAd(adRequest)
         */
 
-        frag=1
+        frag = 1
         val fragmentTransaction = supportFragmentManager.beginTransaction()
         val fragment = Fragment_WorldPhoto()
         fragmentTransaction.replace(R.id.please, fragment)
@@ -160,38 +162,38 @@ class FragmentActivity : AppCompatActivity() {
     }
 
     private val mOnNavigationItemSelectedListener = BottomNavigationView.OnNavigationItemSelectedListener { item ->
+
+        val fragmentTransaction = supportFragmentManager.beginTransaction()
+        if (mLastFragment != null) fragmentTransaction.remove(mLastFragment)
+
         when (item.itemId) {
             R.id.navigation_worldphoto -> {
-                frag=1
-                val fragmentTransaction = supportFragmentManager.beginTransaction()
-                val fragment = Fragment_WorldPhoto()
-                fragmentTransaction.replace(R.id.please, fragment)
+                frag = 1
+                mLastFragment = Fragment_WorldPhoto() // val fragment = Fragment_WorldPhoto()
+                fragmentTransaction.replace(R.id.please, mLastFragment) // fragment)
                 //  fragmentTransaction.addToBackStack(null);
                 fragmentTransaction.commit()
                 return@OnNavigationItemSelectedListener true
             }
             R.id.navigation_mypage -> {
-                frag=2
-                val fragmentTransaction = supportFragmentManager.beginTransaction()
-                val fragment = Fragment_MyPage()
-                fragmentTransaction.replace(R.id.please, fragment)
+                frag = 2
+                mLastFragment = Fragment_MyPage() // val fragment = Fragment_MyPage()
+                fragmentTransaction.replace(R.id.please, mLastFragment) // fragment)
                 fragmentTransaction.commit()
                 return@OnNavigationItemSelectedListener true
             }
             R.id.navigation_setting -> {
-                frag=3
-                val fragmentTransaction = supportFragmentManager.beginTransaction()
-                val fragment = Fragment_Setting()
-                fragmentTransaction.replace(R.id.please, fragment)
+                frag = 3
+                mLastFragment = Fragment_Setting() // val fragment = Fragment_Setting()
+                fragmentTransaction.replace(R.id.please, mLastFragment) // fragment)
                 //  fragmentTransaction.addToBackStack(null);
                 fragmentTransaction.commit()
                 return@OnNavigationItemSelectedListener true
             }
             R.id.navigation_info -> {
-                frag=4
-                val fragmentTransaction = supportFragmentManager.beginTransaction()
-                val fragment = Fragment_Info()
-                fragmentTransaction.replace(R.id.please, fragment)
+                frag = 4
+                mLastFragment = Fragment_Info() // val fragment = Fragment_Info()
+                fragmentTransaction.replace(R.id.please, mLastFragment) // fragment)
                 //    fragmentTransaction.addToBackStack(null);
                 fragmentTransaction.commit()
                 return@OnNavigationItemSelectedListener true
@@ -202,8 +204,8 @@ class FragmentActivity : AppCompatActivity() {
 
     override fun onBackPressed() {
       //  super.onBackPressed()
-        if(frag!=1) {
-            frag=1
+        if (frag != 1) {
+            frag = 1
             val fragmentTransaction = supportFragmentManager.beginTransaction()
             val fragment = Fragment_WorldPhoto()
             fragmentTransaction.replace(R.id.please, fragment)

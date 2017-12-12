@@ -4,8 +4,6 @@ import android.annotation.SuppressLint
 import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
-import android.graphics.Bitmap
-import android.graphics.Color
 import android.location.Geocoder
 import android.location.Location
 import android.location.LocationListener
@@ -30,8 +28,6 @@ import com.google.firebase.database.*
 import com.rapsealk.mobilesw.schema.Photo
 import com.rapsealk.mobilesw.util.SharedPreferenceManager
 import com.squareup.picasso.Picasso
-import com.squareup.picasso.Transformation
-// import kotlinx.android.synthetic.main.activity_world_photo.*
 import kotlinx.android.synthetic.main.fragment_world_photo.*
 
 class Fragment_WorldPhoto : Fragment(), OnMapReadyCallback, GoogleMap.OnCameraIdleListener {
@@ -46,8 +42,8 @@ class Fragment_WorldPhoto : Fragment(), OnMapReadyCallback, GoogleMap.OnCameraId
 
     // STATE FLAGS
     private var mIsInitialGps: Boolean = true
-    private var mIsDraggableState: Boolean = false
-    private var VIEW_PHOTOS_STATE: Boolean = false
+    // private var mIsDraggableState: Boolean = false
+    // private var VIEW_PHOTOS_STATE: Boolean = false
     private var mIsOverlayState: Boolean = false
 
     private var overlays: ArrayList<GroundOverlay>? = null
@@ -60,13 +56,13 @@ class Fragment_WorldPhoto : Fragment(), OnMapReadyCallback, GoogleMap.OnCameraId
     private var mGoogleMap: GoogleMap? = null
     private var mLocationManager: LocationManager? = null
     private var mLocationListener: LocationListener? = null
-    private var mDraggableMarker: Marker? = null
-    private var mPolygonStartPoint: LatLng? = null
-    private var mLastPolygon: Polygon? = null
+    // private var mDraggableMarker: Marker? = null
+    // private var mPolygonStartPoint: LatLng? = null
+    // private var mLastPolygon: Polygon? = null
 
     // Runtime UI Component
-    private var horizontalScrollView: HorizontalScrollView? = null
-    private var linearLayout: LinearLayout? = null
+    // private var horizontalScrollView: HorizontalScrollView? = null
+    // private var linearLayout: LinearLayout? = null
 
     // Firebase Database
     private val db: FirebaseDatabase = FirebaseDatabase.getInstance()
@@ -132,9 +128,10 @@ class Fragment_WorldPhoto : Fragment(), OnMapReadyCallback, GoogleMap.OnCameraId
 
         mGeocoder = Geocoder(ct)
 
-         btnMagnify.setOnClickListener { view -> mGoogleMap!!.animateCamera(CameraUpdateFactory.zoomIn()) }
-         btnReduce.setOnClickListener { view -> mGoogleMap!!.animateCamera(CameraUpdateFactory.zoomOut()) }
+        // btnMagnify.setOnClickListener { view -> mGoogleMap!!.animateCamera(CameraUpdateFactory.zoomIn()) }
+        // btnReduce.setOnClickListener { view -> mGoogleMap!!.animateCamera(CameraUpdateFactory.zoomOut()) }
 
+        /*
         btnState.setOnClickListener { view ->
             mIsDraggableState = !mIsDraggableState
             if (mIsDraggableState) btnState.text = "드래그!"
@@ -142,26 +139,27 @@ class Fragment_WorldPhoto : Fragment(), OnMapReadyCallback, GoogleMap.OnCameraId
             mGoogleMap?.uiSettings!!.isScrollGesturesEnabled = !mIsDraggableState
             clearScreen()
         }
+        */
 
-        btn_Overlay.setOnClickListener { view ->
-         //   toast("TODO : OutOfMemoryError")
-            mIsOverlayState = mIsOverlayState.not()
-            if (mIsOverlayState) {
-                overlays = arrayListOf()
-                db.getReference("photos").addListenerForSingleValueEvent(object : ValueEventListener {
-                    override fun onDataChange(snapshot: DataSnapshot?) {
-                        for (value in snapshot!!.children) {
-                            val photo = value.getValue<Photo>(Photo::class.java)
-                            GroundOverlayGenerator(ct!!, LatLng(photo.latitude, photo.longitude)).execute(photo.url)
-                        }
-                    }
+       btnOverlay.setOnClickListener { view ->
+           //   toast("TODO : OutOfMemoryError")
+           mIsOverlayState = mIsOverlayState.not()
+           if (mIsOverlayState) {
+               overlays = arrayListOf()
+               db.getReference("photos").addListenerForSingleValueEvent(object : ValueEventListener {
+                   override fun onDataChange(snapshot: DataSnapshot?) {
+                       for (value in snapshot!!.children) {
+                           val photo = value.getValue<Photo>(Photo::class.java)
+                           GroundOverlayGenerator(ct!!, LatLng(photo.latitude, photo.longitude)).execute(photo.url)
+                       }
+                   }
 
-                    override fun onCancelled(p0: DatabaseError?) { }
-                })
-            } else {
-                overlays?.forEach { overlay -> overlay.remove() }
-            }
-        }
+                   override fun onCancelled(p0: DatabaseError?) { }
+               })
+           } else {
+               overlays?.forEach { overlay -> overlay.remove() }
+           }
+       }
 
         // GET GPS DATA
 
@@ -222,6 +220,7 @@ class Fragment_WorldPhoto : Fragment(), OnMapReadyCallback, GoogleMap.OnCameraId
         mGoogleMap!!.uiSettings.isZoomControlsEnabled = true
         mGoogleMap!!.uiSettings.isCompassEnabled = true
 
+        /*
         mGoogleMap!!.setOnMapClickListener { point: LatLng ->
             mDraggableMarker?.remove()
             if (mIsDraggableState) {
@@ -234,10 +233,12 @@ class Fragment_WorldPhoto : Fragment(), OnMapReadyCallback, GoogleMap.OnCameraId
                 mPolygonStartPoint = point
             }
         }
+        */
 
-        mGoogleMap!!.setOnMarkerDragListener(CustomDragMarkerListener())
+        // mGoogleMap!!.setOnMarkerDragListener(CustomDragMarkerListener())
         mGoogleMap!!.setOnCameraIdleListener(this)
 
+        /*
         mGoogleMap!!.setOnPolygonClickListener { polygon: Polygon ->
             VIEW_PHOTOS_STATE = VIEW_PHOTOS_STATE.not()
 
@@ -330,6 +331,7 @@ class Fragment_WorldPhoto : Fragment(), OnMapReadyCallback, GoogleMap.OnCameraId
                 override fun onCancelled(p0: DatabaseError?) { }
             })
         }
+        */
 
         val lastKnownLocation = mSharedPreference?.getLastKnownLocation()
         if (lastKnownLocation != null) {
@@ -376,6 +378,7 @@ class Fragment_WorldPhoto : Fragment(), OnMapReadyCallback, GoogleMap.OnCameraId
                             val marker = mGoogleMap?.addMarker(MarkerOptions().position(position).title(data.content).snippet("$timestamp\n"+data.url).icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_ORANGE)))
                             markers.put(timestamp, marker!!)
 
+                            /*
                             var url = data.url
                             if (url.equals("")) url = "https://firebasestorage.googleapis.com/v0/b/mobilesw-178816.appspot.com/o/ReactiveX.jpg?alt=media&token=510350fe-ac5b-4f01-9d9a-2fecf8428940"
                             val imageView = ImageView(ct) // ImageView(this@Fragment_WorldPhoto.context)
@@ -405,6 +408,7 @@ class Fragment_WorldPhoto : Fragment(), OnMapReadyCallback, GoogleMap.OnCameraId
                                 startActivity(intent)
                                 // this@Fragment_WorldPhoto.context.onPause()
                             }
+                            */
                         }
                     }
                     override fun onCancelled(p0: DatabaseError?) { }
@@ -413,7 +417,6 @@ class Fragment_WorldPhoto : Fragment(), OnMapReadyCallback, GoogleMap.OnCameraId
             override fun onCancelled(p0: DatabaseError?) { }
         })
 
-        /*
         Log.d("IDLE", "NORTHEAST: $_northeast, SOUTHWEST: $_southwest");
         try {
             val address = mGeocoder?.getFromLocation((_northeast.latitude + _southwest.latitude) / 2f, (_northeast.longitude + _southwest.longitude) / 2f, 1)
@@ -421,7 +424,6 @@ class Fragment_WorldPhoto : Fragment(), OnMapReadyCallback, GoogleMap.OnCameraId
         } catch (exception: Exception) {
             exception.printStackTrace()
         }
-        */
     }
 
     override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<out String>, grantResults: IntArray) {
@@ -452,6 +454,7 @@ class Fragment_WorldPhoto : Fragment(), OnMapReadyCallback, GoogleMap.OnCameraId
         }
     }
 
+    /*
     private fun clearScreen(): Unit {
         mDraggableMarker?.remove()
         mLastPolygon?.remove()
@@ -463,6 +466,7 @@ class Fragment_WorldPhoto : Fragment(), OnMapReadyCallback, GoogleMap.OnCameraId
             rootLinearLayout.removeView(horizontalScrollView)
         }
     }
+    */
 
     inner class CustomLocationListener : LocationListener {
 
@@ -499,6 +503,7 @@ class Fragment_WorldPhoto : Fragment(), OnMapReadyCallback, GoogleMap.OnCameraId
         override fun onProviderDisabled(provider: String?) { }
     }
 
+    /*
     inner class CustomDragMarkerListener : GoogleMap.OnMarkerDragListener {
 
         override fun onMarkerDragStart(marker: Marker?) { }
@@ -519,6 +524,7 @@ class Fragment_WorldPhoto : Fragment(), OnMapReadyCallback, GoogleMap.OnCameraId
 
         override fun onMarkerDragEnd(marker: Marker?) { }
     }
+    */
 
     fun max(a: Double, b: Double): Double = if (a > b) a else b
     fun min(a: Double, b: Double): Double = if (a < b) a else b

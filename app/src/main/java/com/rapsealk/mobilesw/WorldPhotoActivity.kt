@@ -117,7 +117,7 @@ class WorldPhotoActivity : FragmentActivity(), OnMapReadyCallback, GoogleMap.OnC
             if (DRAG_STATE) btnState.text = "드래그!"
             else btnState.text = "영역 선택"
             mGoogleMap?.uiSettings!!.isScrollGesturesEnabled = !DRAG_STATE
-            clearScreen()
+            ()
         }
         */
 

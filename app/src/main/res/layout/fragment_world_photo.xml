@@ -15,7 +15,7 @@
         <com.google.android.gms.maps.MapView
             android:id="@+id/worldmap"
             android:layout_width="match_parent"
-            android:layout_height="800dp"
+            android:layout_height="match_parent"
             android:layout_weight="1"
             tools:layout_editor_absoluteX="8dp"
             tools:layout_editor_absoluteY="16dp" />
@@ -23,10 +23,25 @@
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:layout_weight="1"
+            android:layout_weight="7"
             android:orientation="vertical">
 
-            <LinearLayout
+            <Button
+                android:id="@+id/btnOverlay"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:text="오버레이" />
+
+            <TextView
+                android:id="@+id/tvAddress"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:text="Address"
+                android:textSize="18sp" />
+
+            <!--LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="horizontal">
@@ -91,7 +106,7 @@
                     android:text="Acc"
                     android:textSize="18sp" />
 
-            </LinearLayout>
+            </LinearLayout-->
 
         </LinearLayout>
 

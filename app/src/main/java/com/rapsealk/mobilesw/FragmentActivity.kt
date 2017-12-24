@@ -15,6 +15,7 @@ import com.google.firebase.iid.FirebaseInstanceId
 import com.rapsealk.mobilesw.service.CameraObservingService
 import com.rapsealk.mobilesw.service.RecallService
 import com.rapsealk.mobilesw.util.SharedPreferenceManager
+import kotlinx.android.synthetic.main.activity_fragment.*
 
 class FragmentActivity : AppCompatActivity() {
 
@@ -202,6 +203,7 @@ class FragmentActivity : AppCompatActivity() {
     override fun onBackPressed() {
         if (mFragmentId != 1) {
             mFragmentId = 1
+            navigation.getMenu().findItem(R.id.navigation_worldphoto).setChecked(true)
             val fragmentTransaction = supportFragmentManager.beginTransaction()
             fragmentTransaction.replace(R.id.please, Fragment_WorldPhoto())
             fragmentTransaction.commit()

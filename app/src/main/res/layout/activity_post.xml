@@ -98,7 +98,8 @@
                     android:id="@+id/imageViewPost"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:src="@drawable/default_image" />
+                    android:src="@drawable/default_image"
+                    android:adjustViewBounds="true"/>
             </RelativeLayout>
 
             <LinearLayout

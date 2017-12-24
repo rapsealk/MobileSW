@@ -9,19 +9,19 @@
         app:showAsAction="always" />
     <item
         android:id="@+id/navigation_mypage"
-        android:icon="@mipmap/worldphoto"
+        android:icon="@mipmap/mypage"
         android:title="mypage"
         app:showAsAction="always"/>
 
     <item
         android:id="@+id/navigation_setting"
-        android:icon="@mipmap/worldphoto"
+        android:icon="@mipmap/setting"
         android:title="setting"
         app:showAsAction="always" />
 
     <item
         android:id="@+id/navigation_info"
-        android:icon="@mipmap/worldphoto"
+        android:icon="@mipmap/info"
         android:title="info"
         app:showAsAction="always" />
 

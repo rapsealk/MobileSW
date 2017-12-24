@@ -11,7 +11,8 @@
         android:layout_height="wrap_content"
         android:layout_marginTop="15dp"
         android:layout_marginLeft="10dp"
-        android:layout_marginRight="10dp">
+        android:layout_marginRight="10dp"
+        android:background="#BCC6DD">
 
         <LinearLayout
             android:id="@+id/verticalLayout"
@@ -56,7 +57,7 @@
                     android:layout_weight="1"
                     android:paddingRight="25dp"
                     android:text="2017-09-01 12:00:00"
-                    android:textAlignment="viewEnd"
+                    android:textAlignment="textEnd"
                     android:textStyle="bold" />
 
             </LinearLayout>

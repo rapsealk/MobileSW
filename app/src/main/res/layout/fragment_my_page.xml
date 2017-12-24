@@ -4,7 +4,8 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context="com.rapsealk.mobilesw.MyPageActivity">
+    tools:context="com.rapsealk.mobilesw.MyPageActivity"
+    android:background="#EBEFF7">
 
     <!--LinearLayout
         android:layout_width="match_parent"
@@ -44,7 +45,7 @@
         android:id="@+id/recyclerView"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:background="@color/com_kakao_cancel_button_background"
+        android:background="#4C4D53"
         app:layoutManager="LinearLayoutManager" />
 
         <!--ScrollView

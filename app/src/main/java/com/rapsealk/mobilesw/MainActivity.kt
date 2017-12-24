@@ -85,38 +85,14 @@ class MainActivity : AppCompatActivity() {
         adView.setAdSize(AdSize.BANNER);
         adView.setAdUnitId("ca-app-pub-3940256099942544/6300978111");
          */
-        MobileAds.initialize(this, "ca-app-pub-3646601663753152~4242295983")
-        val adRequest = AdRequest.Builder()
-                .addTestDevice("11FA7C8BEAD9541214256C4099D5D934")  // Luna S
-                .addTestDevice("3F0353CEF8C0D94235DC6052DCF0D49A")  // Galaxy S6
-                .addTestDevice("2CC79B5532C0B9EC2E03486315B181D0")  // Galaxy Note II
-                .addTestDevice("8BFC47801A471FF1C6D2DE3682F933F3")  // Galaxy S6 Edge
-                .build()
-        adView.loadAd(adRequest)
-       // toast("Test Device: " + adRequest.isTestDevice(this).toString())
-        /*
-        adView.setAdListener(object : AdListener() {
-            override fun onAdLoaded() {
-                super.onAdLoaded()
-            }
-
-            override fun onAdFailedToLoad(p0: Int) {
-                super.onAdFailedToLoad(p0)
-            }
-
-            override fun onAdOpened() {
-                super.onAdOpened()
-            }
-
-            override fun onAdLeftApplication() {
-                super.onAdLeftApplication()
-            }
-
-            override fun onAdClosed() {
-                super.onAdClosed()
-            }
-        })
-        */
+        // MobileAds.initialize(this, "ca-app-pub-3646601663753152~4242295983")
+        // val adRequest = AdRequest.Builder()
+        //         .addTestDevice("11FA7C8BEAD9541214256C4099D5D934")  // Luna S
+        //         .addTestDevice("3F0353CEF8C0D94235DC6052DCF0D49A")  // Galaxy S6
+        //         .addTestDevice("2CC79B5532C0B9EC2E03486315B181D0")  // Galaxy Note II
+        //         .addTestDevice("8BFC47801A471FF1C6D2DE3682F933F3")  // Galaxy S6 Edge
+        //         .build()
+        // adView.loadAd(adRequest)
 
         imageButtonWorldPhoto.setOnClickListener { view: View ->
             val intent = Intent(this, WorldPhotoActivity::class.java)

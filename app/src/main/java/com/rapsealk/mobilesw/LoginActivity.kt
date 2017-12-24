@@ -41,7 +41,7 @@ class LoginActivity : AppCompatActivity() {
         // Firebase Auth
         mFirebaseAuth = FirebaseAuth.getInstance()
         mFirebaseAuthListener = FirebaseAuth.AuthStateListener { auth: FirebaseAuth ->
-            var user: FirebaseUser? = auth.currentUser
+            val user: FirebaseUser? = auth.currentUser
             if (user != null) {
                 // TODO
             } else {
@@ -53,8 +53,8 @@ class LoginActivity : AppCompatActivity() {
         btnRegister.setOnClickListener { v: View? ->
             progressDialog?.setMessage("회원가입 중")
             progressDialog?.show()
-            var email = editTextEmail.text.toString()
-            var password = editTextPassword.text.toString()
+            val email = editTextEmail.text.toString()
+            val password = editTextPassword.text.toString()
             mFirebaseAuth?.createUserWithEmailAndPassword(email, password)
                     ?.addOnCompleteListener(this, object : OnCompleteListener<AuthResult> {
                         override fun onComplete(task: Task<AuthResult>) {
@@ -72,8 +72,8 @@ class LoginActivity : AppCompatActivity() {
         btnLogin.setOnClickListener { v: View? ->
             progressDialog?.setMessage("로그인 중")
             progressDialog?.show()
-            var email = editTextEmail.text.toString()
-            var password = editTextPassword.text.toString()
+            val email = editTextEmail.text.toString()
+            val password = editTextPassword.text.toString()
             mFirebaseAuth?.signInWithEmailAndPassword(email, password)
                     ?.addOnCompleteListener(this, object : OnCompleteListener<AuthResult> {
                         override fun onComplete(task: Task<AuthResult>) {
@@ -88,7 +88,7 @@ class LoginActivity : AppCompatActivity() {
         }
 
         // Google Auth
-        var gso: GoogleSignInOptions = GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
+        val gso: GoogleSignInOptions = GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
                 .requestIdToken(getString(R.string.default_web_client_id))
                 .requestEmail()
                 .build()
@@ -105,7 +105,7 @@ class LoginActivity : AppCompatActivity() {
         google_login_button.setOnClickListener { view ->
             progressDialog?.setMessage("구글 로그인 중")
             progressDialog?.show()
-            var signInIntent = Auth.GoogleSignInApi.getSignInIntent(mGoogleApiClient)
+            val signInIntent = Auth.GoogleSignInApi.getSignInIntent(mGoogleApiClient)
             startActivityForResult(signInIntent, GOOGLE_SIGN_IN_CODE)
         }
 
@@ -114,16 +114,16 @@ class LoginActivity : AppCompatActivity() {
     override fun onActivityResult(requestCode: Int, resultCode: Int, intent: Intent) {
         super.onActivityResult(requestCode, resultCode, intent)
         if (requestCode == GOOGLE_SIGN_IN_CODE) {
-            var result = Auth.GoogleSignInApi.getSignInResultFromIntent(intent)
+            val result = Auth.GoogleSignInApi.getSignInResultFromIntent(intent)
             if (result.isSuccess) {
-                var account: GoogleSignInAccount? = result.signInAccount
+                val account: GoogleSignInAccount? = result.signInAccount
                 firebaseAuthWithGoogle(account!!)
             }
         }
     }
 
     private fun firebaseAuthWithGoogle(account: GoogleSignInAccount) {
-        var credential: AuthCredential = GoogleAuthProvider.getCredential(account.idToken, null)
+        val credential: AuthCredential = GoogleAuthProvider.getCredential(account.idToken, null)
         mFirebaseAuth?.signInWithCredential(credential)!!
                 .addOnCompleteListener(this, object : OnCompleteListener<AuthResult> {
                     override fun onComplete(task: Task<AuthResult>) {
@@ -139,7 +139,7 @@ class LoginActivity : AppCompatActivity() {
 
     private fun welcomeUser(user: FirebaseUser?) {
         toast(user?.displayName + "님 환영합니다.")
-        var intent = Intent(this@LoginActivity, MainActivity::class.java)
+        val intent = Intent(this@LoginActivity, FragmentActivity::class.java)
         startActivity(intent)
         finish()
     }

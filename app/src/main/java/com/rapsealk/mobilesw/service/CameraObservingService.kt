@@ -35,7 +35,7 @@ class CameraObservingService : Service, LocationListener {
     private var mLocationManager: LocationManager? = null
     private var mSharedPreference: SharedPreferenceManager? = null
 
-    var t : Long=0
+    var t: Long = 0
 
     constructor() : super() {}
 

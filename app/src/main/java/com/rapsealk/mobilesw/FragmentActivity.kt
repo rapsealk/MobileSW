@@ -19,7 +19,7 @@ import com.rapsealk.mobilesw.util.SharedPreferenceManager
 class FragmentActivity : AppCompatActivity() {
 
     private var mSharedPreference: SharedPreferenceManager? = null
-    var frag:Int = 0
+    var mFragmentId: Int = 0
     var mLastFragment: Fragment? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -94,11 +94,11 @@ class FragmentActivity : AppCompatActivity() {
         adView.loadAd(adRequest)
         */
 
-        frag = 1
+        mFragmentId = 1
         val fragmentTransaction = supportFragmentManager.beginTransaction()
         val fragment = Fragment_WorldPhoto()
         fragmentTransaction.replace(R.id.please, fragment)
-      //  fragmentTransaction.addToBackStack(null);
+        // fragmentTransaction.addToBackStack(null);
         fragmentTransaction.commit()
 
 
@@ -168,33 +168,30 @@ class FragmentActivity : AppCompatActivity() {
 
         when (item.itemId) {
             R.id.navigation_worldphoto -> {
-                frag = 1
-                mLastFragment = Fragment_WorldPhoto() // val fragment = Fragment_WorldPhoto()
-                fragmentTransaction.replace(R.id.please, mLastFragment) // fragment)
-                //  fragmentTransaction.addToBackStack(null);
+                mFragmentId = 1
+                mLastFragment = Fragment_WorldPhoto()
+                fragmentTransaction.replace(R.id.please, mLastFragment)
                 fragmentTransaction.commit()
                 return@OnNavigationItemSelectedListener true
             }
             R.id.navigation_mypage -> {
-                frag = 2
-                mLastFragment = Fragment_MyPage() // val fragment = Fragment_MyPage()
-                fragmentTransaction.replace(R.id.please, mLastFragment) // fragment)
+                mFragmentId = 2
+                mLastFragment = Fragment_MyPage()
+                fragmentTransaction.replace(R.id.please, mLastFragment)
                 fragmentTransaction.commit()
                 return@OnNavigationItemSelectedListener true
             }
             R.id.navigation_setting -> {
-                frag = 3
-                mLastFragment = Fragment_Setting() // val fragment = Fragment_Setting()
-                fragmentTransaction.replace(R.id.please, mLastFragment) // fragment)
-                //  fragmentTransaction.addToBackStack(null);
+                mFragmentId = 3
+                mLastFragment = Fragment_Setting()
+                fragmentTransaction.replace(R.id.please, mLastFragment)
                 fragmentTransaction.commit()
                 return@OnNavigationItemSelectedListener true
             }
             R.id.navigation_info -> {
-                frag = 4
-                mLastFragment = Fragment_Info() // val fragment = Fragment_Info()
-                fragmentTransaction.replace(R.id.please, mLastFragment) // fragment)
-                //    fragmentTransaction.addToBackStack(null);
+                mFragmentId = 4
+                mLastFragment = Fragment_Info()
+                fragmentTransaction.replace(R.id.please, mLastFragment)
                 fragmentTransaction.commit()
                 return@OnNavigationItemSelectedListener true
             }
@@ -203,14 +200,12 @@ class FragmentActivity : AppCompatActivity() {
     }
 
     override fun onBackPressed() {
-      //  super.onBackPressed()
-        if (frag != 1) {
-            frag = 1
+        if (mFragmentId != 1) {
+            mFragmentId = 1
             val fragmentTransaction = supportFragmentManager.beginTransaction()
-            val fragment = Fragment_WorldPhoto()
-            fragmentTransaction.replace(R.id.please, fragment)
+            fragmentTransaction.replace(R.id.please, Fragment_WorldPhoto())
             fragmentTransaction.commit()
-        }else{
+        } else {
             super.onBackPressed()
         }
 

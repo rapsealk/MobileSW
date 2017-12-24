@@ -11,8 +11,8 @@ import com.google.firebase.auth.FirebaseAuth
 
 class SplashActivity : AppCompatActivity() {
 
-    private val CAMERA_REQUEST_CODE: Int = 10
-    private val FINE_LOCATION_CODE: Int = 11
+    // private val CAMERA_REQUEST_CODE: Int = 10
+    // private val FINE_LOCATION_CODE: Int = 11
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)

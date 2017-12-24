@@ -27,11 +27,13 @@ class Fragment_MyPage : Fragment() {
 
     private var mFirebaseAuth: FirebaseAuth? = null
     private var mFirebaseDatabase: FirebaseDatabase? = null
-    var _context: Context? = null
+    var mContext: Context? = null
+
+    private var mWriteExternalStorageGranted: Boolean = false
 
     override fun onCreateView(inflater: LayoutInflater?, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         val View = inflater!!.inflate(R.layout.fragment_my_page, container, false)
-        _context = container!!.context
+        mContext = container!!.context
         return View
     }
 
@@ -41,14 +43,16 @@ class Fragment_MyPage : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
 
-        if (ContextCompat.checkSelfPermission(_context!!, android.Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
+        mWriteExternalStorageGranted = (ContextCompat.checkSelfPermission(mContext!!, android.Manifest.permission.WRITE_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED)
+
+        if (mWriteExternalStorageGranted.not()) {
             if (ActivityCompat.shouldShowRequestPermissionRationale(activity, android.Manifest.permission.WRITE_EXTERNAL_STORAGE)) {
                 Toast.makeText(context, "이미지를 저장하기 위해서는 권한이 필요합니다.", Toast.LENGTH_SHORT).show()
             }
             ActivityCompat.requestPermissions(activity, Array<String>(1) { android.Manifest.permission.WRITE_EXTERNAL_STORAGE }, WRITE_EXTERNAL_STORAGE_CODE)
         }
 
-        val progressDialog = ProgressDialog(_context)
+        val progressDialog = ProgressDialog(mContext)
         progressDialog.isIndeterminate = true
         progressDialog.setProgressStyle(ProgressDialog.STYLE_SPINNER)
         progressDialog.setMessage("내 사진들 불러오는 중")
@@ -60,9 +64,8 @@ class Fragment_MyPage : Fragment() {
 
         progressDialog.show()
 
-        // recyclerView.setHasFixedSize(true)
         recyclerView.layoutManager = LinearLayoutManager(context)
-        val mCardAdapter = CardAdapter(context)
+        val mCardAdapter = CardAdapter(context, mWriteExternalStorageGranted)
         recyclerView.adapter = mCardAdapter
         recyclerView.layoutMode = LinearLayout.VERTICAL
 
@@ -74,10 +77,6 @@ class Fragment_MyPage : Fragment() {
                     override fun onDataChange(snapshot: DataSnapshot?) {
 
                         val children = snapshot!!.children.reversed()
-                        val lastIndex = children.count() - 1
-
-                        // var horizontalLayout = LinearLayout(_context)
-                        // horizontalLayout.layoutMode = LinearLayout.HORIZONTAL
 
                         val array = ArrayList<Photo>()
 
@@ -101,11 +100,9 @@ class Fragment_MyPage : Fragment() {
             WRITE_EXTERNAL_STORAGE_CODE -> {
                 if (grantResults.size > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED)
                     Toast.makeText(context, "ACCESS_WRITE_EXTERNAL_STORAGE PERMISSION GRANTED", Toast.LENGTH_SHORT).show()
-                // else finish()
                 return
             }
             else -> {
-                // finish()
             }
         }
     }

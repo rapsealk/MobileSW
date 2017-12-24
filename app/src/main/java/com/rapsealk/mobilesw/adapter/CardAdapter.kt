@@ -9,6 +9,7 @@ import android.view.ViewGroup
 import android.widget.ImageView
 import android.widget.ProgressBar
 import android.widget.TextView
+import android.widget.Toast
 import com.rapsealk.mobilesw.R
 import com.rapsealk.mobilesw.schema.Photo
 import com.rapsealk.mobilesw.util.ImageDownloader
@@ -42,10 +43,12 @@ class CardAdapter : RecyclerView.Adapter<CardAdapter.Companion.CardViewHolder> {
 
     private val context: Context
     private var mDataset: ArrayList<Photo>
+    private val mWriteExternalPermissionGranted: Boolean
 
-    constructor(context: Context) {
+    constructor(context: Context, granted: Boolean) {
         this.context = context
         mDataset = ArrayList<Photo>()
+        mWriteExternalPermissionGranted = granted
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): CardViewHolder {
@@ -73,6 +76,10 @@ class CardAdapter : RecyclerView.Adapter<CardAdapter.Companion.CardViewHolder> {
                         }
                         val result = Bitmap.createScaledBitmap(source, width.toInt(), height.toInt(), false)
                         holder.imageView.setOnClickListener { v: View? ->
+                            if (mWriteExternalPermissionGranted.not()) {
+                                Toast.makeText(context, "사진을 저장하기 위해서는 권한이 필요합니다.", Toast.LENGTH_SHORT).show()
+                                return@setOnClickListener
+                            }
                             val mime = item.url.split(".").last().split("?").first()
                             val timestamp = System.currentTimeMillis()
                             val filename = "p$timestamp.$mime"

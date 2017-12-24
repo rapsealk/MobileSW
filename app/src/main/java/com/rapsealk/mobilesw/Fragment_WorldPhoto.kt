@@ -1,6 +1,5 @@
 package com.rapsealk.mobilesw
 
-import android.annotation.SuppressLint
 import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
@@ -51,7 +50,7 @@ class Fragment_WorldPhoto : Fragment(), OnMapReadyCallback, GoogleMap.OnCameraId
 
     private var mGeocoder: Geocoder? = null
 
-    private var mapFragment: SupportMapFragment? = null
+    // private var mapFragment: SupportMapFragment? = null
 
     private var mGoogleMap: GoogleMap? = null
     private var mLocationManager: LocationManager? = null
@@ -68,11 +67,11 @@ class Fragment_WorldPhoto : Fragment(), OnMapReadyCallback, GoogleMap.OnCameraId
     private val db: FirebaseDatabase = FirebaseDatabase.getInstance()
     private var ref: DatabaseReference? = null
 
-    var ct: Context? = null;
+    var mContext: Context? = null;
     internal lateinit var mapView : MapView
 
     override fun onCreateView(inflater: LayoutInflater?, container: ViewGroup?, savedInstanceState: Bundle?): View? {
-        ct=container?.getContext()
+        mContext = container?.getContext()
         val view = inflater!!.inflate(R.layout.fragment_world_photo, container, false)
 
         mapView = view.findViewById(R.id.worldmap) as MapView/////////////////////////////
@@ -82,7 +81,7 @@ class Fragment_WorldPhoto : Fragment(), OnMapReadyCallback, GoogleMap.OnCameraId
 
         try
         {
-          MapsInitializer.initialize(getActivity().getApplicationContext());
+            MapsInitializer.initialize(getActivity().getApplicationContext());
         }
         catch (e:Exception)
         {
@@ -93,14 +92,12 @@ class Fragment_WorldPhoto : Fragment(), OnMapReadyCallback, GoogleMap.OnCameraId
         return view
     }
 
-   // @SuppressLint("MissingPermission")
-    @SuppressLint("MissingPermission")
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         // Permission Check
 
-        if (ContextCompat.checkSelfPermission(ct!!, android.Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+        if (ContextCompat.checkSelfPermission(mContext!!, android.Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
             if (ActivityCompat.shouldShowRequestPermissionRationale(activity, android.Manifest.permission.ACCESS_FINE_LOCATION)) {
-                Toast.makeText(ct, "위치 정보를 이용하기 위해서는 권한이 필요합니다.", Toast.LENGTH_SHORT).show()
+                Toast.makeText(mContext, "위치 정보를 이용하기 위해서는 권한이 필요합니다.", Toast.LENGTH_SHORT).show()
             }
             ActivityCompat.requestPermissions(activity, Array<String>(1) { android.Manifest.permission.ACCESS_FINE_LOCATION }, FINE_LOCATION_CODE)
         }
@@ -120,13 +117,13 @@ class Fragment_WorldPhoto : Fragment(), OnMapReadyCallback, GoogleMap.OnCameraId
         }
 
 
-        mSharedPreference = SharedPreferenceManager.getInstance(ct!!)
+        mSharedPreference = SharedPreferenceManager.getInstance(mContext!!)
 
         // Obtain the SupportMapFragment and get notified when the map is ready to be used.
         //mapFragment = fragmentManager.findFragmentById(R.id.worldmap) as MapFragment
         mapView.getMapAsync(this)
 
-        mGeocoder = Geocoder(ct)
+        mGeocoder = Geocoder(mContext)
 
         // btnMagnify.setOnClickListener { view -> mGoogleMap!!.animateCamera(CameraUpdateFactory.zoomIn()) }
         // btnReduce.setOnClickListener { view -> mGoogleMap!!.animateCamera(CameraUpdateFactory.zoomOut()) }
@@ -141,27 +138,24 @@ class Fragment_WorldPhoto : Fragment(), OnMapReadyCallback, GoogleMap.OnCameraId
         }
         */
 
-       btnOverlay.setOnClickListener { view ->
-           //   toast("TODO : OutOfMemoryError")
-           mIsOverlayState = mIsOverlayState.not()
-           if (mIsOverlayState) {
-               overlays = arrayListOf()
-               db.getReference("photos").addListenerForSingleValueEvent(object : ValueEventListener {
-                   override fun onDataChange(snapshot: DataSnapshot?) {
-                       for (value in snapshot!!.children) {
-                           val photo = value.getValue<Photo>(Photo::class.java)
-                           GroundOverlayGenerator(ct!!, LatLng(photo.latitude, photo.longitude)).execute(photo.url)
-                       }
-                   }
+        btnOverlay.setOnClickListener { view ->
+            mIsOverlayState = mIsOverlayState.not()
+            if (mIsOverlayState) {
+                overlays = arrayListOf()
+                db.getReference("photos").addListenerForSingleValueEvent(object : ValueEventListener {
+                    override fun onDataChange(snapshot: DataSnapshot?) {
+                        for (value in snapshot!!.children) {
+                            val photo = value.getValue<Photo>(Photo::class.java)
+                            GroundOverlayGenerator(mContext!!, LatLng(photo.latitude, photo.longitude)).execute(photo.url)
+                        }
+                    }
 
-                   override fun onCancelled(p0: DatabaseError?) { }
-               })
-           } else {
-               overlays?.forEach { overlay -> overlay.remove() }
-           }
-       }
-
-        // GET GPS DATA
+                    override fun onCancelled(p0: DatabaseError?) { }
+                })
+            } else {
+                overlays?.forEach { overlay -> overlay.remove() }
+            }
+        }
 
         try {
             mLocationManager = getActivity().getSystemService(Context.LOCATION_SERVICE) as LocationManager
@@ -170,11 +164,8 @@ class Fragment_WorldPhoto : Fragment(), OnMapReadyCallback, GoogleMap.OnCameraId
             mLocationManager!!.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 5000, 1f, mLocationListener)
         }
         catch (ex: Exception) {
-           // toast(ex.toString())
-            // finish()
+            ex.printStackTrace()
         }
-
-
     }
 
     override fun onMapReady(googleMap: GoogleMap) {
@@ -190,7 +181,7 @@ class Fragment_WorldPhoto : Fragment(), OnMapReadyCallback, GoogleMap.OnCameraId
                     val url = marker.snippet.split("\n").get(1)
                     if (!url.equals("")) {
                         val imageView = view.findViewById(R.id.imageView) as ImageView
-                        Picasso.with(ct).load(url).resize(192, 108).into(imageView)
+                        Picasso.with(mContext).load(url).resize(192, 108).into(imageView)
                     }
                 }
                 val textView = view.findViewById(R.id.textView) as TextView
@@ -205,7 +196,7 @@ class Fragment_WorldPhoto : Fragment(), OnMapReadyCallback, GoogleMap.OnCameraId
             db.getReference("photos/$timestamp").addListenerForSingleValueEvent(object : ValueEventListener {
                 override fun onDataChange(snapshot: DataSnapshot) {
                     val data = snapshot.getValue<Photo>(Photo::class.java)
-                    val intent = Intent(ct, PostActivity::class.java)
+                    val intent = Intent(mContext, PostActivity::class.java)
                             .putExtra("SerializedData", data)
                     startActivityForResult(intent, CHECK_POST_DELETED_CODE)
                    // ct.onPause()/////////////////////////////////////////////
@@ -335,7 +326,6 @@ class Fragment_WorldPhoto : Fragment(), OnMapReadyCallback, GoogleMap.OnCameraId
 
         val lastKnownLocation = mSharedPreference?.getLastKnownLocation()
         if (lastKnownLocation != null) {
-            // mIsInitialGps = false
             mGoogleMap!!.animateCamera(CameraUpdateFactory.zoomTo(25f))
             mGoogleMap!!.moveCamera(CameraUpdateFactory.newLatLng(lastKnownLocation))
         }
@@ -429,9 +419,11 @@ class Fragment_WorldPhoto : Fragment(), OnMapReadyCallback, GoogleMap.OnCameraId
     override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<out String>, grantResults: IntArray) {
         when (requestCode) {
             FINE_LOCATION_CODE -> {
-                if (grantResults.size > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED)
-                    Toast.makeText(ct, "ACCESS_FINE_LOCATION PERMISSION GRANTED", Toast.LENGTH_SHORT).show()
-                // else finish()
+                if (grantResults.size > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                    Toast.makeText(mContext, "위치 정보가 등록되었습니다.", Toast.LENGTH_SHORT).show()
+                } else {
+                    Toast.makeText(mContext, "위치 안내 기능에는 권한이 필요합니다.", Toast.LENGTH_SHORT).show()
+                }
                 return
             }
             else -> {
@@ -544,7 +536,8 @@ class Fragment_WorldPhoto : Fragment(), OnMapReadyCallback, GoogleMap.OnCameraId
             overlays?.add(
                     mGoogleMap?.addGroundOverlay(GroundOverlayOptions()
                             .image(bitmapDescriptor!!)
-                            .position(latlng, 16f, 16f))!!
+                            .transparency(0.5f)
+                            .position(latlng, 1600f, 1600f))!!
             )
         }
     }
